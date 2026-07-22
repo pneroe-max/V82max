@@ -1,5 +1,5 @@
 // Service Worker V8 Tracker — cache-first per offline
-const CACHE = 'v8tracker-v3';
+const CACHE = 'v8tracker-v5';
 const ASSETS = [
   './',
   './index.html',
