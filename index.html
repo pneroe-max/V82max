@@ -1996,6 +1996,9 @@ const storage = {
       localStorage.setItem(KEY_PREFIX + key, JSON.stringify(value));
       return true;
     } catch (e) {
+      try {
+        notifyStorageError();
+      } catch (e2) {}
       return false;
     }
   },
@@ -2818,6 +2821,12 @@ function HomeScreen(_ref12) {
     color: PLATE.yellow,
     desc: '4 giorni · solo manubri · viaggio'
   }, {
+    id: 'storico',
+    label: 'Storico blocchi',
+    IconComp: Layers,
+    color: '#22D3EE',
+    desc: 'Archivia e confronta i mesocicli'
+  }, {
     id: 'volume',
     label: 'Volume settimanale',
     IconComp: BarChart3,
@@ -3162,7 +3171,7 @@ function HomeScreen(_ref12) {
       letterSpacing: '0.04em',
       fontWeight: '500'
     }
-  }, "V8 Tracker v11.3 \xB7 Protocollo V8.3.4 \xB7 92 kg", /*#__PURE__*/React.createElement("br", null), "Dati salvati sul dispositivo")));
+  }, "V8 Tracker v11.4 \xB7 Protocollo V8.3.4 \xB7 92 kg", /*#__PURE__*/React.createElement("br", null), "Dati salvati sul dispositivo")));
 }
 
 // ============= EXERCISE DETAIL =============
@@ -3512,12 +3521,15 @@ function WorkoutScreen(_ref16) {
           sets_done: sd
         };
       }
+      const now = Date.now();
       const next = {
         ...prev,
         [week]: {
           ...wk,
           [day]: {
             ...dy,
+            startedAt: dy.startedAt || now,
+            ts: now,
             esercizi: {
               ...(dy.esercizi || {}),
               [exIdx]: newEx
@@ -3541,12 +3553,15 @@ function WorkoutScreen(_ref16) {
         esercizi: {},
         completato: false
       };
+      const now = Date.now();
       const next = {
         ...prev,
         [week]: {
           ...wk,
           [day]: {
             ...dy,
+            startedAt: dy.startedAt || now,
+            ts: now,
             completato: !dy.completato
           }
         }
@@ -5536,6 +5551,13 @@ function SettingsScreen(_ref23) {
     size: 16
   }), " Esporta backup JSON"), /*#__PURE__*/React.createElement("div", {
     style: {
+      fontSize: '10.5px',
+      color: '#5A5468',
+      textAlign: 'center',
+      marginBottom: '10px'
+    }
+  }, "Dati salvati: ", storageUsage().kb, " KB su ", storageUsage().voci, " voci"), /*#__PURE__*/React.createElement("div", {
+    style: {
       display: 'flex',
       gap: '7px',
       marginBottom: '10px'
@@ -5665,7 +5687,7 @@ function SettingsScreen(_ref23) {
     style: {
       color: '#F4F2F8'
     }
-  }, "V8 Tracker v11.3 \xABVetro & Viola\xBB \xB7 Protocollo V8.3.4"), /*#__PURE__*/React.createElement("br", null), "Programma: V8 Block Cutting \xB7 8 Settimane \xB7 92kg (progressione a singola variabile)", /*#__PURE__*/React.createElement("br", null), "Storage: localStorage del browser", /*#__PURE__*/React.createElement("br", null), "Funziona offline dopo la prima apertura", /*#__PURE__*/React.createElement("br", null), "Immagini esercizi: Wikimedia Commons (con fallback SVG)"))));
+  }, "V8 Tracker v11.4 \xABVetro & Viola\xBB \xB7 Protocollo V8.3.4"), /*#__PURE__*/React.createElement("br", null), "Programma: V8 Block Cutting \xB7 8 Settimane \xB7 92kg (progressione a singola variabile)", /*#__PURE__*/React.createElement("br", null), "Storage: localStorage del browser", /*#__PURE__*/React.createElement("br", null), "Funziona offline dopo la prima apertura", /*#__PURE__*/React.createElement("br", null), "Immagini esercizi: Wikimedia Commons (con fallback SVG)"))));
 }
 
 // ============= ESTATE / VIAGGIO =============
@@ -20563,7 +20585,7 @@ function ScheduleEditorScreen(_ref45) {
   }, /*#__PURE__*/React.createElement(Plus, {
     size: 15
   }), " Aggiungi esercizio"), /*#__PURE__*/React.createElement("button", {
-    onClick: () => delDay(di),
+    onClick: () => askConfirm('Eliminare il giorno?', 'Perderai tutti gli esercizi che contiene.', () => delDay(di)),
     style: {
       width: '100%',
       marginTop: '8px',
@@ -21062,7 +21084,7 @@ function LibraryScreen(_ref46) {
       size: 14,
       color: "#3FB66C"
     })), /*#__PURE__*/React.createElement(MiniBtn, {
-      onClick: () => remove(s.id),
+      onClick: () => askConfirm('Eliminare la scheda?', 'La scheda e i suoi log verranno rimossi definitivamente.', () => remove(s.id)),
       color: "#E0524A",
       title: "Elimina"
     }, /*#__PURE__*/React.createElement(Trash2, {
@@ -21642,7 +21664,7 @@ function DietEditorScreen(_ref47) {
     }, /*#__PURE__*/React.createElement(Plus, {
       size: 15
     }), " Aggiungi alimento"), /*#__PURE__*/React.createElement("button", {
-      onClick: () => delMeal(mi),
+      onClick: () => askConfirm('Eliminare il pasto?', 'Perderai tutti gli alimenti che contiene.', () => delMeal(mi)),
       style: {
         width: '100%',
         marginTop: '8px',
@@ -22220,7 +22242,7 @@ function DietScreen(_ref48) {
       size: 14,
       color: "#4D82E8"
     })), /*#__PURE__*/React.createElement(MiniBtn, {
-      onClick: () => remove(d.id),
+      onClick: () => askConfirm('Eliminare la dieta?', 'Il piano alimentare verrà rimosso definitivamente.', () => remove(d.id)),
       color: "#E0524A",
       title: "Elimina"
     }, /*#__PURE__*/React.createElement(Trash2, {
@@ -23476,13 +23498,706 @@ function exportDieteCSV() {
   return rows.length - 1;
 }
 
+// ============================================================
+// V11.4 · CONFERME PER LE AZIONI DISTRUTTIVE
+// ============================================================
+let _confirmSetter = null;
+const askConfirm = (titolo, dettaglio, onOk) => {
+  if (_confirmSetter) _confirmSetter({
+    titolo,
+    dettaglio,
+    onOk
+  });else if (window.confirm(titolo)) onOk();
+};
+function ConfirmHost() {
+  const _useState141 = useState(null),
+    _useState142 = _slicedToArray(_useState141, 2),
+    req = _useState142[0],
+    setReq = _useState142[1];
+  useEffect(() => {
+    _confirmSetter = setReq;
+    return () => {
+      _confirmSetter = null;
+    };
+  }, []);
+  useAndroidBack(() => setReq(null), !!req);
+  if (!req) return null;
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      position: 'fixed',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      zIndex: 400,
+      background: 'rgba(7,6,11,0.82)',
+      backdropFilter: 'blur(8px)',
+      WebkitBackdropFilter: 'blur(8px)',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: '20px'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      ...glassCard,
+      padding: '18px',
+      maxWidth: '330px',
+      width: '100%'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontFamily: displayFont,
+      fontSize: '16px',
+      fontWeight: '700',
+      color: '#F4F2F8',
+      marginBottom: '7px'
+    }
+  }, req.titolo), req.dettaglio && /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: '12px',
+      color: '#908AA0',
+      lineHeight: 1.55,
+      marginBottom: '15px'
+    }
+  }, req.dettaglio), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      gap: '8px'
+    }
+  }, /*#__PURE__*/React.createElement("button", {
+    onClick: () => setReq(null),
+    style: {
+      flex: 1,
+      padding: '12px',
+      background: 'rgba(255,255,255,0.07)',
+      border: '1px solid rgba(255,255,255,0.14)',
+      color: '#C7C2D0',
+      borderRadius: '12px',
+      fontSize: '13px',
+      fontWeight: '700',
+      cursor: 'pointer'
+    }
+  }, "Annulla"), /*#__PURE__*/React.createElement("button", {
+    onClick: () => {
+      const f = req.onOk;
+      setReq(null);
+      if (f) f();
+    },
+    style: {
+      flex: 1,
+      padding: '12px',
+      background: 'linear-gradient(135deg, #E0524A 0%, #b93d36 100%)',
+      border: 'none',
+      color: 'white',
+      borderRadius: '12px',
+      fontSize: '13px',
+      fontWeight: '700',
+      cursor: 'pointer'
+    }
+  }, "Elimina"))));
+}
+
+// ============================================================
+// V11.4 · AVVISO SE UN SALVATAGGIO FALLISCE
+// ============================================================
+let _storageErrSetter = null;
+const notifyStorageError = () => {
+  if (_storageErrSetter) _storageErrSetter(Date.now());
+};
+function StorageBanner() {
+  const _useState143 = useState(0),
+    _useState144 = _slicedToArray(_useState143, 2),
+    err = _useState144[0],
+    setErr = _useState144[1];
+  useEffect(() => {
+    _storageErrSetter = setErr;
+    return () => {
+      _storageErrSetter = null;
+    };
+  }, []);
+  if (!err) return null;
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      position: 'fixed',
+      left: '10px',
+      right: '10px',
+      bottom: '86px',
+      zIndex: 350,
+      background: 'rgba(224,82,74,0.96)',
+      borderRadius: '13px',
+      padding: '12px 14px',
+      boxShadow: '0 6px 22px rgba(0,0,0,0.45)'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: '12.5px',
+      fontWeight: '800',
+      color: '#fff',
+      marginBottom: '3px'
+    }
+  }, "Salvataggio non riuscito"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: '11px',
+      color: 'rgba(255,255,255,0.9)',
+      lineHeight: 1.5
+    }
+  }, "Lo spazio del browser \xE8 pieno o bloccato: quello che stai inserendo ", /*#__PURE__*/React.createElement("b", null, "non viene registrato"), ". Esporta un backup e libera spazio dalle impostazioni."), /*#__PURE__*/React.createElement("button", {
+    onClick: () => setErr(0),
+    style: {
+      marginTop: '9px',
+      width: '100%',
+      padding: '8px',
+      background: 'rgba(255,255,255,0.18)',
+      border: 'none',
+      color: '#fff',
+      borderRadius: '9px',
+      fontSize: '11.5px',
+      fontWeight: '700',
+      cursor: 'pointer'
+    }
+  }, "Ho capito"));
+}
+
+// Spazio occupato dai dati dell'app (per le impostazioni)
+const storageUsage = () => {
+  let bytes = 0,
+    n = 0;
+  try {
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i);
+      if (k && k.indexOf(KEY_PREFIX) === 0) {
+        bytes += (localStorage.getItem(k) || '').length + k.length;
+        n++;
+      }
+    }
+  } catch (e) {}
+  return {
+    kb: Math.round(bytes / 1024),
+    voci: n
+  };
+};
+
+// ============================================================
+// V11.4 · STORICO DEI BLOCCHI
+// ============================================================
+const fmtData = ts => {
+  if (!ts) return '—';
+  const d = new Date(ts);
+  return String(d.getDate()).padStart(2, '0') + '/' + String(d.getMonth() + 1).padStart(2, '0') + '/' + d.getFullYear();
+};
+
+// Statistiche complete di un blocco: sessioni, serie, tonnellaggio, volume per muscolo, date
+function statsBlocco(config, log) {
+  const vol = {};
+  VOL_MUSCLES.forEach(m => {
+    vol[m] = 0;
+  });
+  let sessioni = 0,
+    serie = 0,
+    tonnellaggio = 0,
+    primo = null,
+    ultimo = null;
+  Object.keys(log || {}).forEach(week => {
+    (config.days || []).forEach(day => {
+      const dl = log[week][day.id];
+      if (!dl || !dl.esercizi) return;
+      let serieGiorno = 0;
+      const list = config.exercises[day.id] || [];
+      Object.entries(dl.esercizi).forEach(_ref65 => {
+        let _ref66 = _slicedToArray(_ref65, 2),
+          idx = _ref66[0],
+          rec = _ref66[1];
+        const ex = list[parseInt(idx, 10)];
+        const fatte = (rec.sets_done || []).filter(Boolean).length;
+        if (!fatte) return;
+        serieGiorno += fatte;
+        const kg = parseFloat(rec.kg) || 0;
+        (rec.reps || []).forEach((r, i) => {
+          if ((rec.sets_done || [])[i] && kg > 0) tonnellaggio += kg * (parseInt(r, 10) || 0);
+        });
+        if (ex) (ex.tags || []).forEach((t, i) => {
+          if (vol[t] !== undefined) vol[t] += fatte * (i === 0 ? 1 : 0.5);
+        });
+      });
+      if (serieGiorno > 0) {
+        sessioni++;
+        serie += serieGiorno;
+      }
+      const ts = dl.startedAt || dl.ts;
+      if (ts) {
+        if (!primo || ts < primo) primo = ts;
+        if (!ultimo || ts > ultimo) ultimo = ts;
+      }
+    });
+  });
+  return {
+    sessioni,
+    serie,
+    tonnellaggio: Math.round(tonnellaggio),
+    vol,
+    primo,
+    ultimo
+  };
+}
+const PROGRAMMI = () => [{
+  id: 'main',
+  label: 'V8.3.4',
+  config: MAIN_CONFIG
+}, {
+  id: 'summer2',
+  label: 'Estate',
+  config: SUMMER2_CONFIG
+}].concat((storage.get('custom_schedules') || []).map(s => {
+  try {
+    return {
+      id: s.id,
+      label: s.name || 'Scheda',
+      config: rehydrateSchedule(s)
+    };
+  } catch (e) {
+    return null;
+  }
+}).filter(Boolean));
+function StoricoScreen(_ref67) {
+  let goBack = _ref67.goBack;
+  const _useState145 = useState(() => storage.get('archivio') || []),
+    _useState146 = _slicedToArray(_useState145, 2),
+    archivio = _useState146[0],
+    setArchivio = _useState146[1];
+  const _useState147 = useState(0),
+    _useState148 = _slicedToArray(_useState147, 2),
+    progIdx = _useState148[0],
+    setProgIdx = _useState148[1];
+  const _useState149 = useState([]),
+    _useState150 = _slicedToArray(_useState149, 2),
+    cmp = _useState150[0],
+    setCmp = _useState150[1];
+  const _useState151 = useState(null),
+    _useState152 = _slicedToArray(_useState151, 2),
+    msg = _useState152[0],
+    setMsg = _useState152[1];
+  const programs = PROGRAMMI();
+  const prog = programs[progIdx] || programs[0];
+  const logCorrente = storage.get(prog.config.storageKey) || {};
+  const statsCorrente = statsBlocco(prog.config, logCorrente);
+  const archivia = () => {
+    if (statsCorrente.sessioni === 0) {
+      setMsg({
+        ok: false,
+        text: 'Nessuna sessione registrata da archiviare.'
+      });
+      return;
+    }
+    const voce = {
+      id: 'blk_' + Date.now(),
+      programma: prog.label,
+      storageKey: prog.config.storageKey,
+      progId: prog.id,
+      creato: Date.now(),
+      dal: statsCorrente.primo,
+      al: statsCorrente.ultimo,
+      sessioni: statsCorrente.sessioni,
+      serie: statsCorrente.serie,
+      tonnellaggio: statsCorrente.tonnellaggio,
+      vol: statsCorrente.vol,
+      log: logCorrente
+    };
+    const nuovo = [voce].concat(archivio);
+    setArchivio(nuovo);
+    storage.set('archivio', nuovo);
+    storage.set(prog.config.storageKey, {});
+    setMsg({
+      ok: true,
+      text: 'Blocco archiviato. I log del programma sono azzerati: puoi ripartire dalla settimana 1.'
+    });
+  };
+  const elimina = id => {
+    const nuovo = archivio.filter(a => a.id !== id);
+    setArchivio(nuovo);
+    storage.set('archivio', nuovo);
+    setCmp(cmp.filter(c => c !== id));
+  };
+  const ripristina = a => {
+    storage.set(a.storageKey, a.log || {});
+    setMsg({
+      ok: true,
+      text: 'Log ripristinati su "' + a.programma + '". Attenzione: hanno sovrascritto quelli correnti.'
+    });
+  };
+  const toggleCmp = id => {
+    if (cmp.indexOf(id) >= 0) setCmp(cmp.filter(c => c !== id));else if (cmp.length < 2) setCmp(cmp.concat([id]));else setCmp([cmp[1], id]);
+  };
+  const a1 = archivio.find(a => a.id === cmp[0]);
+  const a2 = archivio.find(a => a.id === cmp[1]);
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      minHeight: '100vh',
+      background: 'transparent',
+      paddingBottom: '120px'
+    }
+  }, /*#__PURE__*/React.createElement(Header, {
+    title: "Storico blocchi",
+    subtitle: "Archivia e confronta i mesocicli",
+    onBack: goBack
+  }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: '0 12px'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      gap: '5px',
+      overflowX: 'auto',
+      paddingBottom: '10px'
+    }
+  }, programs.map((p, i) => /*#__PURE__*/React.createElement("button", {
+    key: p.id,
+    onClick: () => setProgIdx(i),
+    style: {
+      flexShrink: 0,
+      padding: '8px 13px',
+      borderRadius: '20px',
+      fontSize: '11.5px',
+      fontWeight: '700',
+      cursor: 'pointer',
+      background: i === progIdx ? VIOLET : 'rgba(255,255,255,0.06)',
+      color: i === progIdx ? '#fff' : '#908AA0',
+      border: '1px solid ' + (i === progIdx ? VIOLET : 'rgba(255,255,255,0.1)')
+    }
+  }, p.label))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      ...glassCard,
+      padding: '14px',
+      marginBottom: '12px',
+      borderLeft: '3px solid #3FB66C'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: '10.5px',
+      color: '#908AA0',
+      fontWeight: '700',
+      letterSpacing: '0.4px',
+      marginBottom: '9px'
+    }
+  }, "BLOCCO IN CORSO \xB7 ", prog.label.toUpperCase()), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      justifyContent: 'space-around',
+      textAlign: 'center',
+      marginBottom: '12px'
+    }
+  }, [['SESSIONI', statsCorrente.sessioni], ['SERIE', Math.round(statsCorrente.serie)], ['TONNELLAGGIO', (statsCorrente.tonnellaggio / 1000).toFixed(1) + ' t']].map(_ref68 => {
+    let _ref69 = _slicedToArray(_ref68, 2),
+      l = _ref69[0],
+      v = _ref69[1];
+    return /*#__PURE__*/React.createElement("div", {
+      key: l
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontFamily: displayFont,
+        fontSize: '19px',
+        fontWeight: '800',
+        color: '#F4F2F8'
+      }
+    }, v), /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: '8.5px',
+        color: '#908AA0',
+        fontWeight: '700',
+        letterSpacing: '0.3px'
+      }
+    }, l));
+  })), statsCorrente.primo && /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: '10px',
+      color: '#5A5468',
+      textAlign: 'center',
+      marginBottom: '11px'
+    }
+  }, "dal ", fmtData(statsCorrente.primo), " al ", fmtData(statsCorrente.ultimo)), /*#__PURE__*/React.createElement(BigBtn, {
+    onClick: () => askConfirm('Archiviare il blocco?', 'I log di "' + prog.label + '" vengono salvati nello storico e poi azzerati, così riparti dalla settimana 1. Puoi sempre ripristinarli da qui.', archivia),
+    color: "#3FB66C",
+    icon: /*#__PURE__*/React.createElement(Save, {
+      size: 16
+    })
+  }, "Archivia e riparti")), msg && /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: msg.ok ? 'rgba(63,182,108,0.14)' : 'rgba(224,82,74,0.14)',
+      border: '1px solid ' + (msg.ok ? 'rgba(63,182,108,0.4)' : 'rgba(224,82,74,0.4)'),
+      borderRadius: '12px',
+      padding: '11px 13px',
+      marginBottom: '12px',
+      fontSize: '12px',
+      color: msg.ok ? '#3FB66C' : '#E0524A',
+      lineHeight: 1.5
+    }
+  }, msg.text), a1 && a2 && /*#__PURE__*/React.createElement("div", {
+    style: {
+      ...glassCard,
+      padding: '14px',
+      marginBottom: '12px',
+      borderLeft: '3px solid ' + VIOLET
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: '10.5px',
+      color: VIOLET,
+      fontWeight: '700',
+      letterSpacing: '0.4px',
+      marginBottom: '11px'
+    }
+  }, "CONFRONTO"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      fontSize: '10px',
+      color: '#908AA0',
+      marginBottom: '8px'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      flex: 1
+    }
+  }, a1.programma, " \xB7 ", fmtData(a1.dal)), /*#__PURE__*/React.createElement("div", {
+    style: {
+      flex: 1,
+      textAlign: 'right'
+    }
+  }, a2.programma, " \xB7 ", fmtData(a2.dal))), [['Sessioni', a1.sessioni, a2.sessioni, ''], ['Serie totali', Math.round(a1.serie), Math.round(a2.serie), ''], ['Tonnellaggio', (a1.tonnellaggio / 1000).toFixed(1), (a2.tonnellaggio / 1000).toFixed(1), ' t']].map(_ref70 => {
+    let _ref71 = _slicedToArray(_ref70, 4),
+      k = _ref71[0],
+      v1 = _ref71[1],
+      v2 = _ref71[2],
+      u = _ref71[3];
+    const d = v2 - v1;
+    const col = d > 0 ? '#3FB66C' : d < 0 ? '#E0524A' : '#908AA0';
+    return /*#__PURE__*/React.createElement("div", {
+      key: k,
+      style: {
+        display: 'flex',
+        alignItems: 'center',
+        padding: '7px 0',
+        borderBottom: '1px solid rgba(255,255,255,0.05)'
+      }
+    }, /*#__PURE__*/React.createElement("span", {
+      style: {
+        flex: 1,
+        fontSize: '12px',
+        color: '#F4F2F8',
+        fontWeight: '700'
+      }
+    }, v1, u), /*#__PURE__*/React.createElement("span", {
+      style: {
+        flex: 1.4,
+        fontSize: '10.5px',
+        color: '#908AA0',
+        textAlign: 'center'
+      }
+    }, k), /*#__PURE__*/React.createElement("span", {
+      style: {
+        flex: 1,
+        fontSize: '12px',
+        color: '#F4F2F8',
+        fontWeight: '700',
+        textAlign: 'right'
+      }
+    }, v2, u, " ", /*#__PURE__*/React.createElement("span", {
+      style: {
+        color: col,
+        fontSize: '9.5px'
+      }
+    }, d > 0 ? '+' : '', typeof d === 'number' ? Math.abs(d) < 1 ? d.toFixed(1) : Math.round(d) : d)));
+  }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: '10.5px',
+      color: '#908AA0',
+      fontWeight: '700',
+      margin: '12px 0 7px'
+    }
+  }, "Volume per gruppo"), VOL_MUSCLES.filter(m => (a1.vol[m] || 0) + (a2.vol[m] || 0) > 0).map(m => {
+    const v1 = a1.vol[m] || 0,
+      v2 = a2.vol[m] || 0,
+      d = v2 - v1;
+    const col = TAG_COLORS[m] && TAG_COLORS[m].text || '#908AA0';
+    return /*#__PURE__*/React.createElement("div", {
+      key: m,
+      style: {
+        display: 'flex',
+        alignItems: 'center',
+        padding: '4px 0'
+      }
+    }, /*#__PURE__*/React.createElement("span", {
+      style: {
+        flex: 1,
+        fontSize: '11.5px',
+        color: '#C7C2D0'
+      }
+    }, Math.round(v1)), /*#__PURE__*/React.createElement("span", {
+      style: {
+        flex: 1.4,
+        fontSize: '10px',
+        fontWeight: '800',
+        color: col,
+        textAlign: 'center'
+      }
+    }, m), /*#__PURE__*/React.createElement("span", {
+      style: {
+        flex: 1,
+        fontSize: '11.5px',
+        color: '#C7C2D0',
+        textAlign: 'right'
+      }
+    }, Math.round(v2), " ", /*#__PURE__*/React.createElement("span", {
+      style: {
+        color: d > 0 ? '#3FB66C' : d < 0 ? '#E0524A' : '#5A5468',
+        fontSize: '9px'
+      }
+    }, d > 0 ? '+' : '', Math.round(d))));
+  })), archivio.length === 0 ? /*#__PURE__*/React.createElement("div", {
+    style: {
+      ...glassCard,
+      padding: '22px 16px',
+      textAlign: 'center'
+    }
+  }, /*#__PURE__*/React.createElement(Layers, {
+    size: 30,
+    color: "#5A5468"
+  }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: '13px',
+      color: '#C7C2D0',
+      fontWeight: '600',
+      marginTop: '10px'
+    }
+  }, "Nessun blocco archiviato"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: '11px',
+      color: '#908AA0',
+      marginTop: '6px',
+      lineHeight: 1.55
+    }
+  }, "Quando finisci un mesociclo, archivialo: i numeri restano consultabili e il programma riparte pulito dalla settimana 1.")) : /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: '10.5px',
+      color: '#908AA0',
+      fontWeight: '700',
+      letterSpacing: '0.4px',
+      marginBottom: '9px'
+    }
+  }, "ARCHIVIO \xB7 ", archivio.length, " blocc", archivio.length === 1 ? 'o' : 'hi', cmp.length > 0 ? ' · ' + cmp.length + '/2 selezionati' : ' · tocca per confrontare'), archivio.map(a => {
+    const sel = cmp.indexOf(a.id) >= 0;
+    return /*#__PURE__*/React.createElement("div", {
+      key: a.id,
+      style: {
+        ...glassCard,
+        padding: '13px',
+        marginBottom: '10px',
+        borderLeft: '3px solid ' + (sel ? VIOLET : 'rgba(255,255,255,0.1)')
+      }
+    }, /*#__PURE__*/React.createElement("button", {
+      onClick: () => toggleCmp(a.id),
+      style: {
+        width: '100%',
+        textAlign: 'left',
+        background: 'none',
+        border: 'none',
+        padding: 0,
+        cursor: 'pointer'
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        display: 'flex',
+        alignItems: 'baseline',
+        gap: '8px'
+      }
+    }, /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontFamily: displayFont,
+        fontSize: '14px',
+        fontWeight: '700',
+        color: '#F4F2F8',
+        flex: 1
+      }
+    }, a.programma), sel && /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontSize: '9px',
+        fontWeight: '800',
+        color: VIOLET
+      }
+    }, "SELEZIONATO")), /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: '10px',
+        color: '#908AA0',
+        marginTop: '3px'
+      }
+    }, a.dal ? fmtData(a.dal) + ' → ' + fmtData(a.al) : 'archiviato il ' + fmtData(a.creato)), /*#__PURE__*/React.createElement("div", {
+      style: {
+        display: 'flex',
+        gap: '14px',
+        marginTop: '8px'
+      }
+    }, [['sessioni', a.sessioni], ['serie', Math.round(a.serie)], ['tonn.', (a.tonnellaggio / 1000).toFixed(1) + ' t']].map(_ref72 => {
+      let _ref73 = _slicedToArray(_ref72, 2),
+        l = _ref73[0],
+        v = _ref73[1];
+      return /*#__PURE__*/React.createElement("div", {
+        key: l
+      }, /*#__PURE__*/React.createElement("span", {
+        style: {
+          fontSize: '13px',
+          fontWeight: '800',
+          color: '#F4F2F8'
+        }
+      }, v), " ", /*#__PURE__*/React.createElement("span", {
+        style: {
+          fontSize: '9px',
+          color: '#5A5468'
+        }
+      }, l));
+    }))), /*#__PURE__*/React.createElement("div", {
+      style: {
+        display: 'flex',
+        gap: '6px',
+        marginTop: '11px'
+      }
+    }, /*#__PURE__*/React.createElement("button", {
+      onClick: () => askConfirm('Ripristinare questo blocco?', 'I log archiviati tornano nel programma "' + a.programma + '" e sovrascrivono quelli attuali.', () => ripristina(a)),
+      style: {
+        flex: 1,
+        padding: '9px',
+        background: 'rgba(77,130,232,0.13)',
+        border: '1px solid rgba(77,130,232,0.35)',
+        color: '#4D82E8',
+        borderRadius: '10px',
+        fontSize: '11.5px',
+        fontWeight: '700',
+        cursor: 'pointer'
+      }
+    }, "Ripristina"), /*#__PURE__*/React.createElement(MiniBtn, {
+      onClick: () => askConfirm('Eliminare dallo storico?', 'Il blocco "' + a.programma + '" e i suoi log verranno cancellati definitivamente.', () => elimina(a.id)),
+      color: "#E0524A",
+      title: "Elimina"
+    }, /*#__PURE__*/React.createElement(Trash2, {
+      size: 14,
+      color: "#E0524A"
+    }))));
+  })), /*#__PURE__*/React.createElement(InfoBox, {
+    color: "#78909c",
+    title: "Perch\xE9 archiviare"
+  }, "I log sono indicizzati per numero di settimana: senza archiviazione, ricominciando un blocco sovrascriveresti i dati vecchi. Archiviando conservi ", /*#__PURE__*/React.createElement("b", {
+    style: {
+      color: '#F4F2F8'
+    }
+  }, "volume, tonnellaggio e date"), " di ogni mesociclo e puoi confrontarli fra loro.")));
+}
+
 // ============= MAIN =============
 
 function App() {
-  const _useState141 = useState('home'),
-    _useState142 = _slicedToArray(_useState141, 2),
-    screen = _useState142[0],
-    setScreen = _useState142[1];
+  const _useState153 = useState('home'),
+    _useState154 = _slicedToArray(_useState153, 2),
+    screen = _useState154[0],
+    setScreen = _useState154[1];
   const goHome = useCallback(() => setScreen('home'), []);
   // Quando siamo fuori da home, intercetta il tasto indietro per tornare alla home
   useAndroidBack(goHome, screen !== 'home');
@@ -23507,7 +24222,9 @@ function App() {
     goBack: goHome
   }), screen === 'volume' && /*#__PURE__*/React.createElement(VolumeScreen, {
     goBack: goHome
-  }), screen === 'tdee' && /*#__PURE__*/React.createElement(TdeeScreen, {
+  }), screen === 'storico' && /*#__PURE__*/React.createElement(StoricoScreen, {
+    goBack: goHome
+  }), /*#__PURE__*/React.createElement(ConfirmHost, null), /*#__PURE__*/React.createElement(StorageBanner, null), screen === 'tdee' && /*#__PURE__*/React.createElement(TdeeScreen, {
     goBack: goHome
   }), screen === 'nutrition' && /*#__PURE__*/React.createElement(NutritionScreen, {
     goBack: goHome
