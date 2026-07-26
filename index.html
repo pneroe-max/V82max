@@ -33,9 +33,7 @@
   html, body {
     margin: 0; padding: 0;
     background:
-      radial-gradient(ellipse 100% 60% at 20% 0%, rgba(90,24,154,0.18), transparent 60%),
-      radial-gradient(ellipse 90% 50% at 90% 30%, rgba(181,23,158,0.12), transparent 60%),
-      #0A0810;
+      #0C0C0E;
     color: var(--ink);
     font-family: 'Archivo', -apple-system, "Helvetica Neue", Arial, sans-serif;
     -webkit-tap-highlight-color: transparent;
@@ -56,12 +54,7 @@
   /* SFERE AMBIENTALI — sature di loro, NESSUN blend mode (robusto ovunque).
      Su nero profondo un radiale a colore pieno è già luminoso;
      blur moderato per non spegnerle. */
-  .ambient-glow { position: fixed; pointer-events: none; z-index: 0; border-radius: 50%; filter: blur(46px); opacity: 0.95; }
-  .glow-1 { top: -60px; left: -50px; width: 290px; height: 290px; background: radial-gradient(circle at 42% 40%, #C77DFF 0%, #8E2DE2 45%, rgba(142,45,226,0) 76%); }
-  .glow-2 { top: 21%; right: -130px; width: 230px; height: 230px; opacity: 0.8; background: radial-gradient(circle at 50% 50%, #FF5FC1 0%, #C2179B 46%, rgba(194,23,155,0) 76%); }
-  .glow-3 { bottom: -110px; left: 4%; width: 330px; height: 300px; opacity: 0.85; background: radial-gradient(circle at 50% 45%, #8C6BFF 0%, #5F2EEA 48%, rgba(95,46,234,0) 78%); }
-  .glow-4 { position: fixed; pointer-events: none; z-index: 0; border-radius: 50%; filter: blur(50px); opacity: 0.65; top: 58%; left: -110px; width: 220px; height: 220px; background: radial-gradient(circle at 50% 50%, #53C8F0 0%, #3D5AF1 48%, rgba(61,90,241,0) 78%); }
-  @keyframes slideUp { from { transform: translate(-50%, 100%); opacity: 0; } to { transform: translate(-50%, 0); opacity: 1; } }
+            @keyframes slideUp { from { transform: translate(-50%, 100%); opacity: 0; } to { transform: translate(-50%, 0); opacity: 1; } }
   @keyframes slideDown { from { transform: translate(0, -100%); opacity: 0; } to { transform: translate(0, 0); opacity: 1; } }
   @keyframes slideUpModal { from { transform: translateY(100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
   @keyframes fadeInModal { from { opacity: 0; } to { opacity: 1; } }
@@ -72,10 +65,6 @@
 </style>
 </head>
 <body>
-<div class="ambient-glow glow-1"></div>
-<div class="ambient-glow glow-2"></div>
-<div class="ambient-glow glow-3"></div>
-<div class="glow-4"></div>
 <div id="root" style="position: relative; z-index: 1;"></div>
 
 <!-- React incluso nel file: nessuna dipendenza da CDN, funziona offline -->
@@ -2869,11 +2858,19 @@ function HomeScreen(_ref12) {
         }
       });
     });
-    const ultimaSett = peso ? Object.values(peso).filter(p => p.media).slice(-1)[0] : null;
+    const serie = peso ? Object.keys(peso).map(Number).sort((a, b) => a - b).filter(w => (peso[w] || {}).media > 0) : [];
+    const ultimaSett = serie.length ? peso[serie[serie.length - 1]] : null;
+    let trend = null;
+    if (serie.length >= 2) {
+      const da = serie[Math.max(0, serie.length - 4)],
+        a = serie[serie.length - 1];
+      if (a > da) trend = (peso[a].media - peso[da].media) / (a - da);
+    }
     setStats({
-      peso: ultimaSett ? `${ultimaSett.media.toFixed(1)} kg` : '—',
+      peso: ultimaSett ? ultimaSett.media.toFixed(1).replace('.', ',') : '—',
       sessioni,
-      sett: lastWeek
+      sett: lastWeek,
+      trend
     });
   }, []);
   const sections = [{
@@ -3046,52 +3043,53 @@ function HomeScreen(_ref12) {
     color: "#C7C2D0"
   })))), /*#__PURE__*/React.createElement("div", {
     style: {
-      padding: '14px 18px 18px'
+      padding: '12px 16px 18px'
     }
   }, /*#__PURE__*/React.createElement("div", {
     style: {
-      fontSize: '13px',
-      color: 'rgba(244,242,248,0.82)',
-      fontWeight: '500',
-      marginBottom: '6px',
-      textShadow: '0 1px 12px rgba(0,0,0,0.45)'
-    }
-  }, "Blocco corrente \xB7 V8.3.4"), /*#__PURE__*/React.createElement("div", {
-    style: {
       display: 'flex',
-      alignItems: 'flex-end',
       justifyContent: 'space-between',
-      gap: '12px'
+      alignItems: 'flex-start'
     }
-  }, /*#__PURE__*/React.createElement("div", {
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    style: lblStyle
+  }, "V8.3.4 \xB7 blocco ", stats.sett, " di 8"), /*#__PURE__*/React.createElement("div", {
     style: {
       display: 'flex',
-      alignItems: 'baseline'
+      alignItems: 'baseline',
+      gap: '9px',
+      marginTop: '7px'
     }
   }, /*#__PURE__*/React.createElement("span", {
     style: {
       ...numStyle,
-      fontSize: '46px',
+      fontSize: '42px',
       fontWeight: '600',
       lineHeight: 0.9,
-      letterSpacing: '-0.04em'
+      letterSpacing: '-0.04em',
+      color: IRON.chalk
     }
-  }, stats.peso === '—' ? '92' : stats.peso.replace(' kg', '').split('.')[0]), /*#__PURE__*/React.createElement("span", {
+  }, stats.peso === '—' ? '—' : stats.peso), /*#__PURE__*/React.createElement("span", {
     style: {
       ...numStyle,
-      fontSize: '26px',
-      fontWeight: '500',
-      color: IRON.dust,
-      lineHeight: 0.9
+      fontSize: '13px',
+      color: IRON.dust
     }
-  }, ".", stats.peso === '—' ? '0' : stats.peso.replace(' kg', '').split('.')[1] || '0', " kg")), /*#__PURE__*/React.createElement("div", {
+  }, "KG"), stats.trend != null && stats.trend !== 0 && /*#__PURE__*/React.createElement("span", {
+    style: {
+      ...numStyle,
+      fontSize: '12px',
+      color: stats.trend < 0 ? '#2FA055' : '#E5A82B'
+    }
+  }, stats.trend > 0 ? '+' : '', String(Math.round(stats.trend * 100) / 100).replace('.', ','), "/sett")), /*#__PURE__*/React.createElement(PesoSpark, null)), /*#__PURE__*/React.createElement("div", {
     style: {
       display: 'flex',
       alignItems: 'center',
       gap: '8px',
       border: '1px solid ' + IRON.edge,
       borderRadius: '3px',
-      padding: '7px 11px'
+      padding: '7px 11px',
+      marginTop: '2px'
     }
   }, /*#__PURE__*/React.createElement("span", {
     style: {
@@ -3107,62 +3105,11 @@ function HomeScreen(_ref12) {
       color: IRON.chalk,
       fontSize: '10.5px'
     }
-  }, "CUT"))), /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: 'inline-flex',
-      alignItems: 'center',
-      gap: '6px',
-      marginTop: '10px',
-      background: 'rgba(255,255,255,0.05)',
-      border: '1px solid rgba(255,255,255,0.12)',
-      borderRadius: '16px',
-      padding: '5px 11px'
-    }
-  }, /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontSize: '11px',
-      color: 'rgba(244,242,248,0.78)'
-    }
-  }, "IF 16:8 \xB7 ~2.000 kcal \xB7 200P"))), /*#__PURE__*/React.createElement("div", {
+  }, "CUT")))), /*#__PURE__*/React.createElement("div", {
     style: {
       padding: '0 14px'
     }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: 'flex',
-      gap: '8px',
-      marginBottom: '14px'
-    }
-  }, statItems.map(s => /*#__PURE__*/React.createElement("div", {
-    key: s.label,
-    style: {
-      ...glassCard,
-      flex: 1,
-      padding: '14px 8px',
-      textAlign: 'center',
-      borderRadius: '18px'
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: '9px',
-      color: '#908AA0',
-      textTransform: 'uppercase',
-      letterSpacing: '0.1em',
-      fontWeight: '600'
-    }
-  }, s.label), /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontFamily: displayFont,
-      fontSize: '23px',
-      fontWeight: '800',
-      color: s.color,
-      marginTop: '4px',
-      lineHeight: 1
-    }
-  }, s.value)))), /*#__PURE__*/React.createElement(MesocycleWave, {
-    currentWeek: stats.sett,
-    onPick: () => navigate('workout')
-  }), /*#__PURE__*/React.createElement(TodayCard, {
+  }, /*#__PURE__*/React.createElement(TodayCard, {
     navigate: navigate
   }), [['Allenarsi', ['workout', 'summer', 'library']], ['Registrare', ['peso', 'nutrition', 'diets', 'recovery']], ['Analizzare', ['dashboard', 'volume', 'tdee', 'storico']], ['Riferimento', ['exdb', 'bilanciere', 'guide', 'settings']]].concat((() => {
     const assegnate = ['workout', 'summer', 'library', 'peso', 'nutrition', 'diets', 'recovery', 'dashboard', 'volume', 'tdee', 'storico', 'exdb', 'bilanciere', 'guide', 'settings'];
@@ -4100,24 +4047,39 @@ function WorkoutScreen(_ref18) {
     }, "Obiettivo raggiunto."), " Settimana prossima: +", isLowerBody(ex.tags) ? '5' : '2,5', " kg")), /*#__PURE__*/React.createElement("div", {
       style: {
         display: 'flex',
-        gap: '8px',
-        marginBottom: '10px'
+        gap: '9px',
+        marginBottom: '12px',
+        alignItems: 'stretch'
       }
-    }, /*#__PURE__*/React.createElement("div", {
+    }, /*#__PURE__*/React.createElement("button", {
+      onClick: () => {
+        const v = parseFloat(exData.kg) || parseFloat(suggested) || 0;
+        updateExercise(selectedWeek, selectedDay, idx, 'kg', String(Math.max(0, Math.round((v - 2.5) * 10) / 10)));
+      },
       style: {
-        flex: '2'
+        width: '58px',
+        minHeight: '70px',
+        background: IRON.surface,
+        border: '1px solid ' + IRON.edge,
+        borderRadius: '3px',
+        color: IRON.chalk,
+        fontFamily: monoFont,
+        fontSize: '22px',
+        cursor: 'pointer'
       }
-    }, /*#__PURE__*/React.createElement("div", {
+    }, "\u2212"), /*#__PURE__*/React.createElement("div", {
       style: {
-        fontSize: '9px',
-        textTransform: 'uppercase',
-        color: '#908AA0',
-        marginBottom: '5px',
-        letterSpacing: '0.1em',
-        textAlign: 'center',
-        fontWeight: '600'
+        flex: 1,
+        minHeight: '70px',
+        background: IRON.surface,
+        border: '1px solid ' + IRON.edge,
+        borderRadius: '3px',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center'
       }
-    }, "Kg working"), /*#__PURE__*/React.createElement("input", {
+    }, /*#__PURE__*/React.createElement("input", {
       type: "number",
       inputMode: "decimal",
       step: "0.5",
@@ -4125,45 +4087,40 @@ function WorkoutScreen(_ref18) {
       value: exData.kg,
       onChange: e => updateExercise(selectedWeek, selectedDay, idx, 'kg', e.target.value),
       style: {
-        ...inputDark,
         width: '100%',
-        padding: '10px',
-        fontSize: '17px',
-        fontWeight: '800',
-        color: day.color,
-        border: `1px solid ${day.color}55`,
-        fontFamily: displayFont,
-        boxSizing: 'border-box'
-      }
-    })), /*#__PURE__*/React.createElement("div", {
-      style: {
-        flex: '1'
-      }
-    }, /*#__PURE__*/React.createElement("div", {
-      style: {
-        fontSize: '9px',
-        textTransform: 'uppercase',
-        color: '#908AA0',
-        marginBottom: '5px',
-        letterSpacing: '0.1em',
+        background: 'none',
+        border: 'none',
+        outline: 'none',
         textAlign: 'center',
-        fontWeight: '600'
+        ...numStyle,
+        fontSize: '30px',
+        fontWeight: '600',
+        color: IRON.chalk,
+        letterSpacing: '-0.03em'
       }
-    }, "RIR"), /*#__PURE__*/React.createElement("input", {
-      type: "number",
-      inputMode: "numeric",
-      placeholder: "\u2014",
-      value: exData.rir,
-      onChange: e => updateExercise(selectedWeek, selectedDay, idx, 'rir', e.target.value),
+    }), /*#__PURE__*/React.createElement("span", {
       style: {
-        ...inputDark,
-        width: '100%',
-        padding: '10px',
-        fontSize: '16px',
-        fontWeight: '700',
-        boxSizing: 'border-box'
+        ...lblStyle,
+        fontSize: '8.5px',
+        marginTop: '-2px'
       }
-    }))), usaBilanciere(ex) && exData.kg && /*#__PURE__*/React.createElement("div", {
+    }, usaBilanciere(ex) ? 'kg sul bilanciere' : 'kg')), /*#__PURE__*/React.createElement("button", {
+      onClick: () => {
+        const v = parseFloat(exData.kg) || parseFloat(suggested) || 0;
+        updateExercise(selectedWeek, selectedDay, idx, 'kg', String(Math.round((v + 2.5) * 10) / 10));
+      },
+      style: {
+        width: '58px',
+        minHeight: '70px',
+        background: IRON.surface,
+        border: '1px solid ' + IRON.edge,
+        borderRadius: '3px',
+        color: IRON.chalk,
+        fontFamily: monoFont,
+        fontSize: '22px',
+        cursor: 'pointer'
+      }
+    }, "+")), usaBilanciere(ex) && exData.kg && /*#__PURE__*/React.createElement("div", {
       style: {
         margin: '4px -14px 12px',
         padding: '10px 14px 4px',
@@ -4196,7 +4153,14 @@ function WorkoutScreen(_ref18) {
     }, "Rep"), /*#__PURE__*/React.createElement("th", {
       style: {
         ...lblStyle,
-        width: '72px',
+        width: '62px',
+        textAlign: 'center',
+        padding: '0 0 7px'
+      }
+    }, "RIR"), /*#__PURE__*/React.createElement("th", {
+      style: {
+        ...lblStyle,
+        width: '66px',
         textAlign: 'center',
         padding: '0 0 7px'
       }
@@ -4254,6 +4218,30 @@ function WorkoutScreen(_ref18) {
           fontSize: '19px',
           fontWeight: '600',
           color: repCol
+        }
+      })), /*#__PURE__*/React.createElement("td", {
+        style: {
+          borderTop: '1px solid ' + IRON.edge,
+          padding: 0
+        }
+      }, /*#__PURE__*/React.createElement("input", {
+        type: "number",
+        inputMode: "numeric",
+        placeholder: setIdx === 0 ? logic.rir || '—' : '—',
+        value: setIdx === 0 ? exData.rir || '' : '',
+        onChange: e => updateExercise(selectedWeek, selectedDay, idx, 'rir', e.target.value),
+        disabled: setIdx !== 0,
+        style: {
+          width: '100%',
+          minHeight: '56px',
+          background: 'none',
+          border: 'none',
+          outline: 'none',
+          textAlign: 'center',
+          ...numStyle,
+          fontSize: '15px',
+          fontWeight: '500',
+          color: setIdx === 0 ? IRON.dust : IRON.edge
         }
       })), /*#__PURE__*/React.createElement("td", {
         style: {
@@ -24800,6 +24788,35 @@ function TodayCard(_ref79) {
       marginTop: '7px'
     }
   }, "Nessuna seduta in programma. NEAT alto e proteine.")));
+}
+
+// ============================================================
+// REGISTRO · ANDAMENTO PESO IN TESTATA
+// ============================================================
+function PesoSpark() {
+  const log = storage.get('peso') || {};
+  const serie = Object.keys(log).map(Number).sort((a, b) => a - b).map(w => (log[w] || {}).media).filter(v => v > 0).slice(-10);
+  if (serie.length < 2) return null;
+  const mn = Math.min(...serie),
+    mx = Math.max(...serie);
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      alignItems: 'flex-end',
+      gap: '2px',
+      height: '24px',
+      marginTop: '9px'
+    }
+  }, serie.map((v, i) => /*#__PURE__*/React.createElement("span", {
+    key: i,
+    style: {
+      width: '5px',
+      display: 'block',
+      borderRadius: '1px',
+      height: 6 + (v - mn) / (mx - mn || 1) * 18 + 'px',
+      background: i >= serie.length - 2 ? IRON.dust : IRON.edge
+    }
+  })));
 }
 
 // ============= MAIN =============
