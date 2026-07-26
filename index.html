@@ -2365,6 +2365,7 @@ function FloatingTimer() {
       }
     }, String(min).padStart(2, '0'), ":", String(sec).padStart(2, '0')));
   }
+  if (_barraGiu) return null; // durante l'allenamento il conto alla rovescia sta nella barra della seduta
   return /*#__PURE__*/React.createElement("div", {
     style: {
       position: 'fixed',
@@ -3397,6 +3398,7 @@ const MAIN_CONFIG = {
   rotation: true
 };
 function WorkoutScreen(_ref18) {
+  var _data$selectedWeek2;
   let goBack = _ref18.goBack,
     _ref18$config = _ref18.config,
     config = _ref18$config === void 0 ? MAIN_CONFIG : _ref18$config;
@@ -3439,6 +3441,14 @@ function WorkoutScreen(_ref18) {
     _useState30 = _slicedToArray(_useState29, 2),
     swapFor = _useState30[0],
     setSwapFor = _useState30[1];
+  const _useState31 = useState(0),
+    _useState32 = _slicedToArray(_useState31, 2),
+    curEx = _useState32[0],
+    setCurEx = _useState32[1];
+  const touch = useRef(null);
+  useEffect(() => {
+    setCurEx(0);
+  }, [selectedDay, selectedWeek]);
   const swapKey = (d, i) => storageKey + '|' + d + '|' + i;
   const doSwap = (d, i, alt) => {
     const n = {
@@ -3553,6 +3563,8 @@ function WorkoutScreen(_ref18) {
       };
       // Digitazione (kg/reps/rir) → debounced. Toggle serie → immediato.
       if (field === 'sets_done') {
+        clearTimeout(_saveTimers[storageKey]);
+        delete _pendingSaves[storageKey];
         storage.set(storageKey, next);
       } else {
         scheduleSave(storageKey, next);
@@ -3804,7 +3816,23 @@ function WorkoutScreen(_ref18) {
     onPick: alt => doSwap(selectedDay, swapFor, alt),
     onReset: () => undoSwap(selectedDay, swapFor),
     onClose: () => setSwapFor(null)
-  }), /*#__PURE__*/React.createElement(Header, {
+  }), /*#__PURE__*/React.createElement("div", {
+    onTouchStart: e => {
+      touch.current = {
+        x: e.touches[0].clientX,
+        y: e.touches[0].clientY
+      };
+    },
+    onTouchEnd: e => {
+      if (!touch.current) return;
+      const dx = e.changedTouches[0].clientX - touch.current.x;
+      const dy = e.changedTouches[0].clientY - touch.current.y;
+      touch.current = null;
+      if (Math.abs(dx) < 65 || Math.abs(dy) > Math.abs(dx)) return;
+      if (dx < 0 && curEx < exercises.length - 1) setCurEx(curEx + 1);
+      if (dx > 0 && curEx > 0) setCurEx(curEx - 1);
+    }
+  }, /*#__PURE__*/React.createElement(Header, {
     title: `S${selectedWeek} · ${day.dayName} · ${day.label}`,
     subtitle: `${block.label} · ${day.subtitle}`,
     onBack: () => setView('select')
@@ -3812,7 +3840,14 @@ function WorkoutScreen(_ref18) {
     style: {
       padding: '0 12px'
     }
-  }, rotation && /*#__PURE__*/React.createElement("div", {
+  }, /*#__PURE__*/React.createElement(ProgressoSeduta, {
+    esercizi: exercises,
+    data: data,
+    week: selectedWeek,
+    dayId: selectedDay,
+    cur: curEx,
+    vai: setCurEx
+  }), rotation && /*#__PURE__*/React.createElement("div", {
     style: {
       background: isRotA ? 'rgba(232, 176, 40, 0.1)' : 'rgba(38, 198, 218, 0.1)',
       border: `1px solid ${isRotA ? 'rgba(232, 176, 40, 0.3)' : 'rgba(38, 198, 218, 0.3)'}`,
@@ -3823,8 +3858,9 @@ function WorkoutScreen(_ref18) {
       color: isRotA ? '#E8B43C' : '#26c6da',
       textAlign: 'center'
     }
-  }, "Settimana ", selectedWeek, " \u2192 Rotazione ", /*#__PURE__*/React.createElement("strong", null, isRotA ? 'A (sett 1-3-5-7)' : 'B (sett 2-4-6-8)')), exercises.map((ex, idx) => {
+  }, "Settimana ", selectedWeek, " \u2192 Rotazione ", /*#__PURE__*/React.createElement("strong", null, isRotA ? 'A (sett 1-3-5-7)' : 'B (sett 2-4-6-8)')), exercises.slice(curEx, curEx + 1).map(ex => {
     var _data$selectedWeek;
+    const idx = curEx;
     const exData = ((_data$selectedWeek = data[selectedWeek]) === null || _data$selectedWeek === void 0 || (_data$selectedWeek = _data$selectedWeek[selectedDay]) === null || _data$selectedWeek === void 0 || (_data$selectedWeek = _data$selectedWeek.esercizi) === null || _data$selectedWeek === void 0 ? void 0 : _data$selectedWeek[idx]) || {
       kg: '',
       reps: ['', '', '', ''],
@@ -4290,55 +4326,48 @@ function WorkoutScreen(_ref18) {
       exIdx: idx,
       kgAttuale: exData.kg
     }));
-  }), /*#__PURE__*/React.createElement("button", {
-    onClick: () => toggleComplete(selectedWeek, selectedDay),
-    style: {
-      width: '100%',
-      padding: '16px',
-      marginTop: '8px',
-      background: completed ? 'linear-gradient(135deg, #3FB66C 0%, #2E8F54 100%)' : 'linear-gradient(135deg, #4D82E8 0%, #1e88e5 100%)',
-      color: 'white',
-      border: 'none',
-      borderRadius: '14px',
-      fontSize: '14px',
-      fontWeight: '700',
-      cursor: 'pointer',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      gap: '8px',
-      boxShadow: '0 4px 12px rgba(0,0,0,0.3)'
-    }
-  }, completed ? /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement(Check, {
-    size: 18
-  }), " Sessione completata") : /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement(Save, {
-    size: 18
-  }), " Segna come completato"))));
+  }))), /*#__PURE__*/React.createElement(BarraSeduta, {
+    esercizi: exercises,
+    idx: curEx,
+    vai: setCurEx,
+    exData: ((_data$selectedWeek2 = data[selectedWeek]) === null || _data$selectedWeek2 === void 0 || (_data$selectedWeek2 = _data$selectedWeek2[selectedDay]) === null || _data$selectedWeek2 === void 0 || (_data$selectedWeek2 = _data$selectedWeek2.esercizi) === null || _data$selectedWeek2 === void 0 ? void 0 : _data$selectedWeek2[curEx]) || {},
+    logic: applyLogic(exercises[curEx] || {}, selectedWeek),
+    onSpunta: (setIdx, reps) => {
+      if (reps) updateExercise(selectedWeek, selectedDay, curEx, 'reps', reps, setIdx);
+      updateExercise(selectedWeek, selectedDay, curEx, 'sets_done', true, setIdx);
+      startTimer(parseRestSeconds(applyLogic(exercises[curEx] || {}, selectedWeek).rest), (exercises[curEx] || {}).name + ' S' + (setIdx + 1));
+      try {
+        if (navigator.vibrate) navigator.vibrate(40);
+      } catch (e) {}
+    },
+    completa: () => toggleComplete(selectedWeek, selectedDay),
+    completato: completed
+  }));
 }
 // ============= PESO =============
 
 function PesoScreen(_ref19) {
   let goBack = _ref19.goBack;
-  const _useState31 = useState({}),
-    _useState32 = _slicedToArray(_useState31, 2),
-    data = _useState32[0],
-    setData = _useState32[1];
-  const _useState33 = useState(92),
+  const _useState33 = useState({}),
     _useState34 = _slicedToArray(_useState33, 2),
-    pesoIniziale = _useState34[0],
-    setPesoIniziale = _useState34[1];
-  const _useState35 = useState({}),
+    data = _useState34[0],
+    setData = _useState34[1];
+  const _useState35 = useState(92),
     _useState36 = _slicedToArray(_useState35, 2),
-    misure = _useState36[0],
-    setMisure = _useState36[1];
+    pesoIniziale = _useState36[0],
+    setPesoIniziale = _useState36[1];
   const _useState37 = useState({}),
     _useState38 = _slicedToArray(_useState37, 2),
-    foto = _useState38[0],
-    setFoto = _useState38[1];
-  const _useState39 = useState('peso'),
+    misure = _useState38[0],
+    setMisure = _useState38[1];
+  const _useState39 = useState({}),
     _useState40 = _slicedToArray(_useState39, 2),
-    tab = _useState40[0],
-    setTab = _useState40[1];
+    foto = _useState40[0],
+    setFoto = _useState40[1];
+  const _useState41 = useState('peso'),
+    _useState42 = _slicedToArray(_useState41, 2),
+    tab = _useState42[0],
+    setTab = _useState42[1];
   useEffect(() => {
     setData(storage.get('peso') || {});
     const init = storage.get('pesoIniziale');
@@ -4720,18 +4749,18 @@ function PesoScreen(_ref19) {
 
 function DashboardScreen(_ref20) {
   let goBack = _ref20.goBack;
-  const _useState41 = useState({}),
-    _useState42 = _slicedToArray(_useState41, 2),
-    workouts = _useState42[0],
-    setWorkouts = _useState42[1];
   const _useState43 = useState({}),
     _useState44 = _slicedToArray(_useState43, 2),
-    pesoData = _useState44[0],
-    setPesoData = _useState44[1];
-  const _useState45 = useState(92),
+    workouts = _useState44[0],
+    setWorkouts = _useState44[1];
+  const _useState45 = useState({}),
     _useState46 = _slicedToArray(_useState45, 2),
-    pesoIniziale = _useState46[0],
-    setPesoIniziale = _useState46[1];
+    pesoData = _useState46[0],
+    setPesoData = _useState46[1];
+  const _useState47 = useState(92),
+    _useState48 = _slicedToArray(_useState47, 2),
+    pesoIniziale = _useState48[0],
+    setPesoIniziale = _useState48[1];
   useEffect(() => {
     setWorkouts(storage.get('workouts') || {});
     setPesoData(storage.get('peso') || {});
@@ -5071,10 +5100,10 @@ function DashboardScreen(_ref20) {
 
 function RecoveryScreen(_ref23) {
   let goBack = _ref23.goBack;
-  const _useState47 = useState({}),
-    _useState48 = _slicedToArray(_useState47, 2),
-    data = _useState48[0],
-    setData = _useState48[1];
+  const _useState49 = useState({}),
+    _useState50 = _slicedToArray(_useState49, 2),
+    data = _useState50[0],
+    setData = _useState50[1];
   useEffect(() => {
     setData(storage.get('recovery') || {});
   }, []);
@@ -5512,10 +5541,10 @@ function GuideScreen(_ref24) {
 
 function SettingsScreen(_ref25) {
   let goBack = _ref25.goBack;
-  const _useState49 = useState(null),
-    _useState50 = _slicedToArray(_useState49, 2),
-    msg = _useState50[0],
-    setMsg = _useState50[1];
+  const _useState51 = useState(null),
+    _useState52 = _slicedToArray(_useState51, 2),
+    msg = _useState52[0],
+    setMsg = _useState52[1];
   const fileInputRef = useRef(null);
   const exportData = () => {
     const data = storage.exportAll();
@@ -17613,10 +17642,10 @@ function InfoBox(_ref28) {
 }
 function SummerScreen(_ref29) {
   let goBack = _ref29.goBack;
-  const _useState51 = useState('info'),
-    _useState52 = _slicedToArray(_useState51, 2),
-    mode = _useState52[0],
-    setMode = _useState52[1]; // 'info' | 'train'
+  const _useState53 = useState('info'),
+    _useState54 = _slicedToArray(_useState53, 2),
+    mode = _useState54[0],
+    setMode = _useState54[1]; // 'info' | 'train'
 
   if (mode === 'train') {
     return /*#__PURE__*/React.createElement(WorkoutScreen, {
@@ -17947,10 +17976,10 @@ const SUPP_STACK = [{
 }];
 function NutritionScreen(_ref30) {
   let goBack = _ref30.goBack;
-  const _useState53 = useState('dieta'),
-    _useState54 = _slicedToArray(_useState53, 2),
-    tab = _useState54[0],
-    setTab = _useState54[1];
+  const _useState55 = useState('dieta'),
+    _useState56 = _slicedToArray(_useState55, 2),
+    tab = _useState56[0],
+    setTab = _useState56[1];
   const tabs = [{
     id: 'dieta',
     label: 'Dieta'
@@ -18377,10 +18406,10 @@ const XIcon = p => /*#__PURE__*/React.createElement(Icon, _extends({
 // ============= ESTATE V2 · 4 GIORNI =============
 function Summer2Screen(_ref35) {
   let goBack = _ref35.goBack;
-  const _useState55 = useState('info'),
-    _useState56 = _slicedToArray(_useState55, 2),
-    mode = _useState56[0],
-    setMode = _useState56[1];
+  const _useState57 = useState('info'),
+    _useState58 = _slicedToArray(_useState57, 2),
+    mode = _useState58[0],
+    setMode = _useState58[1];
   if (mode === 'train') return /*#__PURE__*/React.createElement(WorkoutScreen, {
     goBack: () => setMode('info'),
     config: SUMMER2_CONFIG
@@ -18502,26 +18531,26 @@ function Summer2Screen(_ref35) {
 // ============= LIBRERIA SCHEDE (import .v8w) =============
 function LibraryScreenLegacy(_ref38) {
   let goBack = _ref38.goBack;
-  const _useState57 = useState(() => storage.get('custom_schedules') || []),
-    _useState58 = _slicedToArray(_useState57, 2),
-    schedules = _useState58[0],
-    setSchedules = _useState58[1];
-  const _useState59 = useState(null),
+  const _useState59 = useState(() => storage.get('custom_schedules') || []),
     _useState60 = _slicedToArray(_useState59, 2),
-    selected = _useState60[0],
-    setSelected = _useState60[1];
-  const _useState61 = useState(false),
+    schedules = _useState60[0],
+    setSchedules = _useState60[1];
+  const _useState61 = useState(null),
     _useState62 = _slicedToArray(_useState61, 2),
-    panel = _useState62[0],
-    setPanel = _useState62[1];
-  const _useState63 = useState(''),
+    selected = _useState62[0],
+    setSelected = _useState62[1];
+  const _useState63 = useState(false),
     _useState64 = _slicedToArray(_useState63, 2),
-    paste = _useState64[0],
-    setPaste = _useState64[1];
-  const _useState65 = useState(null),
+    panel = _useState64[0],
+    setPanel = _useState64[1];
+  const _useState65 = useState(''),
     _useState66 = _slicedToArray(_useState65, 2),
-    msg = _useState66[0],
-    setMsg = _useState66[1];
+    paste = _useState66[0],
+    setPaste = _useState66[1];
+  const _useState67 = useState(null),
+    _useState68 = _slicedToArray(_useState67, 2),
+    msg = _useState68[0],
+    setMsg = _useState68[1];
   const fileRef = useRef(null);
   const persist = list => {
     setSchedules(list);
@@ -19796,14 +19825,14 @@ function MacroBar(_ref44) {
 function ExercisePicker(_ref45) {
   let onPick = _ref45.onPick,
     onClose = _ref45.onClose;
-  const _useState67 = useState(''),
-    _useState68 = _slicedToArray(_useState67, 2),
-    q = _useState68[0],
-    setQ = _useState68[1];
-  const _useState69 = useState(null),
+  const _useState69 = useState(''),
     _useState70 = _slicedToArray(_useState69, 2),
-    tag = _useState70[0],
-    setTag = _useState70[1];
+    q = _useState70[0],
+    setQ = _useState70[1];
+  const _useState71 = useState(null),
+    _useState72 = _slicedToArray(_useState71, 2),
+    tag = _useState72[0],
+    setTag = _useState72[1];
   const all = Object.values(EXERCISE_DB).filter(e => !BUILTIN_TWIN[e.id]);
   const tags = [];
   all.forEach(e => (e.tags || []).forEach(t => {
@@ -19967,14 +19996,14 @@ function ExercisePicker(_ref45) {
 function FoodPicker(_ref46) {
   let onPick = _ref46.onPick,
     onClose = _ref46.onClose;
-  const _useState71 = useState(''),
-    _useState72 = _slicedToArray(_useState71, 2),
-    q = _useState72[0],
-    setQ = _useState72[1];
-  const _useState73 = useState(null),
+  const _useState73 = useState(''),
     _useState74 = _slicedToArray(_useState73, 2),
-    cat = _useState74[0],
-    setCat = _useState74[1];
+    q = _useState74[0],
+    setQ = _useState74[1];
+  const _useState75 = useState(null),
+    _useState76 = _slicedToArray(_useState75, 2),
+    cat = _useState76[0],
+    setCat = _useState76[1];
   const ql = q.trim().toLowerCase();
   const list = FOOD_DB.filter(f => (!ql || f.n.toLowerCase().indexOf(ql) >= 0) && (!cat || f.cat === cat));
   const addCustom = () => onPick({
@@ -20271,22 +20300,22 @@ function ScheduleEditorScreen(_ref47) {
   let initial = _ref47.initial,
     onSave = _ref47.onSave,
     goBack = _ref47.goBack;
-  const _useState75 = useState(() => toEditableSched(initial)),
-    _useState76 = _slicedToArray(_useState75, 2),
-    ed = _useState76[0],
-    setEd = _useState76[1];
-  const _useState77 = useState(0),
+  const _useState77 = useState(() => toEditableSched(initial)),
     _useState78 = _slicedToArray(_useState77, 2),
-    open = _useState78[0],
-    setOpen = _useState78[1];
-  const _useState79 = useState(null),
+    ed = _useState78[0],
+    setEd = _useState78[1];
+  const _useState79 = useState(0),
     _useState80 = _slicedToArray(_useState79, 2),
-    picker = _useState80[0],
-    setPicker = _useState80[1]; // indice giorno
+    open = _useState80[0],
+    setOpen = _useState80[1];
   const _useState81 = useState(null),
     _useState82 = _slicedToArray(_useState81, 2),
-    msg = _useState82[0],
-    setMsg = _useState82[1];
+    picker = _useState82[0],
+    setPicker = _useState82[1]; // indice giorno
+  const _useState83 = useState(null),
+    _useState84 = _slicedToArray(_useState83, 2),
+    msg = _useState84[0],
+    setMsg = _useState84[1];
   useAndroidBack(goBack, true);
   const setField = (k, v) => setEd(p => ({
     ...p,
@@ -20747,30 +20776,30 @@ function ScheduleEditorScreen(_ref47) {
 // ============================================================
 function LibraryScreen(_ref48) {
   let goBack = _ref48.goBack;
-  const _useState83 = useState(() => storage.get('custom_schedules') || []),
-    _useState84 = _slicedToArray(_useState83, 2),
-    schedules = _useState84[0],
-    setSchedules = _useState84[1];
-  const _useState85 = useState('list'),
+  const _useState85 = useState(() => storage.get('custom_schedules') || []),
     _useState86 = _slicedToArray(_useState85, 2),
-    view = _useState86[0],
-    setView = _useState86[1];
-  const _useState87 = useState(null),
+    schedules = _useState86[0],
+    setSchedules = _useState86[1];
+  const _useState87 = useState('list'),
     _useState88 = _slicedToArray(_useState87, 2),
-    current = _useState88[0],
-    setCurrent = _useState88[1];
-  const _useState89 = useState(false),
+    view = _useState88[0],
+    setView = _useState88[1];
+  const _useState89 = useState(null),
     _useState90 = _slicedToArray(_useState89, 2),
-    panel = _useState90[0],
-    setPanel = _useState90[1];
-  const _useState91 = useState(''),
+    current = _useState90[0],
+    setCurrent = _useState90[1];
+  const _useState91 = useState(false),
     _useState92 = _slicedToArray(_useState91, 2),
-    paste = _useState92[0],
-    setPaste = _useState92[1];
-  const _useState93 = useState(null),
+    panel = _useState92[0],
+    setPanel = _useState92[1];
+  const _useState93 = useState(''),
     _useState94 = _slicedToArray(_useState93, 2),
-    msg = _useState94[0],
-    setMsg = _useState94[1];
+    paste = _useState94[0],
+    setPaste = _useState94[1];
+  const _useState95 = useState(null),
+    _useState96 = _slicedToArray(_useState95, 2),
+    msg = _useState96[0],
+    setMsg = _useState96[1];
   const fileRef = useRef(null);
   const persist = list => {
     setSchedules(list);
@@ -21276,22 +21305,22 @@ function DietEditorScreen(_ref49) {
   let initial = _ref49.initial,
     onSave = _ref49.onSave,
     goBack = _ref49.goBack;
-  const _useState95 = useState(() => JSON.parse(JSON.stringify(initial))),
-    _useState96 = _slicedToArray(_useState95, 2),
-    d = _useState96[0],
-    setD = _useState96[1];
-  const _useState97 = useState(null),
+  const _useState97 = useState(() => JSON.parse(JSON.stringify(initial))),
     _useState98 = _slicedToArray(_useState97, 2),
-    picker = _useState98[0],
-    setPicker = _useState98[1]; // indice pasto
-  const _useState99 = useState(0),
+    d = _useState98[0],
+    setD = _useState98[1];
+  const _useState99 = useState(null),
     _useState100 = _slicedToArray(_useState99, 2),
-    openMeal = _useState100[0],
-    setOpenMeal = _useState100[1];
-  const _useState101 = useState(null),
+    picker = _useState100[0],
+    setPicker = _useState100[1]; // indice pasto
+  const _useState101 = useState(0),
     _useState102 = _slicedToArray(_useState101, 2),
-    msg = _useState102[0],
-    setMsg = _useState102[1];
+    openMeal = _useState102[0],
+    setOpenMeal = _useState102[1];
+  const _useState103 = useState(null),
+    _useState104 = _slicedToArray(_useState103, 2),
+    msg = _useState104[0],
+    setMsg = _useState104[1];
   useAndroidBack(goBack, true);
   const setField = (k, v) => setD(p => ({
     ...p,
@@ -21827,38 +21856,38 @@ function DietEditorScreen(_ref49) {
 // ============================================================
 function DietScreen(_ref50) {
   let goBack = _ref50.goBack;
-  const _useState103 = useState(() => storage.get('custom_diets') || []),
-    _useState104 = _slicedToArray(_useState103, 2),
-    diets = _useState104[0],
-    setDiets = _useState104[1];
-  const _useState105 = useState('list'),
+  const _useState105 = useState(() => storage.get('custom_diets') || []),
     _useState106 = _slicedToArray(_useState105, 2),
-    view = _useState106[0],
-    setView = _useState106[1];
-  const _useState107 = useState(null),
+    diets = _useState106[0],
+    setDiets = _useState106[1];
+  const _useState107 = useState('list'),
     _useState108 = _slicedToArray(_useState107, 2),
-    current = _useState108[0],
-    setCurrent = _useState108[1];
+    view = _useState108[0],
+    setView = _useState108[1];
   const _useState109 = useState(null),
     _useState110 = _slicedToArray(_useState109, 2),
-    shop = _useState110[0],
-    setShop = _useState110[1];
-  const _useState111 = useState(7),
+    current = _useState110[0],
+    setCurrent = _useState110[1];
+  const _useState111 = useState(null),
     _useState112 = _slicedToArray(_useState111, 2),
-    days = _useState112[0],
-    setDays = _useState112[1];
-  const _useState113 = useState(false),
+    shop = _useState112[0],
+    setShop = _useState112[1];
+  const _useState113 = useState(7),
     _useState114 = _slicedToArray(_useState113, 2),
-    panel = _useState114[0],
-    setPanel = _useState114[1];
-  const _useState115 = useState(''),
+    days = _useState114[0],
+    setDays = _useState114[1];
+  const _useState115 = useState(false),
     _useState116 = _slicedToArray(_useState115, 2),
-    paste = _useState116[0],
-    setPaste = _useState116[1];
-  const _useState117 = useState(null),
+    panel = _useState116[0],
+    setPanel = _useState116[1];
+  const _useState117 = useState(''),
     _useState118 = _slicedToArray(_useState117, 2),
-    msg = _useState118[0],
-    setMsg = _useState118[1];
+    paste = _useState118[0],
+    setPaste = _useState118[1];
+  const _useState119 = useState(null),
+    _useState120 = _slicedToArray(_useState119, 2),
+    msg = _useState120[0],
+    setMsg = _useState120[1];
   const fileRef = useRef(null);
   const persist = list => {
     setDiets(list);
@@ -22355,10 +22384,10 @@ function Thumb(_ref55) {
     _ref55$size = _ref55.size,
     size = _ref55$size === void 0 ? 58 : _ref55$size;
   const urls = EXERCISE_IMAGES[id] || [];
-  const _useState119 = useState(0),
-    _useState120 = _slicedToArray(_useState119, 2),
-    i = _useState120[0],
-    setI = _useState120[1];
+  const _useState121 = useState(0),
+    _useState122 = _slicedToArray(_useState121, 2),
+    i = _useState122[0],
+    setI = _useState122[1];
   useEffect(() => {
     setI(0);
   }, [id]);
@@ -22583,26 +22612,26 @@ function ExDetailModal(_ref56) {
 }
 function ExerciseDBScreen(_ref59) {
   let goBack = _ref59.goBack;
-  const _useState121 = useState(''),
-    _useState122 = _slicedToArray(_useState121, 2),
-    q = _useState122[0],
-    setQ = _useState122[1];
-  const _useState123 = useState(null),
+  const _useState123 = useState(''),
     _useState124 = _slicedToArray(_useState123, 2),
-    tag = _useState124[0],
-    setTag = _useState124[1];
+    q = _useState124[0],
+    setQ = _useState124[1];
   const _useState125 = useState(null),
     _useState126 = _slicedToArray(_useState125, 2),
-    eq = _useState126[0],
-    setEq = _useState126[1];
+    tag = _useState126[0],
+    setTag = _useState126[1];
   const _useState127 = useState(null),
     _useState128 = _slicedToArray(_useState127, 2),
-    sel = _useState128[0],
-    setSel = _useState128[1];
-  const _useState129 = useState(30),
+    eq = _useState128[0],
+    setEq = _useState128[1];
+  const _useState129 = useState(null),
     _useState130 = _slicedToArray(_useState129, 2),
-    limit = _useState130[0],
-    setLimit = _useState130[1];
+    sel = _useState130[0],
+    setSel = _useState130[1];
+  const _useState131 = useState(30),
+    _useState132 = _slicedToArray(_useState131, 2),
+    limit = _useState132[0],
+    setLimit = _useState132[1];
   const all = Object.values(EXERCISE_DB).filter(e => !BUILTIN_TWIN[e.id]);
   const ql = q.trim().toLowerCase();
   const list = all.filter(e => (!ql || (e.name || '').toLowerCase().indexOf(ql) >= 0 || (e.nameEn || '').toLowerCase().indexOf(ql) >= 0) && (!tag || (e.tags || []).indexOf(tag) >= 0) && (!eq || e.equip === eq));
@@ -22882,17 +22911,17 @@ function VolumeScreen(_ref62) {
       config: cfg
     } : null;
   }).filter(Boolean));
-  const _useState131 = useState(0),
-    _useState132 = _slicedToArray(_useState131, 2),
-    progIdx = _useState132[0],
-    setProgIdx = _useState132[1];
+  const _useState133 = useState(0),
+    _useState134 = _slicedToArray(_useState133, 2),
+    progIdx = _useState134[0],
+    setProgIdx = _useState134[1];
   const prog = programs[progIdx] || programs[0];
   const log = storage.get(prog.config.storageKey) || {};
   const weeksWithData = (prog.config.weeks || []).filter(w => log[w]);
-  const _useState133 = useState(weeksWithData.length ? weeksWithData[weeksWithData.length - 1] : (prog.config.weeks || [1])[0]),
-    _useState134 = _slicedToArray(_useState133, 2),
-    week = _useState134[0],
-    setWeek = _useState134[1];
+  const _useState135 = useState(weeksWithData.length ? weeksWithData[weeksWithData.length - 1] : (prog.config.weeks || [1])[0]),
+    _useState136 = _slicedToArray(_useState135, 2),
+    week = _useState136[0],
+    setWeek = _useState136[1];
   useEffect(() => {
     const l = storage.get(prog.config.storageKey) || {};
     const ws = (prog.config.weeks || []).filter(w => l[w]);
@@ -23108,14 +23137,14 @@ function TdeeScreen(_ref63) {
   let goBack = _ref63.goBack;
   const pesoLog = storage.get('peso') || {};
   const diets = storage.get('custom_diets') || [];
-  const _useState135 = useState(() => storage.get('tdee_giorni') || {}),
-    _useState136 = _slicedToArray(_useState135, 2),
-    assign = _useState136[0],
-    setAssign = _useState136[1];
-  const _useState137 = useState(() => storage.get('tdee_manuale') || ''),
+  const _useState137 = useState(() => storage.get('tdee_giorni') || {}),
     _useState138 = _slicedToArray(_useState137, 2),
-    manual = _useState138[0],
-    setManual = _useState138[1];
+    assign = _useState138[0],
+    setAssign = _useState138[1];
+  const _useState139 = useState(() => storage.get('tdee_manuale') || ''),
+    _useState140 = _slicedToArray(_useState139, 2),
+    manual = _useState140[0],
+    setManual = _useState140[1];
   const setDays = (id, n) => {
     const next = {
       ...assign,
@@ -23375,10 +23404,10 @@ function SwapModal(_ref66) {
     onClose = _ref66.onClose,
     onReset = _ref66.onReset,
     hasSwap = _ref66.hasSwap;
-  const _useState139 = useState(null),
-    _useState140 = _slicedToArray(_useState139, 2),
-    eq = _useState140[0],
-    setEq = _useState140[1];
+  const _useState141 = useState(null),
+    _useState142 = _slicedToArray(_useState141, 2),
+    eq = _useState142[0],
+    setEq = _useState142[1];
   const primary = (exercise.tags || [])[0];
   // gli esercizi dei programmi non hanno il campo attrezzo: lo prendo dal gemello del pacchetto
   const twinId = BUILTIN_TWIN[exercise.id];
@@ -23595,10 +23624,10 @@ const askConfirm = (titolo, dettaglio, onOk) => {
   });else if (window.confirm(titolo)) onOk();
 };
 function ConfirmHost() {
-  const _useState141 = useState(null),
-    _useState142 = _slicedToArray(_useState141, 2),
-    req = _useState142[0],
-    setReq = _useState142[1];
+  const _useState143 = useState(null),
+    _useState144 = _slicedToArray(_useState143, 2),
+    req = _useState144[0],
+    setReq = _useState144[1];
   useEffect(() => {
     _confirmSetter = setReq;
     return () => {
@@ -23689,10 +23718,10 @@ const notifyStorageError = () => {
   if (_storageErrSetter) _storageErrSetter(Date.now());
 };
 function StorageBanner() {
-  const _useState143 = useState(0),
-    _useState144 = _slicedToArray(_useState143, 2),
-    err = _useState144[0],
-    setErr = _useState144[1];
+  const _useState145 = useState(0),
+    _useState146 = _slicedToArray(_useState145, 2),
+    err = _useState146[0],
+    setErr = _useState146[1];
   useEffect(() => {
     _storageErrSetter = setErr;
     return () => {
@@ -23844,22 +23873,22 @@ const PROGRAMMI = () => [{
 }).filter(Boolean));
 function StoricoScreen(_ref69) {
   let goBack = _ref69.goBack;
-  const _useState145 = useState(() => storage.get('archivio') || []),
-    _useState146 = _slicedToArray(_useState145, 2),
-    archivio = _useState146[0],
-    setArchivio = _useState146[1];
-  const _useState147 = useState(0),
+  const _useState147 = useState(() => storage.get('archivio') || []),
     _useState148 = _slicedToArray(_useState147, 2),
-    progIdx = _useState148[0],
-    setProgIdx = _useState148[1];
-  const _useState149 = useState([]),
+    archivio = _useState148[0],
+    setArchivio = _useState148[1];
+  const _useState149 = useState(0),
     _useState150 = _slicedToArray(_useState149, 2),
-    cmp = _useState150[0],
-    setCmp = _useState150[1];
-  const _useState151 = useState(null),
+    progIdx = _useState150[0],
+    setProgIdx = _useState150[1];
+  const _useState151 = useState([]),
     _useState152 = _slicedToArray(_useState151, 2),
-    msg = _useState152[0],
-    setMsg = _useState152[1];
+    cmp = _useState152[0],
+    setCmp = _useState152[1];
+  const _useState153 = useState(null),
+    _useState154 = _slicedToArray(_useState153, 2),
+    msg = _useState154[0],
+    setMsg = _useState154[1];
   const programs = PROGRAMMI();
   const prog = programs[progIdx] || programs[0];
   const logCorrente = storage.get(prog.config.storageKey) || {};
@@ -24528,10 +24557,10 @@ function UltimaVolta(_ref77) {
 // ============================================================
 function BilanciereScreen(_ref78) {
   let goBack = _ref78.goBack;
-  const _useState153 = useState(plateCfg),
-    _useState154 = _slicedToArray(_useState153, 2),
-    cfg = _useState154[0],
-    setCfg = _useState154[1];
+  const _useState155 = useState(plateCfg),
+    _useState156 = _slicedToArray(_useState155, 2),
+    cfg = _useState156[0],
+    setCfg = _useState156[1];
   const salva = next => {
     setCfg(next);
     storage.set('bilanciere', next);
@@ -24819,13 +24848,249 @@ function PesoSpark() {
   })));
 }
 
+// ============================================================
+// LAYOUT · AVANZAMENTO DELLA SEDUTA
+// Una tacca per esercizio: piena se finito, a metà se iniziato.
+// ============================================================
+let _barraGiu = false; // vero quando la barra della seduta occupa il fondo schermo
+function ProgressoSeduta(_ref82) {
+  let esercizi = _ref82.esercizi,
+    data = _ref82.data,
+    week = _ref82.week,
+    dayId = _ref82.dayId,
+    cur = _ref82.cur,
+    vai = _ref82.vai;
+  const log = (data[week] || {})[dayId] || {};
+  const stato = esercizi.map((ex, i) => {
+    const rec = (log.esercizi || {})[i] || {};
+    const fatte = (rec.sets_done || []).filter(Boolean).length;
+    const tot = ex.sets || 4;
+    return fatte === 0 ? 0 : fatte >= tot ? 2 : 1;
+  });
+  const finiti = stato.filter(s => s === 2).length;
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      margin: '0 0 14px'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      gap: '4px'
+    }
+  }, esercizi.map((ex, i) => /*#__PURE__*/React.createElement("button", {
+    key: i,
+    onClick: () => vai(i),
+    "aria-label": 'Esercizio ' + (i + 1),
+    style: {
+      flex: 1,
+      minHeight: '30px',
+      padding: 0,
+      cursor: 'pointer',
+      borderRadius: '2px',
+      background: i === cur ? IRON.chalk : stato[i] === 2 ? '#2FA055' : stato[i] === 1 ? '#2A5B3A' : IRON.knurl,
+      border: '1px solid ' + (i === cur ? IRON.chalk : IRON.edge),
+      fontFamily: monoFont,
+      fontSize: '10px',
+      fontWeight: '600',
+      color: i === cur ? IRON.bg : stato[i] ? '#DFF3E6' : IRON.ash
+    }
+  }, String(i + 1).padStart(2, '0')))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      justifyContent: 'space-between',
+      marginTop: '6px'
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: lblStyle
+  }, "Esercizio ", cur + 1, " di ", esercizi.length), /*#__PURE__*/React.createElement("span", {
+    style: {
+      ...lblStyle,
+      color: finiti === esercizi.length ? '#2FA055' : IRON.ash
+    }
+  }, finiti, " completati")));
+}
+
+// ============================================================
+// LAYOUT · BARRA FISSA IN BASSO
+// L'azione più frequente (spuntare la serie) sta nella zona del
+// pollice e non si sposta mai. Durante il recupero diventa timer.
+// ============================================================
+function BarraSeduta(_ref83) {
+  let esercizi = _ref83.esercizi,
+    idx = _ref83.idx,
+    vai = _ref83.vai,
+    exData = _ref83.exData,
+    logic = _ref83.logic,
+    onSpunta = _ref83.onSpunta,
+    completa = _ref83.completa,
+    completato = _ref83.completato;
+  const _useTimer4 = useTimer(),
+    active = _useTimer4.active,
+    remaining = _useTimer4.remaining,
+    stopTimer = _useTimer4.stopTimer;
+  useEffect(() => {
+    _barraGiu = true;
+    return () => {
+      _barraGiu = false;
+    };
+  }, []);
+  const tot = logic.sets || 4;
+  const fatte = (exData.sets_done || []).filter(Boolean).length;
+  const prossima = (exData.sets_done || []).findIndex((v, i) => !v && i < tot);
+  const nextSet = prossima >= 0 ? prossima : fatte < tot ? fatte : -1;
+  const inRecupero = !!active && remaining > 0;
+  const ultimoEsercizio = idx >= esercizi.length - 1;
+  const targets = parseRepRange(logic.reps);
+  const min = Math.floor(Math.max(0, remaining) / 60);
+  const sec = Math.max(0, remaining) % 60;
+  let centro;
+  if (inRecupero) {
+    centro = /*#__PURE__*/React.createElement("button", {
+      onClick: stopTimer,
+      style: {
+        ...btnCentro,
+        background: '#E5A82B',
+        color: '#141110'
+      }
+    }, /*#__PURE__*/React.createElement("span", {
+      style: {
+        ...numStyle,
+        fontSize: '22px',
+        fontWeight: '700'
+      }
+    }, String(min).padStart(2, '0'), ":", String(sec).padStart(2, '0')), /*#__PURE__*/React.createElement("span", {
+      style: {
+        ...lblStyle,
+        color: 'rgba(20,17,16,0.75)',
+        fontSize: '8.5px'
+      }
+    }, "recupero \xB7 tocca per saltare"));
+  } else if (nextSet >= 0) {
+    centro = /*#__PURE__*/React.createElement("button", {
+      onClick: () => onSpunta(nextSet, exData.reps && exData.reps[nextSet] ? null : String(targets.max)),
+      style: {
+        ...btnCentro,
+        background: IRON.chalk,
+        color: IRON.bg
+      }
+    }, /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontFamily: displayFont,
+        fontVariationSettings: "'wdth' 112",
+        fontSize: '15px',
+        fontWeight: '800',
+        letterSpacing: '0.06em',
+        textTransform: 'uppercase'
+      }
+    }, "Serie ", nextSet + 1, " fatta"), /*#__PURE__*/React.createElement("span", {
+      style: {
+        ...lblStyle,
+        color: 'rgba(12,12,14,0.6)',
+        fontSize: '8.5px'
+      }
+    }, fatte, " di ", tot, " \xB7 avvia recupero ", logic.rest));
+  } else if (!ultimoEsercizio) {
+    centro = /*#__PURE__*/React.createElement("button", {
+      onClick: () => vai(idx + 1),
+      style: {
+        ...btnCentro,
+        background: '#2FA055',
+        color: '#08210F'
+      }
+    }, /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontFamily: displayFont,
+        fontVariationSettings: "'wdth' 112",
+        fontSize: '15px',
+        fontWeight: '800',
+        letterSpacing: '0.06em',
+        textTransform: 'uppercase'
+      }
+    }, "Esercizio successivo"), /*#__PURE__*/React.createElement("span", {
+      style: {
+        ...lblStyle,
+        color: 'rgba(8,33,15,0.65)',
+        fontSize: '8.5px'
+      }
+    }, (esercizi[idx + 1] || {}).name));
+  } else {
+    centro = /*#__PURE__*/React.createElement("button", {
+      onClick: completa,
+      style: {
+        ...btnCentro,
+        background: completato ? IRON.knurl : '#2FA055',
+        color: completato ? IRON.dust : '#08210F'
+      }
+    }, /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontFamily: displayFont,
+        fontVariationSettings: "'wdth' 112",
+        fontSize: '15px',
+        fontWeight: '800',
+        letterSpacing: '0.06em',
+        textTransform: 'uppercase'
+      }
+    }, completato ? 'Sessione completata' : 'Chiudi la sessione'));
+  }
+  const frecciaStile = attiva => ({
+    width: '52px',
+    minHeight: '62px',
+    flexShrink: 0,
+    borderRadius: '3px',
+    cursor: attiva ? 'pointer' : 'default',
+    background: IRON.surface,
+    border: '1px solid ' + IRON.edge,
+    color: attiva ? IRON.chalk : IRON.edge,
+    fontFamily: monoFont,
+    fontSize: '19px'
+  });
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      position: 'fixed',
+      left: 0,
+      right: 0,
+      bottom: 0,
+      zIndex: 200,
+      background: IRON.bg,
+      borderTop: '1px solid ' + IRON.edge,
+      padding: '10px 12px calc(10px + env(safe-area-inset-bottom))',
+      display: 'flex',
+      gap: '8px',
+      alignItems: 'stretch'
+    }
+  }, /*#__PURE__*/React.createElement("button", {
+    onClick: () => idx > 0 && vai(idx - 1),
+    disabled: idx === 0,
+    style: frecciaStile(idx > 0),
+    "aria-label": "Esercizio precedente"
+  }, "\u2039"), centro, /*#__PURE__*/React.createElement("button", {
+    onClick: () => idx < esercizi.length - 1 && vai(idx + 1),
+    disabled: ultimoEsercizio,
+    style: frecciaStile(!ultimoEsercizio),
+    "aria-label": "Esercizio successivo"
+  }, "\u203A"));
+}
+const btnCentro = {
+  flex: 1,
+  minHeight: '62px',
+  border: 'none',
+  borderRadius: '3px',
+  cursor: 'pointer',
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'center',
+  justifyContent: 'center',
+  gap: '2px',
+  padding: '0 8px'
+};
+
 // ============= MAIN =============
 
 function App() {
-  const _useState155 = useState('home'),
-    _useState156 = _slicedToArray(_useState155, 2),
-    screen = _useState156[0],
-    setScreen = _useState156[1];
+  const _useState157 = useState('home'),
+    _useState158 = _slicedToArray(_useState157, 2),
+    screen = _useState158[0],
+    setScreen = _useState158[1];
   const goHome = useCallback(() => setScreen('home'), []);
   // Quando siamo fuori da home, intercetta il tasto indietro per tornare alla home
   useAndroidBack(goHome, screen !== 'home');
