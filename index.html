@@ -14,13 +14,13 @@
 <title>V8 Tracker</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400;62..125,500;62..125,600;62..125,700;62..125,800&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   /* ============================================================
      TEMA v5 "VETRO & VIOLA" — sintesi img1 (nero+viola, card dati)
      + img2 (vetro caldo su sfere). Accento UI viola elettrico;
      i 5 colori-disco restano per i giorni (colore = informazione).
-     Font: Sora (geometrico, numeri puliti).
+     Font: Archivo (titoli) + IBM Plex Mono (cifre incolonnate).
      ============================================================ */
   :root {
     --bg: #0B0A0F; --surface: #16141C; --surface-2: #1C1925;
@@ -37,7 +37,7 @@
       radial-gradient(ellipse 90% 50% at 90% 30%, rgba(181,23,158,0.12), transparent 60%),
       #0A0810;
     color: var(--ink);
-    font-family: 'Sora', -apple-system, "Helvetica Neue", Arial, sans-serif;
+    font-family: 'Archivo', -apple-system, "Helvetica Neue", Arial, sans-serif;
     -webkit-tap-highlight-color: transparent;
     overscroll-behavior: none;
     overflow-x: hidden;
@@ -748,8 +748,6 @@ function TechModalProvider(_ref2) {
       position: 'fixed',
       inset: 0,
       background: 'rgba(0,0,0,0.75)',
-      backdropFilter: 'blur(8px)',
-      WebkitBackdropFilter: 'blur(8px)',
       zIndex: 1000,
       display: 'flex',
       alignItems: 'flex-end',
@@ -2060,7 +2058,79 @@ document.addEventListener('visibilitychange', () => {
 // ============= TEMA v5 "VETRO & VIOLA" =============
 // Card-vetro semitrasparenti (img2) che lasciano filtrare le sfere viola;
 // accento UI viola elettrico (img1). Colori-disco solo per i giorni.
-const displayFont = "'Sora', -apple-system, sans-serif";
+const displayFont = "'Archivo', -apple-system, system-ui, sans-serif";
+const monoFont = "'IBM Plex Mono', ui-monospace, 'SF Mono', monospace";
+// cifra: sempre monospaziata e incolonnata
+const numStyle = {
+  fontFamily: monoFont,
+  fontVariantNumeric: 'tabular-nums',
+  fontFeatureSettings: '"tnum"'
+};
+// titolo: Archivo in larghezza espansa, come una stampigliatura sul metallo
+const dispStyle = {
+  fontFamily: "'Archivo', sans-serif",
+  fontVariationSettings: "'wdth' 112",
+  fontWeight: 800,
+  letterSpacing: '-0.03em',
+  textTransform: 'uppercase',
+  lineHeight: 0.9
+};
+// etichetta tecnica
+const lblStyle = {
+  fontFamily: monoFont,
+  fontSize: '9.5px',
+  fontWeight: 500,
+  letterSpacing: '0.16em',
+  textTransform: 'uppercase',
+  color: '#55555E'
+};
+// GHISA
+const IRON = {
+  bg: '#0C0C0E',
+  surface: '#141417',
+  knurl: '#1E1E23',
+  edge: '#2A2A31',
+  chalk: '#F2F1ED',
+  dust: '#8A8A93',
+  ash: '#55555E'
+};
+// DISCHI DI GARA — il colore qui significa un carico
+const DISC = [{
+  kg: 25,
+  col: '#D8342C',
+  h: 112,
+  w: 15
+}, {
+  kg: 20,
+  col: '#1F62D2',
+  h: 104,
+  w: 13
+}, {
+  kg: 15,
+  col: '#E5A82B',
+  h: 96,
+  w: 11
+}, {
+  kg: 10,
+  col: '#2FA055',
+  h: 84,
+  w: 9
+}, {
+  kg: 5,
+  col: '#EDEBE4',
+  h: 66,
+  w: 8
+}, {
+  kg: 2.5,
+  col: '#D8342C',
+  h: 52,
+  w: 7
+}, {
+  kg: 1.25,
+  col: '#C2762F',
+  h: 40,
+  w: 6
+}];
 const VIOLET = '#A855F7';
 const PLATE = {
   red: '#E0524A',
@@ -2069,26 +2139,26 @@ const PLATE = {
   green: '#3FB66C',
   purple: '#A855F7'
 };
-const bgGradient = '#0B0A0F';
+const bgGradient = '#0C0C0E';
 // VETRO VERO (img2): più trasparente e luminoso, con bordo specular in alto.
 // La saturazione spinta del backdrop fa risaltare le sfere invece di spegnerle.
 const glassCard = {
-  background: 'linear-gradient(160deg, rgba(255,255,255,0.10) 0%, rgba(255,255,255,0.04) 45%, rgba(255,255,255,0.02) 100%), rgba(14, 12, 19, 0.52)',
-  backdropFilter: 'blur(28px) saturate(170%)',
-  WebkitBackdropFilter: 'blur(28px) saturate(170%)',
-  border: '1px solid rgba(255, 255, 255, 0.14)',
-  borderRadius: '24px',
-  boxShadow: '0 1px 0 rgba(255,255,255,0.16) inset, 0 16px 50px rgba(0, 0, 0, 0.5)'
+  background: 'linear-gradient(160deg, #1B1B20 0%, #141417 100%)',
+  border: '1px solid #2A2A31',
+  borderRadius: '4px'
 };
 const inputDark = {
-  background: 'rgba(10, 9, 14, 0.65)',
-  border: '1px solid rgba(255, 255, 255, 0.1)',
-  color: '#F4F2F8',
-  borderRadius: '12px',
-  fontSize: '15px',
+  background: '#0E0E11',
+  border: '1px solid #2A2A31',
+  color: '#F2F1ED',
+  borderRadius: '3px',
+  fontFamily: monoFont,
+  fontVariantNumeric: 'tabular-nums',
+  fontSize: '16px',
   fontWeight: '600',
   textAlign: 'center',
-  outline: 'none'
+  outline: 'none',
+  minHeight: '48px'
 };
 // ============= TIMER CONTEXT (persistente cross-screen) =============
 const TimerContext = createContext(null);
@@ -2524,8 +2594,6 @@ function Header(_ref0) {
       top: '0',
       zIndex: 50,
       background: 'rgba(16,15,13,0.82)',
-      backdropFilter: 'blur(12px)',
-      WebkitBackdropFilter: 'blur(12px)',
       borderBottom: '1px solid var(--line)'
     }
   }, /*#__PURE__*/React.createElement("div", {
@@ -2821,6 +2889,12 @@ function HomeScreen(_ref12) {
     color: PLATE.yellow,
     desc: '4 giorni · solo manubri · viaggio'
   }, {
+    id: 'bilanciere',
+    label: 'Bilanciere e dischi',
+    IconComp: Settings,
+    color: '#8A8A93',
+    desc: 'Carico per lato negli esercizi a bilanciere'
+  }, {
     id: 'storico',
     label: 'Storico blocchi',
     IconComp: Layers,
@@ -2925,8 +2999,6 @@ function HomeScreen(_ref12) {
       height: '44px',
       borderRadius: '50%',
       background: 'rgba(255,255,255,0.07)',
-      backdropFilter: 'blur(20px)',
-      WebkitBackdropFilter: 'blur(20px)',
       border: '1px solid rgba(255,255,255,0.14)',
       display: 'flex',
       alignItems: 'center',
@@ -2947,8 +3019,6 @@ function HomeScreen(_ref12) {
       height: '44px',
       borderRadius: '50%',
       background: 'rgba(255,255,255,0.07)',
-      backdropFilter: 'blur(20px)',
-      WebkitBackdropFilter: 'blur(20px)',
       border: '1px solid rgba(255,255,255,0.14)',
       display: 'flex',
       alignItems: 'center',
@@ -2965,8 +3035,6 @@ function HomeScreen(_ref12) {
       height: '44px',
       borderRadius: '50%',
       background: 'rgba(255,255,255,0.07)',
-      backdropFilter: 'blur(20px)',
-      WebkitBackdropFilter: 'blur(20px)',
       border: '1px solid rgba(255,255,255,0.14)',
       display: 'flex',
       alignItems: 'center',
@@ -3002,47 +3070,42 @@ function HomeScreen(_ref12) {
     }
   }, /*#__PURE__*/React.createElement("span", {
     style: {
-      fontFamily: displayFont,
-      fontSize: '52px',
-      fontWeight: '800',
+      ...numStyle,
+      fontSize: '46px',
+      fontWeight: '600',
       lineHeight: 0.9,
-      letterSpacing: '-0.02em'
+      letterSpacing: '-0.04em'
     }
   }, stats.peso === '—' ? '92' : stats.peso.replace(' kg', '').split('.')[0]), /*#__PURE__*/React.createElement("span", {
     style: {
-      fontFamily: displayFont,
-      fontSize: '30px',
-      fontWeight: '700',
-      color: '#908AA0',
+      ...numStyle,
+      fontSize: '26px',
+      fontWeight: '500',
+      color: IRON.dust,
       lineHeight: 0.9
     }
   }, ".", stats.peso === '—' ? '0' : stats.peso.replace(' kg', '').split('.')[1] || '0', " kg")), /*#__PURE__*/React.createElement("div", {
     style: {
       display: 'flex',
       alignItems: 'center',
-      gap: '7px',
-      background: 'rgba(255,255,255,0.07)',
-      backdropFilter: 'blur(20px)',
-      WebkitBackdropFilter: 'blur(20px)',
-      border: '1px solid rgba(255,255,255,0.14)',
-      borderRadius: '20px',
-      padding: '7px 13px'
+      gap: '8px',
+      border: '1px solid ' + IRON.edge,
+      borderRadius: '3px',
+      padding: '7px 11px'
     }
   }, /*#__PURE__*/React.createElement("span", {
     style: {
-      width: '20px',
-      height: '20px',
-      borderRadius: '50%',
-      background: `linear-gradient(135deg, ${VIOLET}, ${PLATE.blue})`,
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      fontSize: '11px'
+      width: '3px',
+      height: '15px',
+      background: '#D8342C',
+      borderRadius: '1px',
+      display: 'block'
     }
-  }, "\uD83C\uDFCB"), /*#__PURE__*/React.createElement("span", {
+  }), /*#__PURE__*/React.createElement("span", {
     style: {
-      fontSize: '13px',
-      fontWeight: '700'
+      ...lblStyle,
+      color: IRON.chalk,
+      fontSize: '10.5px'
     }
   }, "CUT"))), /*#__PURE__*/React.createElement("div", {
     style: {
@@ -3051,8 +3114,6 @@ function HomeScreen(_ref12) {
       gap: '6px',
       marginTop: '10px',
       background: 'rgba(255,255,255,0.05)',
-      backdropFilter: 'blur(20px)',
-      WebkitBackdropFilter: 'blur(20px)',
       border: '1px solid rgba(255,255,255,0.12)',
       borderRadius: '16px',
       padding: '5px 11px'
@@ -3101,67 +3162,73 @@ function HomeScreen(_ref12) {
   }, s.value)))), /*#__PURE__*/React.createElement(MesocycleWave, {
     currentWeek: stats.sett,
     onPick: () => navigate('workout')
-  }), /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: 'flex',
-      flexDirection: 'column',
-      gap: '9px'
-    }
-  }, sections.map(s => {
-    const I = s.IconComp;
-    return /*#__PURE__*/React.createElement("button", {
+  }), /*#__PURE__*/React.createElement(TodayCard, {
+    navigate: navigate
+  }), [['Allenarsi', ['workout', 'summer', 'library']], ['Registrare', ['peso', 'nutrition', 'diets', 'recovery']], ['Analizzare', ['dashboard', 'volume', 'tdee', 'storico']], ['Riferimento', ['exdb', 'bilanciere', 'guide', 'settings']]].concat((() => {
+    const assegnate = ['workout', 'summer', 'library', 'peso', 'nutrition', 'diets', 'recovery', 'dashboard', 'volume', 'tdee', 'storico', 'exdb', 'bilanciere', 'guide', 'settings'];
+    const resto = sections.filter(x => assegnate.indexOf(x.id) < 0).map(x => x.id);
+    return resto.length ? [['Altro', resto]] : [];
+  })()).map(_ref15 => {
+    let _ref16 = _slicedToArray(_ref15, 2),
+      titolo = _ref16[0],
+      ids = _ref16[1];
+    const voci = ids.map(id => sections.find(x => x.id === id)).filter(Boolean);
+    if (!voci.length) return null;
+    return /*#__PURE__*/React.createElement("div", {
+      key: titolo,
+      style: {
+        marginBottom: '20px'
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        ...lblStyle,
+        padding: '0 2px 8px'
+      }
+    }, titolo), /*#__PURE__*/React.createElement("div", {
+      style: {
+        border: '1px solid ' + IRON.edge,
+        borderRadius: '4px',
+        overflow: 'hidden',
+        background: IRON.surface
+      }
+    }, voci.map((s, i) => /*#__PURE__*/React.createElement("button", {
       key: s.id,
       onClick: () => navigate(s.id),
       style: {
-        ...glassCard,
+        width: '100%',
         display: 'flex',
         alignItems: 'center',
         gap: '13px',
-        padding: '14px',
-        textAlign: 'left',
+        minHeight: '56px',
+        padding: '0 14px',
+        background: 'none',
         cursor: 'pointer',
-        borderRadius: '18px',
-        width: '100%'
+        border: 'none',
+        borderTop: i ? '1px solid ' + IRON.edge : 'none',
+        textAlign: 'left'
       }
-    }, /*#__PURE__*/React.createElement("div", {
+    }, /*#__PURE__*/React.createElement("span", {
       style: {
-        background: `${s.color}22`,
-        border: `1px solid ${s.color}44`,
-        width: '44px',
-        height: '44px',
-        borderRadius: '13px',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        flexShrink: 0
+        width: '3px',
+        height: '22px',
+        borderRadius: '2px',
+        background: s.color,
+        flexShrink: 0,
+        display: 'block'
       }
-    }, /*#__PURE__*/React.createElement(I, {
-      size: 20,
-      color: s.color
-    })), /*#__PURE__*/React.createElement("div", {
+    }), /*#__PURE__*/React.createElement("span", {
       style: {
-        flex: 1
-      }
-    }, /*#__PURE__*/React.createElement("div", {
-      style: {
+        flex: 1,
         fontFamily: displayFont,
-        fontSize: '15px',
-        fontWeight: '700',
-        color: '#F4F2F8',
-        lineHeight: 1.1
+        fontSize: '14px',
+        fontWeight: '600',
+        color: IRON.chalk
       }
-    }, s.label), /*#__PURE__*/React.createElement("div", {
-      style: {
-        fontSize: '11px',
-        color: '#908AA0',
-        marginTop: '4px',
-        fontWeight: '500'
-      }
-    }, s.desc)), /*#__PURE__*/React.createElement(ChevronRight, {
-      size: 18,
-      color: "#5A5468"
-    }));
-  })), /*#__PURE__*/React.createElement("div", {
+    }, s.label), /*#__PURE__*/React.createElement(ChevronRight, {
+      size: 16,
+      color: IRON.ash
+    })))));
+  }), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: '10px',
       color: '#5A5468',
@@ -3171,20 +3238,20 @@ function HomeScreen(_ref12) {
       letterSpacing: '0.04em',
       fontWeight: '500'
     }
-  }, "V8 Tracker v11.4 \xB7 Protocollo V8.3.4 \xB7 92 kg", /*#__PURE__*/React.createElement("br", null), "Dati salvati sul dispositivo")));
+  }, "V8 Tracker v12.0 \xABRegistro\xBB \xB7 Protocollo V8.3.4 \xB7 92 kg", /*#__PURE__*/React.createElement("br", null), "Dati salvati sul dispositivo")));
 }
 
 // ============= EXERCISE DETAIL =============
 
-function ExerciseDetailScreen(_ref15) {
-  let exercise = _ref15.exercise,
-    week = _ref15.week,
-    dayId = _ref15.dayId,
-    goBack = _ref15.goBack,
-    _ref15$applyLogic = _ref15.applyLogic,
-    applyLogic = _ref15$applyLogic === void 0 ? applyBlockLogic : _ref15$applyLogic,
-    _ref15$days = _ref15.days,
-    days = _ref15$days === void 0 ? DAYS : _ref15$days;
+function ExerciseDetailScreen(_ref17) {
+  let exercise = _ref17.exercise,
+    week = _ref17.week,
+    dayId = _ref17.dayId,
+    goBack = _ref17.goBack,
+    _ref17$applyLogic = _ref17.applyLogic,
+    applyLogic = _ref17$applyLogic === void 0 ? applyBlockLogic : _ref17$applyLogic,
+    _ref17$days = _ref17.days,
+    days = _ref17$days === void 0 ? DAYS : _ref17$days;
   const _useTimer2 = useTimer(),
     startTimer = _useTimer2.startTimer;
   const logic = applyLogic(exercise, week);
@@ -3382,10 +3449,10 @@ const MAIN_CONFIG = {
   weeks: [1, 2, 3, 4, 5, 6, 7, 8],
   rotation: true
 };
-function WorkoutScreen(_ref16) {
-  let goBack = _ref16.goBack,
-    _ref16$config = _ref16.config,
-    config = _ref16$config === void 0 ? MAIN_CONFIG : _ref16$config;
+function WorkoutScreen(_ref18) {
+  let goBack = _ref18.goBack,
+    _ref18$config = _ref18.config,
+    config = _ref18$config === void 0 ? MAIN_CONFIG : _ref18$config;
   const EXS = config.exercises,
     DYS = config.days,
     BLKS = config.blocks,
@@ -4096,30 +4163,44 @@ function WorkoutScreen(_ref16) {
         fontWeight: '700',
         boxSizing: 'border-box'
       }
-    }))), /*#__PURE__*/React.createElement("div", {
+    }))), usaBilanciere(ex) && exData.kg && /*#__PURE__*/React.createElement("div", {
       style: {
-        marginBottom: '10px'
+        margin: '4px -14px 12px',
+        padding: '10px 14px 4px',
+        borderTop: '1px solid ' + IRON.edge,
+        borderBottom: '1px solid ' + IRON.edge,
+        background: 'repeating-linear-gradient(90deg,transparent 0 3px,rgba(255,255,255,0.022) 3px 4px)'
       }
-    }, /*#__PURE__*/React.createElement("div", {
+    }, /*#__PURE__*/React.createElement(Sleeve, {
+      peso: exData.kg,
+      compatta: true
+    })), /*#__PURE__*/React.createElement("table", {
       style: {
-        fontSize: '9px',
-        textTransform: 'uppercase',
-        color: '#908AA0',
-        marginBottom: '6px',
-        letterSpacing: '0.1em',
-        fontWeight: '600',
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center'
+        width: '100%',
+        borderCollapse: 'collapse',
+        marginTop: '4px'
       }
-    }, /*#__PURE__*/React.createElement("span", null, "Serie"), /*#__PURE__*/React.createElement("span", {
+    }, /*#__PURE__*/React.createElement("thead", null, /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("th", {
       style: {
-        color: '#5A5468',
-        fontWeight: '600',
-        textTransform: 'none',
-        letterSpacing: 0
+        ...lblStyle,
+        width: '46px',
+        textAlign: 'left',
+        padding: '0 0 7px'
       }
-    }, "tap \u2713 per partire timer ", logic.rest)), Array.from({
+    }, "Set"), /*#__PURE__*/React.createElement("th", {
+      style: {
+        ...lblStyle,
+        textAlign: 'center',
+        padding: '0 0 7px'
+      }
+    }, "Rep"), /*#__PURE__*/React.createElement("th", {
+      style: {
+        ...lblStyle,
+        width: '72px',
+        textAlign: 'center',
+        padding: '0 0 7px'
+      }
+    }, "Fatto"))), /*#__PURE__*/React.createElement("tbody", null, Array.from({
       length: logic.sets
     }).map((_, setIdx) => {
       var _exData$reps, _exData$sets_done;
@@ -4127,52 +4208,62 @@ function WorkoutScreen(_ref16) {
       const isDone = !!((_exData$sets_done = exData.sets_done) !== null && _exData$sets_done !== void 0 && _exData$sets_done[setIdx]);
       const targets = parseRepRange(logic.reps);
       const repNum = parseInt(repValue);
-      let borderColor = 'rgba(244,242,248,0.12)';
+      let repCol = IRON.chalk;
       if (!isNaN(repNum) && repNum > 0) {
-        if (repNum >= targets.max) borderColor = `${PLATE.green}88`;else if (repNum >= targets.min) borderColor = `${PLATE.blue}88`;else borderColor = `${PLATE.red}88`;
+        if (repNum >= targets.max) repCol = '#2FA055';else if (repNum < targets.min) repCol = '#E5A82B';
       }
-      return /*#__PURE__*/React.createElement("div", {
+      return /*#__PURE__*/React.createElement("tr", {
         key: setIdx,
         style: {
-          display: 'grid',
-          gridTemplateColumns: '32px 1fr 44px',
-          alignItems: 'center',
-          gap: '8px',
-          padding: '6px 8px',
-          marginBottom: '6px',
-          borderRadius: '10px',
-          background: isDone ? `${PLATE.green}12` : 'rgba(244,242,248,0.02)',
-          border: isDone ? `1px solid ${PLATE.green}40` : '1px solid var(--line)',
-          transition: 'all 0.2s'
+          background: isDone ? 'rgba(47,160,85,0.055)' : 'transparent'
+        }
+      }, /*#__PURE__*/React.createElement("td", {
+        style: {
+          borderTop: '1px solid ' + IRON.edge,
+          padding: 0
         }
       }, /*#__PURE__*/React.createElement("div", {
         style: {
-          fontFamily: displayFont,
-          fontSize: '15px',
-          color: isDone ? PLATE.green : day.color,
-          fontWeight: '800',
-          textAlign: 'center'
+          minHeight: '56px',
+          display: 'flex',
+          alignItems: 'center',
+          fontFamily: monoFont,
+          fontSize: '13px',
+          color: IRON.ash
         }
-      }, setIdx + 1), /*#__PURE__*/React.createElement("input", {
+      }, String(setIdx + 1).padStart(2, '0'))), /*#__PURE__*/React.createElement("td", {
+        style: {
+          borderTop: '1px solid ' + IRON.edge,
+          padding: 0
+        }
+      }, /*#__PURE__*/React.createElement("input", {
         type: "number",
         inputMode: "numeric",
         placeholder: String(targets.max),
         value: repValue,
         onChange: e => updateExercise(selectedWeek, selectedDay, idx, 'reps', e.target.value, setIdx),
         style: {
-          ...inputDark,
           width: '100%',
-          padding: '8px 10px',
-          fontSize: '14px',
-          fontWeight: '700',
-          border: `1px solid ${borderColor}`,
-          boxSizing: 'border-box',
+          minHeight: '56px',
+          background: 'none',
+          border: 'none',
+          outline: 'none',
+          textAlign: 'center',
+          fontFamily: monoFont,
+          fontVariantNumeric: 'tabular-nums',
+          fontSize: '19px',
+          fontWeight: '600',
+          color: repCol
+        }
+      })), /*#__PURE__*/React.createElement("td", {
+        style: {
+          borderTop: '1px solid ' + IRON.edge,
+          padding: 0,
           textAlign: 'center'
         }
-      }), /*#__PURE__*/React.createElement("button", {
+      }, /*#__PURE__*/React.createElement("button", {
         onClick: () => {
           const willBeDone = !isDone;
-          // Se non ho inserito reps e sto confermando, uso il massimo del range
           if (willBeDone && (!repValue || repValue === '')) {
             updateExercise(selectedWeek, selectedDay, idx, 'reps', String(targets.max), setIdx);
           }
@@ -4185,24 +4276,32 @@ function WorkoutScreen(_ref16) {
           }
         },
         style: {
-          width: '40px',
-          height: '38px',
-          borderRadius: '10px',
-          background: isDone ? PLATE.green : 'rgba(244,242,248,0.05)',
-          border: isDone ? `1px solid ${PLATE.green}` : '1px solid rgba(244,242,248,0.12)',
-          color: isDone ? '#100F0D' : '#5A5468',
+          width: '100%',
+          minHeight: '56px',
+          background: 'none',
+          border: 'none',
           cursor: 'pointer',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          boxShadow: isDone ? '0 0 12px rgba(47, 164, 92, 0.4)' : 'none',
-          transition: 'all 0.2s'
+          fontFamily: monoFont,
+          fontSize: '19px',
+          color: isDone ? '#2FA055' : IRON.ash,
+          fontWeight: isDone ? '700' : '400'
         },
         "aria-label": isDone ? 'Annulla serie' : 'Conferma serie e avvia timer'
-      }, /*#__PURE__*/React.createElement(Check, {
-        size: 18
-      })));
-    })));
+      }, isDone ? '\u25CF' : '\u25CB')));
+    }))), /*#__PURE__*/React.createElement("div", {
+      style: {
+        ...lblStyle,
+        textAlign: 'right',
+        paddingTop: '7px',
+        fontSize: '9px'
+      }
+    }, "tocca il cerchio per avviare il recupero di ", logic.rest), /*#__PURE__*/React.createElement(UltimaVolta, {
+      log: data,
+      week: selectedWeek,
+      dayId: selectedDay,
+      exIdx: idx,
+      kgAttuale: exData.kg
+    }));
   }), /*#__PURE__*/React.createElement("button", {
     onClick: () => toggleComplete(selectedWeek, selectedDay),
     style: {
@@ -4230,8 +4329,8 @@ function WorkoutScreen(_ref16) {
 }
 // ============= PESO =============
 
-function PesoScreen(_ref17) {
-  let goBack = _ref17.goBack;
+function PesoScreen(_ref19) {
+  let goBack = _ref19.goBack;
   const _useState31 = useState({}),
     _useState32 = _slicedToArray(_useState31, 2),
     data = _useState32[0],
@@ -4631,8 +4730,8 @@ function PesoScreen(_ref17) {
 
 // ============= DASHBOARD =============
 
-function DashboardScreen(_ref18) {
-  let goBack = _ref18.goBack;
+function DashboardScreen(_ref20) {
+  let goBack = _ref20.goBack;
   const _useState41 = useState({}),
     _useState42 = _slicedToArray(_useState41, 2),
     workouts = _useState42[0],
@@ -4663,10 +4762,10 @@ function DashboardScreen(_ref18) {
     });
     return result;
   };
-  const ultimaSett = Object.entries(pesoData).filter(_ref19 => {
-    let _ref20 = _slicedToArray(_ref19, 2),
-      _ = _ref20[0],
-      v = _ref20[1];
+  const ultimaSett = Object.entries(pesoData).filter(_ref21 => {
+    let _ref22 = _slicedToArray(_ref21, 2),
+      _ = _ref22[0],
+      v = _ref22[1];
     return v.media > 0;
   }).sort((a, b) => parseInt(a[0]) - parseInt(b[0])).slice(-1)[0];
   const pesoAttuale = ultimaSett ? ultimaSett[1].media : pesoIniziale;
@@ -4982,8 +5081,8 @@ function DashboardScreen(_ref18) {
 
 // ============= RECOVERY =============
 
-function RecoveryScreen(_ref21) {
-  let goBack = _ref21.goBack;
+function RecoveryScreen(_ref23) {
+  let goBack = _ref23.goBack;
   const _useState47 = useState({}),
     _useState48 = _slicedToArray(_useState47, 2),
     data = _useState48[0],
@@ -5136,8 +5235,8 @@ function RecoveryScreen(_ref21) {
 
 // ============= GUIDE =============
 
-function GuideScreen(_ref22) {
-  let goBack = _ref22.goBack;
+function GuideScreen(_ref24) {
+  let goBack = _ref24.goBack;
   const techniques = [{
     badge: 'C',
     name: 'Compound principale',
@@ -5423,8 +5522,8 @@ function GuideScreen(_ref22) {
 
 // ============= SETTINGS =============
 
-function SettingsScreen(_ref23) {
-  let goBack = _ref23.goBack;
+function SettingsScreen(_ref25) {
+  let goBack = _ref25.goBack;
   const _useState49 = useState(null),
     _useState50 = _slicedToArray(_useState49, 2),
     msg = _useState50[0],
@@ -5687,7 +5786,7 @@ function SettingsScreen(_ref23) {
     style: {
       color: '#F4F2F8'
     }
-  }, "V8 Tracker v11.4 \xABVetro & Viola\xBB \xB7 Protocollo V8.3.4"), /*#__PURE__*/React.createElement("br", null), "Programma: V8 Block Cutting \xB7 8 Settimane \xB7 92kg (progressione a singola variabile)", /*#__PURE__*/React.createElement("br", null), "Storage: localStorage del browser", /*#__PURE__*/React.createElement("br", null), "Funziona offline dopo la prima apertura", /*#__PURE__*/React.createElement("br", null), "Immagini esercizi: Wikimedia Commons (con fallback SVG)"))));
+  }, "V8 Tracker v12.0 \xABRegistro\xBB \xABVetro & Viola\xBB \xB7 Protocollo V8.3.4"), /*#__PURE__*/React.createElement("br", null), "Programma: V8 Block Cutting \xB7 8 Settimane \xB7 92kg (progressione a singola variabile)", /*#__PURE__*/React.createElement("br", null), "Storage: localStorage del browser", /*#__PURE__*/React.createElement("br", null), "Funziona offline dopo la prima apertura", /*#__PURE__*/React.createElement("br", null), "Immagini esercizi: Wikimedia Commons (con fallback SVG)"))));
 }
 
 // ============= ESTATE / VIAGGIO =============
@@ -17440,10 +17539,10 @@ const validateV8w = obj => {
 // "Gonfia" una scheda leggera .v8w in un config completo per WorkoutScreen.
 const rehydrateSchedule = v8w => {
   const localDb = {};
-  if (v8w.newExercises) Object.entries(v8w.newExercises).forEach(_ref24 => {
-    let _ref25 = _slicedToArray(_ref24, 2),
-      id = _ref25[0],
-      def = _ref25[1];
+  if (v8w.newExercises) Object.entries(v8w.newExercises).forEach(_ref26 => {
+    let _ref27 = _slicedToArray(_ref26, 2),
+      id = _ref27[0],
+      def = _ref27[1];
     localDb[id] = {
       id,
       ...def
@@ -17497,10 +17596,10 @@ const rehydrateSchedule = v8w => {
     rotation: !!v8w.rotation
   };
 };
-function InfoBox(_ref26) {
-  let color = _ref26.color,
-    title = _ref26.title,
-    children = _ref26.children;
+function InfoBox(_ref28) {
+  let color = _ref28.color,
+    title = _ref28.title,
+    children = _ref28.children;
   return /*#__PURE__*/React.createElement("div", {
     style: {
       background: `${color}14`,
@@ -17524,8 +17623,8 @@ function InfoBox(_ref26) {
     }
   }, children));
 }
-function SummerScreen(_ref27) {
-  let goBack = _ref27.goBack;
+function SummerScreen(_ref29) {
+  let goBack = _ref29.goBack;
   const _useState51 = useState('info'),
     _useState52 = _slicedToArray(_useState51, 2),
     mode = _useState52[0],
@@ -17858,8 +17957,8 @@ const SUPP_STACK = [{
   e: 'Micronutrienti',
   t: '#908AA0'
 }];
-function NutritionScreen(_ref28) {
-  let goBack = _ref28.goBack;
+function NutritionScreen(_ref30) {
+  let goBack = _ref30.goBack;
   const _useState53 = useState('dieta'),
     _useState54 = _slicedToArray(_useState53, 2),
     tab = _useState54[0],
@@ -17915,11 +18014,11 @@ function NutritionScreen(_ref28) {
       gap: '6px',
       marginBottom: '12px'
     }
-  }, [['KCAL', '~2.000', '#E0524A'], ['PROT', '200g', '#3FB66C'], ['CHO', '170g', '#E8B43C'], ['GRASSI', '55g', '#4D82E8']].map(_ref29 => {
-    let _ref30 = _slicedToArray(_ref29, 3),
-      l = _ref30[0],
-      v = _ref30[1],
-      c = _ref30[2];
+  }, [['KCAL', '~2.000', '#E0524A'], ['PROT', '200g', '#3FB66C'], ['CHO', '170g', '#E8B43C'], ['GRASSI', '55g', '#4D82E8']].map(_ref31 => {
+    let _ref32 = _slicedToArray(_ref31, 3),
+      l = _ref32[0],
+      v = _ref32[1],
+      c = _ref32[2];
     return /*#__PURE__*/React.createElement("div", {
       key: l,
       style: {
@@ -18143,11 +18242,11 @@ function NutritionScreen(_ref28) {
       gap: '6px',
       marginBottom: '12px'
     }
-  }, [['KCAL', '~2.800', '#E0524A'], ['PROT', '200g', '#3FB66C'], ['CHO', '460-550', '#E8B43C'], ['GRASSI', '30-40', '#4D82E8']].map(_ref31 => {
-    let _ref32 = _slicedToArray(_ref31, 3),
-      l = _ref32[0],
-      v = _ref32[1],
-      c = _ref32[2];
+  }, [['KCAL', '~2.800', '#E0524A'], ['PROT', '200g', '#3FB66C'], ['CHO', '460-550', '#E8B43C'], ['GRASSI', '30-40', '#4D82E8']].map(_ref33 => {
+    let _ref34 = _slicedToArray(_ref33, 3),
+      l = _ref34[0],
+      v = _ref34[1],
+      c = _ref34[2];
     return /*#__PURE__*/React.createElement("div", {
       key: l,
       style: {
@@ -18288,8 +18387,8 @@ const XIcon = p => /*#__PURE__*/React.createElement(Icon, _extends({
 }, p));
 
 // ============= ESTATE V2 · 4 GIORNI =============
-function Summer2Screen(_ref33) {
-  let goBack = _ref33.goBack;
+function Summer2Screen(_ref35) {
+  let goBack = _ref35.goBack;
   const _useState55 = useState('info'),
     _useState56 = _slicedToArray(_useState55, 2),
     mode = _useState56[0],
@@ -18340,11 +18439,11 @@ function Summer2Screen(_ref33) {
       gap: '4px',
       marginBottom: '14px'
     }
-  }, cols.map(_ref34 => {
-    let _ref35 = _slicedToArray(_ref34, 3),
-      d = _ref35[0],
-      n = _ref35[1],
-      c = _ref35[2];
+  }, cols.map(_ref36 => {
+    let _ref37 = _slicedToArray(_ref36, 3),
+      d = _ref37[0],
+      n = _ref37[1],
+      c = _ref37[2];
     return /*#__PURE__*/React.createElement("div", {
       key: d,
       style: {
@@ -18413,8 +18512,8 @@ function Summer2Screen(_ref33) {
 }
 
 // ============= LIBRERIA SCHEDE (import .v8w) =============
-function LibraryScreenLegacy(_ref36) {
-  let goBack = _ref36.goBack;
+function LibraryScreenLegacy(_ref38) {
+  let goBack = _ref38.goBack;
   const _useState57 = useState(() => storage.get('custom_schedules') || []),
     _useState58 = _slicedToArray(_useState57, 2),
     schedules = _useState58[0],
@@ -19465,17 +19564,17 @@ const copyText = t => {
 // ============================================================
 // V10 · COMPONENTI UI CONDIVISI
 // ============================================================
-function Fld(_ref37) {
-  let label = _ref37.label,
-    value = _ref37.value,
-    onChange = _ref37.onChange,
-    _ref37$type = _ref37.type,
-    type = _ref37$type === void 0 ? 'text' : _ref37$type,
-    ph = _ref37.ph,
-    _ref37$align = _ref37.align,
-    align = _ref37$align === void 0 ? 'center' : _ref37$align,
-    _ref37$flex = _ref37.flex,
-    flex = _ref37$flex === void 0 ? 1 : _ref37$flex;
+function Fld(_ref39) {
+  let label = _ref39.label,
+    value = _ref39.value,
+    onChange = _ref39.onChange,
+    _ref39$type = _ref39.type,
+    type = _ref39$type === void 0 ? 'text' : _ref39$type,
+    ph = _ref39.ph,
+    _ref39$align = _ref39.align,
+    align = _ref39$align === void 0 ? 'center' : _ref39$align,
+    _ref39$flex = _ref39.flex,
+    flex = _ref39$flex === void 0 ? 1 : _ref39$flex;
   return /*#__PURE__*/React.createElement("div", {
     style: {
       flex: flex,
@@ -19506,8 +19605,8 @@ function Fld(_ref37) {
     }
   }));
 }
-function BtnRow(_ref38) {
-  let children = _ref38.children;
+function BtnRow(_ref40) {
+  let children = _ref40.children;
   return /*#__PURE__*/React.createElement("div", {
     style: {
       display: 'flex',
@@ -19516,12 +19615,12 @@ function BtnRow(_ref38) {
     }
   }, children);
 }
-function MiniBtn(_ref39) {
-  let onClick = _ref39.onClick,
-    _ref39$color = _ref39.color,
-    color = _ref39$color === void 0 ? '#908AA0' : _ref39$color,
-    children = _ref39.children,
-    title = _ref39.title;
+function MiniBtn(_ref41) {
+  let onClick = _ref41.onClick,
+    _ref41$color = _ref41.color,
+    color = _ref41$color === void 0 ? '#908AA0' : _ref41$color,
+    children = _ref41.children,
+    title = _ref41.title;
   return /*#__PURE__*/React.createElement("button", {
     onClick: onClick,
     title: title,
@@ -19540,14 +19639,14 @@ function MiniBtn(_ref39) {
     }
   }, children);
 }
-function BigBtn(_ref40) {
-  let onClick = _ref40.onClick,
-    _ref40$color = _ref40.color,
-    color = _ref40$color === void 0 ? '#A855F7' : _ref40$color,
-    icon = _ref40.icon,
-    children = _ref40.children,
-    disabled = _ref40.disabled,
-    ghost = _ref40.ghost;
+function BigBtn(_ref42) {
+  let onClick = _ref42.onClick,
+    _ref42$color = _ref42.color,
+    color = _ref42$color === void 0 ? '#A855F7' : _ref42$color,
+    icon = _ref42.icon,
+    children = _ref42.children,
+    disabled = _ref42.disabled,
+    ghost = _ref42.ghost;
   return /*#__PURE__*/React.createElement("button", {
     onClick: onClick,
     disabled: disabled,
@@ -19568,11 +19667,11 @@ function BigBtn(_ref40) {
     }
   }, icon, children);
 }
-function Modal(_ref41) {
-  let title = _ref41.title,
-    subtitle = _ref41.subtitle,
-    onClose = _ref41.onClose,
-    children = _ref41.children;
+function Modal(_ref43) {
+  let title = _ref43.title,
+    subtitle = _ref43.subtitle,
+    onClose = _ref43.onClose,
+    children = _ref43.children;
   useAndroidBack(onClose, true);
   return /*#__PURE__*/React.createElement("div", {
     style: {
@@ -19583,8 +19682,6 @@ function Modal(_ref41) {
       bottom: 0,
       zIndex: 300,
       background: 'rgba(7,6,11,0.86)',
-      backdropFilter: 'blur(10px)',
-      WebkitBackdropFilter: 'blur(10px)',
       display: 'flex',
       flexDirection: 'column'
     }
@@ -19643,11 +19740,11 @@ function Modal(_ref41) {
 }
 
 // Barra macro con confronto sul target
-function MacroBar(_ref42) {
-  let label = _ref42.label,
-    value = _ref42.value,
-    target = _ref42.target,
-    color = _ref42.color;
+function MacroBar(_ref44) {
+  let label = _ref44.label,
+    value = _ref44.value,
+    target = _ref44.target,
+    color = _ref44.color;
   const t = parseFloat(target) || 0;
   const pct = t > 0 ? Math.min(100, value / t * 100) : 0;
   const delta = t > 0 ? value - t : null;
@@ -19708,9 +19805,9 @@ function MacroBar(_ref42) {
 // ============================================================
 // V10 · SELETTORE ESERCIZI (dal database interno)
 // ============================================================
-function ExercisePicker(_ref43) {
-  let onPick = _ref43.onPick,
-    onClose = _ref43.onClose;
+function ExercisePicker(_ref45) {
+  let onPick = _ref45.onPick,
+    onClose = _ref45.onClose;
   const _useState67 = useState(''),
     _useState68 = _slicedToArray(_useState67, 2),
     q = _useState68[0],
@@ -19879,9 +19976,9 @@ function ExercisePicker(_ref43) {
 // ============================================================
 // V10 · SELETTORE ALIMENTI
 // ============================================================
-function FoodPicker(_ref44) {
-  let onPick = _ref44.onPick,
-    onClose = _ref44.onClose;
+function FoodPicker(_ref46) {
+  let onPick = _ref46.onPick,
+    onClose = _ref46.onClose;
   const _useState71 = useState(''),
     _useState72 = _slicedToArray(_useState71, 2),
     q = _useState72[0],
@@ -20182,10 +20279,10 @@ const DAY_COLORS = ['#4D82E8', '#3b82f6', '#8b5cf6', '#A855F7', '#f59e0b', '#14b
 // ============================================================
 // V10 · EDITOR SCHEDA ALLENAMENTO
 // ============================================================
-function ScheduleEditorScreen(_ref45) {
-  let initial = _ref45.initial,
-    onSave = _ref45.onSave,
-    goBack = _ref45.goBack;
+function ScheduleEditorScreen(_ref47) {
+  let initial = _ref47.initial,
+    onSave = _ref47.onSave,
+    goBack = _ref47.goBack;
   const _useState75 = useState(() => toEditableSched(initial)),
     _useState76 = _slicedToArray(_useState75, 2),
     ed = _useState76[0],
@@ -20660,8 +20757,8 @@ function ScheduleEditorScreen(_ref45) {
 // ============================================================
 // V10 · LIBRERIA SCHEDE ALLENAMENTO
 // ============================================================
-function LibraryScreen(_ref46) {
-  let goBack = _ref46.goBack;
+function LibraryScreen(_ref48) {
+  let goBack = _ref48.goBack;
   const _useState83 = useState(() => storage.get('custom_schedules') || []),
     _useState84 = _slicedToArray(_useState83, 2),
     schedules = _useState84[0],
@@ -21187,10 +21284,10 @@ const validateV8d = o => {
 // ============================================================
 // V10 · EDITOR DIETA
 // ============================================================
-function DietEditorScreen(_ref47) {
-  let initial = _ref47.initial,
-    onSave = _ref47.onSave,
-    goBack = _ref47.goBack;
+function DietEditorScreen(_ref49) {
+  let initial = _ref49.initial,
+    onSave = _ref49.onSave,
+    goBack = _ref49.goBack;
   const _useState95 = useState(() => JSON.parse(JSON.stringify(initial))),
     _useState96 = _slicedToArray(_useState95, 2),
     d = _useState96[0],
@@ -21740,8 +21837,8 @@ function DietEditorScreen(_ref47) {
 // ============================================================
 // V10 · LIBRERIA DIETE + LISTA DELLA SPESA
 // ============================================================
-function DietScreen(_ref48) {
-  let goBack = _ref48.goBack;
+function DietScreen(_ref50) {
+  let goBack = _ref50.goBack;
   const _useState103 = useState(() => storage.get('custom_diets') || []),
     _useState104 = _slicedToArray(_useState103, 2),
     diets = _useState104[0],
@@ -21859,19 +21956,19 @@ function DietScreen(_ref48) {
       agg[key].g += (parseFloat(it.g) || 0) * n;
     }));
     const byCat = {};
-    Object.entries(agg).forEach(_ref49 => {
-      let _ref50 = _slicedToArray(_ref49, 2),
-        k = _ref50[0],
-        v = _ref50[1];
+    Object.entries(agg).forEach(_ref51 => {
+      let _ref52 = _slicedToArray(_ref51, 2),
+        k = _ref52[0],
+        v = _ref52[1];
       (byCat[v.cat] = byCat[v.cat] || []).push([k, v.g]);
     });
     let out = 'LISTA SPESA — ' + d.name + ' × ' + n + ' giorni\n';
     Object.keys(byCat).sort().forEach(cat => {
       out += '\n' + cat.toUpperCase() + '\n';
-      byCat[cat].sort((a, b) => b[1] - a[1]).forEach(_ref51 => {
-        let _ref52 = _slicedToArray(_ref51, 2),
-          k = _ref52[0],
-          g = _ref52[1];
+      byCat[cat].sort((a, b) => b[1] - a[1]).forEach(_ref53 => {
+        let _ref54 = _slicedToArray(_ref53, 2),
+          k = _ref54[0],
+          g = _ref54[1];
         out += '  • ' + k + ' — ' + (g >= 1000 ? Math.round(g / 100) / 10 + ' kg' : Math.round(g) + ' g') + '\n';
       });
     });
@@ -22265,10 +22362,10 @@ function DietScreen(_ref48) {
 // ============================================================
 const EQUIP_LIST = ['Manubri', 'Bilanciere', 'Cavi', 'Macchina', 'Corpo libero', 'Bilanciere EZ', 'Elastici', 'Varie'];
 const TAG_LIST = ['PETTO', 'DORSO', 'D.ANT', 'D.MED', 'D.POST', 'BI', 'TRI', 'AVB', 'QUAD', 'HAM', 'GLUTE', 'POLP', 'CORE'];
-function Thumb(_ref53) {
-  let id = _ref53.id,
-    _ref53$size = _ref53.size,
-    size = _ref53$size === void 0 ? 58 : _ref53$size;
+function Thumb(_ref55) {
+  let id = _ref55.id,
+    _ref55$size = _ref55.size,
+    size = _ref55$size === void 0 ? 58 : _ref55$size;
   const urls = EXERCISE_IMAGES[id] || [];
   const _useState119 = useState(0),
     _useState120 = _slicedToArray(_useState119, 2),
@@ -22292,9 +22389,9 @@ function Thumb(_ref53) {
     }
   });
 }
-function ExDetailModal(_ref54) {
-  let ex = _ref54.ex,
-    onClose = _ref54.onClose;
+function ExDetailModal(_ref56) {
+  let ex = _ref56.ex,
+    onClose = _ref56.onClose;
   const imgs = EXERCISE_IMAGES[ex.id] || [];
   return /*#__PURE__*/React.createElement(Modal, {
     title: ex.name,
@@ -22386,10 +22483,10 @@ function ExDetailModal(_ref54) {
       justifyContent: 'space-around',
       textAlign: 'center'
     }
-  }, [['SERIE', ex.sets], ['REP', ex.reps], ['RIR', ex.rir], ['REC.', ex.rest]].map(_ref55 => {
-    let _ref56 = _slicedToArray(_ref55, 2),
-      l = _ref56[0],
-      v = _ref56[1];
+  }, [['SERIE', ex.sets], ['REP', ex.reps], ['RIR', ex.rir], ['REC.', ex.rest]].map(_ref57 => {
+    let _ref58 = _slicedToArray(_ref57, 2),
+      l = _ref58[0],
+      v = _ref58[1];
     return /*#__PURE__*/React.createElement("div", {
       key: l
     }, /*#__PURE__*/React.createElement("div", {
@@ -22496,8 +22593,8 @@ function ExDetailModal(_ref54) {
     }
   }, "Nome originale: ", ex.nameEn));
 }
-function ExerciseDBScreen(_ref57) {
-  let goBack = _ref57.goBack;
+function ExerciseDBScreen(_ref59) {
+  let goBack = _ref59.goBack;
   const _useState121 = useState(''),
     _useState122 = _slicedToArray(_useState121, 2),
     q = _useState122[0],
@@ -22758,10 +22855,10 @@ function computeVolume(config, weekLog) {
     const dayLog = weekLog[day.id];
     if (!dayLog || !dayLog.esercizi) return;
     const list = config.exercises[day.id] || [];
-    Object.entries(dayLog.esercizi).forEach(_ref58 => {
-      let _ref59 = _slicedToArray(_ref58, 2),
-        idx = _ref59[0],
-        rec = _ref59[1];
+    Object.entries(dayLog.esercizi).forEach(_ref60 => {
+      let _ref61 = _slicedToArray(_ref60, 2),
+        idx = _ref61[0],
+        rec = _ref61[1];
       const ex = list[parseInt(idx, 10)];
       if (!ex) return;
       const done = (rec.sets_done || []).filter(Boolean).length;
@@ -22774,8 +22871,8 @@ function computeVolume(config, weekLog) {
   });
   return out;
 }
-function VolumeScreen(_ref60) {
-  let goBack = _ref60.goBack;
+function VolumeScreen(_ref62) {
+  let goBack = _ref62.goBack;
   const programs = [{
     id: 'main',
     label: 'V8.3.4',
@@ -23019,8 +23116,8 @@ function VolumeScreen(_ref60) {
 // ============================================================
 const KCAL_PER_KG = 7700; // ~7700 kcal per kg di massa persa/guadagnata
 
-function TdeeScreen(_ref61) {
-  let goBack = _ref61.goBack;
+function TdeeScreen(_ref63) {
+  let goBack = _ref63.goBack;
   const pesoLog = storage.get('peso') || {};
   const diets = storage.get('custom_diets') || [];
   const _useState135 = useState(() => storage.get('tdee_giorni') || {}),
@@ -23229,10 +23326,10 @@ function TdeeScreen(_ref61) {
       padding: '13px',
       marginBottom: '12px'
     }
-  }, [['Intake medio', Math.round(intakeMedio) + ' kcal/g'], ['Finestra analizzata', settimane + ' settimane (S' + primo.w + '→S' + ultimo.w + ')'], ['Variazione peso', (deltaKg > 0 ? '+' : '') + deltaKg.toFixed(2) + ' kg'], ['Ritmo settimanale', (kgSett > 0 ? '+' : '') + kgSett.toFixed(2) + ' kg/sett (' + (pctSett > 0 ? '+' : '') + pctSett.toFixed(2) + '%)'], ['Scarto calorico', (scartoGiorno > 0 ? '+' : '') + Math.round(scartoGiorno) + ' kcal/g']].map(_ref62 => {
-    let _ref63 = _slicedToArray(_ref62, 2),
-      k = _ref63[0],
-      v = _ref63[1];
+  }, [['Intake medio', Math.round(intakeMedio) + ' kcal/g'], ['Finestra analizzata', settimane + ' settimane (S' + primo.w + '→S' + ultimo.w + ')'], ['Variazione peso', (deltaKg > 0 ? '+' : '') + deltaKg.toFixed(2) + ' kg'], ['Ritmo settimanale', (kgSett > 0 ? '+' : '') + kgSett.toFixed(2) + ' kg/sett (' + (pctSett > 0 ? '+' : '') + pctSett.toFixed(2) + '%)'], ['Scarto calorico', (scartoGiorno > 0 ? '+' : '') + Math.round(scartoGiorno) + ' kcal/g']].map(_ref64 => {
+    let _ref65 = _slicedToArray(_ref64, 2),
+      k = _ref65[0],
+      v = _ref65[1];
     return /*#__PURE__*/React.createElement("div", {
       key: k,
       style: {
@@ -23284,12 +23381,12 @@ function TdeeScreen(_ref61) {
 // V11.2 · SOSTITUZIONE ESERCIZIO AL VOLO
 // ============================================================
 const SWAP_EQUIP = ['Manubri', 'Bilanciere', 'Bilanciere EZ', 'Cavi', 'Corpo libero'];
-function SwapModal(_ref64) {
-  let exercise = _ref64.exercise,
-    onPick = _ref64.onPick,
-    onClose = _ref64.onClose,
-    onReset = _ref64.onReset,
-    hasSwap = _ref64.hasSwap;
+function SwapModal(_ref66) {
+  let exercise = _ref66.exercise,
+    onPick = _ref66.onPick,
+    onClose = _ref66.onClose,
+    onReset = _ref66.onReset,
+    hasSwap = _ref66.hasSwap;
   const _useState139 = useState(null),
     _useState140 = _slicedToArray(_useState139, 2),
     eq = _useState140[0],
@@ -23531,8 +23628,6 @@ function ConfirmHost() {
       bottom: 0,
       zIndex: 400,
       background: 'rgba(7,6,11,0.82)',
-      backdropFilter: 'blur(8px)',
-      WebkitBackdropFilter: 'blur(8px)',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
@@ -23704,10 +23799,10 @@ function statsBlocco(config, log) {
       if (!dl || !dl.esercizi) return;
       let serieGiorno = 0;
       const list = config.exercises[day.id] || [];
-      Object.entries(dl.esercizi).forEach(_ref65 => {
-        let _ref66 = _slicedToArray(_ref65, 2),
-          idx = _ref66[0],
-          rec = _ref66[1];
+      Object.entries(dl.esercizi).forEach(_ref67 => {
+        let _ref68 = _slicedToArray(_ref67, 2),
+          idx = _ref68[0],
+          rec = _ref68[1];
         const ex = list[parseInt(idx, 10)];
         const fatte = (rec.sets_done || []).filter(Boolean).length;
         if (!fatte) return;
@@ -23759,8 +23854,8 @@ const PROGRAMMI = () => [{
     return null;
   }
 }).filter(Boolean));
-function StoricoScreen(_ref67) {
-  let goBack = _ref67.goBack;
+function StoricoScreen(_ref69) {
+  let goBack = _ref69.goBack;
   const _useState145 = useState(() => storage.get('archivio') || []),
     _useState146 = _slicedToArray(_useState145, 2),
     archivio = _useState146[0],
@@ -23887,10 +23982,10 @@ function StoricoScreen(_ref67) {
       textAlign: 'center',
       marginBottom: '12px'
     }
-  }, [['SESSIONI', statsCorrente.sessioni], ['SERIE', Math.round(statsCorrente.serie)], ['TONNELLAGGIO', (statsCorrente.tonnellaggio / 1000).toFixed(1) + ' t']].map(_ref68 => {
-    let _ref69 = _slicedToArray(_ref68, 2),
-      l = _ref69[0],
-      v = _ref69[1];
+  }, [['SESSIONI', statsCorrente.sessioni], ['SERIE', Math.round(statsCorrente.serie)], ['TONNELLAGGIO', (statsCorrente.tonnellaggio / 1000).toFixed(1) + ' t']].map(_ref70 => {
+    let _ref71 = _slicedToArray(_ref70, 2),
+      l = _ref71[0],
+      v = _ref71[1];
     return /*#__PURE__*/React.createElement("div", {
       key: l
     }, /*#__PURE__*/React.createElement("div", {
@@ -23963,12 +24058,12 @@ function StoricoScreen(_ref67) {
       flex: 1,
       textAlign: 'right'
     }
-  }, a2.programma, " \xB7 ", fmtData(a2.dal))), [['Sessioni', a1.sessioni, a2.sessioni, ''], ['Serie totali', Math.round(a1.serie), Math.round(a2.serie), ''], ['Tonnellaggio', (a1.tonnellaggio / 1000).toFixed(1), (a2.tonnellaggio / 1000).toFixed(1), ' t']].map(_ref70 => {
-    let _ref71 = _slicedToArray(_ref70, 4),
-      k = _ref71[0],
-      v1 = _ref71[1],
-      v2 = _ref71[2],
-      u = _ref71[3];
+  }, a2.programma, " \xB7 ", fmtData(a2.dal))), [['Sessioni', a1.sessioni, a2.sessioni, ''], ['Serie totali', Math.round(a1.serie), Math.round(a2.serie), ''], ['Tonnellaggio', (a1.tonnellaggio / 1000).toFixed(1), (a2.tonnellaggio / 1000).toFixed(1), ' t']].map(_ref72 => {
+    let _ref73 = _slicedToArray(_ref72, 4),
+      k = _ref73[0],
+      v1 = _ref73[1],
+      v2 = _ref73[2],
+      u = _ref73[3];
     const d = v2 - v1;
     const col = d > 0 ? '#3FB66C' : d < 0 ? '#E0524A' : '#908AA0';
     return /*#__PURE__*/React.createElement("div", {
@@ -24136,10 +24231,10 @@ function StoricoScreen(_ref67) {
         gap: '14px',
         marginTop: '8px'
       }
-    }, [['sessioni', a.sessioni], ['serie', Math.round(a.serie)], ['tonn.', (a.tonnellaggio / 1000).toFixed(1) + ' t']].map(_ref72 => {
-      let _ref73 = _slicedToArray(_ref72, 2),
-        l = _ref73[0],
-        v = _ref73[1];
+    }, [['sessioni', a.sessioni], ['serie', Math.round(a.serie)], ['tonn.', (a.tonnellaggio / 1000).toFixed(1) + ' t']].map(_ref74 => {
+      let _ref75 = _slicedToArray(_ref74, 2),
+        l = _ref75[0],
+        v = _ref75[1];
       return /*#__PURE__*/React.createElement("div", {
         key: l
       }, /*#__PURE__*/React.createElement("span", {
@@ -24191,13 +24286,529 @@ function StoricoScreen(_ref67) {
   }, "volume, tonnellaggio e date"), " di ogni mesociclo e puoi confrontarli fra loro.")));
 }
 
+// ============================================================
+// REGISTRO · CARICO E DISCHI
+// ============================================================
+const plateCfg = () => {
+  const c = storage.get('bilanciere') || {};
+  return {
+    barra: c.barra != null ? parseFloat(c.barra) : 20,
+    disponibili: Array.isArray(c.disponibili) && c.disponibili.length ? c.disponibili : DISC.map(d => d.kg)
+  };
+};
+
+// Scompone un carico totale nei dischi per lato.
+function scomponi(totale, cfg) {
+  const c = cfg || plateCfg();
+  const lato = (totale - c.barra) / 2;
+  if (isNaN(lato)) return {
+    err: 'carico non valido'
+  };
+  if (lato < 0) return {
+    err: 'sotto il peso del bilanciere (' + c.barra + ' kg)'
+  };
+  const lista = [];
+  let resto = Math.round(lato * 100) / 100;
+  DISC.filter(d => c.disponibili.indexOf(d.kg) >= 0).forEach(d => {
+    const n = Math.floor(resto / d.kg + 1e-9);
+    if (n > 0) {
+      lista.push({
+        d,
+        n
+      });
+      resto = Math.round((resto - n * d.kg) * 100) / 100;
+    }
+  });
+  return {
+    lista,
+    resto,
+    lato
+  };
+}
+
+// Il manicotto: la firma visiva del registro.
+function Sleeve(_ref76) {
+  let peso = _ref76.peso,
+    compatta = _ref76.compatta;
+  const r = scomponi(parseFloat(peso) || 0);
+  const H = compatta ? 0.52 : 1;
+  if (r.err) {
+    return /*#__PURE__*/React.createElement("div", {
+      style: {
+        padding: '14px 0',
+        textAlign: 'center',
+        ...lblStyle,
+        color: '#E5A82B',
+        letterSpacing: '0.08em'
+      }
+    }, r.err);
+  }
+  return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      alignItems: 'center',
+      height: (compatta ? 74 : 132) + 'px',
+      overflow: 'hidden'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      width: '54px',
+      height: '13px',
+      flex: 'none',
+      background: 'repeating-linear-gradient(90deg,#7C7884 0 1px,#3A3742 1px 3px)'
+    }
+  }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      width: '22px',
+      height: '13px',
+      flex: 'none',
+      background: 'linear-gradient(180deg,#9A96A0,#4E4A55 60%,#2E2C34)'
+    }
+  }), r.lista.map((x, i) => Array.from({
+    length: x.n
+  }).map((_, j) => /*#__PURE__*/React.createElement("div", {
+    key: i + '-' + j,
+    style: {
+      flex: 'none',
+      margin: '0 2px',
+      borderRadius: '2px',
+      height: Math.round(x.d.h * H) + 'px',
+      width: Math.round(x.d.w * (compatta ? 0.8 : 1)) + 'px',
+      background: x.d.col,
+      boxShadow: 'inset 0 2px 0 rgba(255,255,255,0.42), inset 0 -3px 7px rgba(0,0,0,0.5), 0 3px 10px rgba(0,0,0,0.5)'
+    }
+  }))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      width: '9px',
+      height: Math.round(30 * H) + 'px',
+      flex: 'none',
+      borderRadius: '2px',
+      marginLeft: '2px',
+      background: 'linear-gradient(180deg,#8A8694,#3E3B47)'
+    }
+  }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      width: '30px',
+      height: '13px',
+      flex: 'none',
+      background: 'linear-gradient(180deg,#9A96A0,#4E4A55 60%,#2E2C34)'
+    }
+  })), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      alignItems: 'center',
+      flexWrap: 'wrap',
+      gap: '13px',
+      padding: '9px 0 2px'
+    }
+  }, r.lista.length === 0 ? /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontFamily: monoFont,
+      fontSize: '11px',
+      color: IRON.dust
+    }
+  }, "solo bilanciere \xB7 ", plateCfg().barra, " kg") : r.lista.map((x, i) => /*#__PURE__*/React.createElement("span", {
+    key: i,
+    style: {
+      display: 'flex',
+      alignItems: 'center',
+      gap: '6px',
+      fontFamily: monoFont,
+      fontSize: '11px',
+      color: IRON.dust
+    }
+  }, /*#__PURE__*/React.createElement("b", {
+    style: {
+      width: '9px',
+      height: '9px',
+      borderRadius: '1px',
+      background: x.d.col,
+      display: 'block'
+    }
+  }), x.n, "\xD7", String(x.d.kg).replace('.', ','))), r.lista.length > 0 && /*#__PURE__*/React.createElement("span", {
+    style: {
+      marginLeft: 'auto',
+      ...lblStyle,
+      fontSize: '9px'
+    }
+  }, "per lato")), r.resto > 0.01 && /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontFamily: monoFont,
+      fontSize: '10.5px',
+      color: '#E5A82B',
+      paddingTop: '3px'
+    }
+  }, "non componibile: restano ", String(r.resto).replace('.', ','), " kg per lato"));
+}
+
+// ============================================================
+// REGISTRO · L'ULTIMA VOLTA CHE HAI FATTO QUESTO ESERCIZIO
+// ============================================================
+// Cerca a ritroso nelle settimane precedenti il log dello stesso esercizio.
+function ultimaVolta(log, week, dayId, exIdx) {
+  for (let w = week - 1; w >= 1; w--) {
+    const d = log[w] && log[w][dayId];
+    const rec = d && d.esercizi && d.esercizi[exIdx];
+    if (!rec) continue;
+    const reps = (rec.reps || []).map(r => parseInt(r, 10)).filter(r => !isNaN(r) && r > 0);
+    if (!rec.kg || reps.length === 0) continue;
+    return {
+      week: w,
+      kg: parseFloat(rec.kg),
+      reps,
+      rir: rec.rir,
+      ts: d.ts || d.startedAt
+    };
+  }
+  return null;
+}
+function UltimaVolta(_ref77) {
+  let log = _ref77.log,
+    week = _ref77.week,
+    dayId = _ref77.dayId,
+    exIdx = _ref77.exIdx,
+    kgAttuale = _ref77.kgAttuale;
+  const p = ultimaVolta(log, week, dayId, exIdx);
+  if (!p) return null;
+  const kg = parseFloat(kgAttuale) || 0;
+  const dKg = kg > 0 ? kg - p.kg : null;
+  const giorni = p.ts ? Math.round((Date.now() - p.ts) / 86400000) : null;
+  let verdetto = null;
+  if (dKg != null) {
+    if (dKg > 0) verdetto = {
+      t: '+' + String(Math.round(dKg * 10) / 10).replace('.', ',') + ' kg rispetto alla volta scorsa',
+      c: '#2FA055'
+    };else if (dKg === 0) verdetto = {
+      t: 'stesso carico: cerca una ripetizione in più',
+      c: IRON.dust
+    };else verdetto = {
+      t: String(Math.round(dKg * 10) / 10).replace('.', ',') + ' kg rispetto alla volta scorsa',
+      c: '#E5A82B'
+    };
+  }
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginTop: '14px',
+      border: '1px solid ' + IRON.edge,
+      borderLeft: '2px solid ' + IRON.ash,
+      background: IRON.surface,
+      padding: '11px 13px',
+      borderRadius: '3px'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'baseline',
+      marginBottom: '6px'
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: lblStyle
+  }, "Ultima volta"), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontFamily: monoFont,
+      fontSize: '9.5px',
+      color: IRON.dust
+    }
+  }, "S", p.week, giorni != null ? ' · ' + giorni + ' giorni fa' : '')), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontFamily: monoFont,
+      fontSize: '13.5px',
+      color: IRON.chalk,
+      letterSpacing: '0.02em'
+    }
+  }, String(p.kg).replace('.', ','), " kg ", /*#__PURE__*/React.createElement("span", {
+    style: {
+      color: IRON.ash
+    }
+  }, "\xD7"), " ", p.reps.join(' · '), p.rir ? /*#__PURE__*/React.createElement("span", {
+    style: {
+      color: IRON.ash
+    }
+  }, " @ RIR ", p.rir) : null), verdetto && /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontFamily: monoFont,
+      fontSize: '10.5px',
+      color: verdetto.c,
+      marginTop: '5px'
+    }
+  }, verdetto.t));
+}
+
+// ============================================================
+// REGISTRO · IMPOSTAZIONI BILANCIERE E DISCHI
+// ============================================================
+function BilanciereScreen(_ref78) {
+  let goBack = _ref78.goBack;
+  const _useState153 = useState(plateCfg),
+    _useState154 = _slicedToArray(_useState153, 2),
+    cfg = _useState154[0],
+    setCfg = _useState154[1];
+  const salva = next => {
+    setCfg(next);
+    storage.set('bilanciere', next);
+  };
+  const toggle = kg => {
+    const has = cfg.disponibili.indexOf(kg) >= 0;
+    salva({
+      ...cfg,
+      disponibili: has ? cfg.disponibili.filter(x => x !== kg) : cfg.disponibili.concat([kg])
+    });
+  };
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      minHeight: '100vh',
+      paddingBottom: '120px'
+    }
+  }, /*#__PURE__*/React.createElement(Header, {
+    title: "Bilanciere e dischi",
+    subtitle: "Usati per calcolare il carico per lato",
+    onBack: goBack
+  }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: '0 14px'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      ...glassCard,
+      padding: '14px',
+      marginBottom: '14px'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      ...lblStyle,
+      marginBottom: '9px'
+    }
+  }, "Peso del bilanciere"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      gap: '7px'
+    }
+  }, [7.5, 10, 15, 20, 25].map(b => /*#__PURE__*/React.createElement("button", {
+    key: b,
+    onClick: () => salva({
+      ...cfg,
+      barra: b
+    }),
+    style: {
+      flex: 1,
+      minHeight: '52px',
+      borderRadius: '3px',
+      cursor: 'pointer',
+      fontFamily: monoFont,
+      fontSize: '14px',
+      fontWeight: '600',
+      background: cfg.barra === b ? IRON.chalk : IRON.surface,
+      color: cfg.barra === b ? IRON.bg : IRON.dust,
+      border: '1px solid ' + (cfg.barra === b ? IRON.chalk : IRON.edge)
+    }
+  }, String(b).replace('.', ','))))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      ...glassCard,
+      padding: '14px',
+      marginBottom: '14px'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      ...lblStyle,
+      marginBottom: '11px'
+    }
+  }, "Dischi che hai (per lato)"), DISC.map(d => {
+    const on = cfg.disponibili.indexOf(d.kg) >= 0;
+    return /*#__PURE__*/React.createElement("button", {
+      key: d.kg,
+      onClick: () => toggle(d.kg),
+      style: {
+        width: '100%',
+        minHeight: '54px',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '13px',
+        background: 'none',
+        border: 'none',
+        borderBottom: '1px solid ' + IRON.edge,
+        cursor: 'pointer',
+        padding: '0 2px'
+      }
+    }, /*#__PURE__*/React.createElement("span", {
+      style: {
+        width: '10px',
+        height: on ? '30px' : '14px',
+        borderRadius: '2px',
+        background: on ? d.col : IRON.edge,
+        display: 'block',
+        flexShrink: 0,
+        transition: 'height .15s'
+      }
+    }), /*#__PURE__*/React.createElement("span", {
+      style: {
+        flex: 1,
+        textAlign: 'left',
+        fontFamily: monoFont,
+        fontSize: '15px',
+        fontWeight: '600',
+        color: on ? IRON.chalk : IRON.ash
+      }
+    }, String(d.kg).replace('.', ','), " kg"), /*#__PURE__*/React.createElement("span", {
+      style: {
+        ...lblStyle,
+        color: on ? '#2FA055' : IRON.ash
+      }
+    }, on ? 'sì' : 'no'));
+  })), /*#__PURE__*/React.createElement("div", {
+    style: {
+      ...glassCard,
+      padding: '14px',
+      marginBottom: '14px'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      ...lblStyle,
+      marginBottom: '11px'
+    }
+  }, "Prova: 100 kg sul bilanciere"), /*#__PURE__*/React.createElement(Sleeve, {
+    peso: 100
+  })), /*#__PURE__*/React.createElement(InfoBox, {
+    color: "#8A8A93",
+    title: "Dove compare"
+  }, "Il bilanciere con i dischi appare negli esercizi con ", /*#__PURE__*/React.createElement("b", {
+    style: {
+      color: IRON.chalk
+    }
+  }, "bilanciere"), ". Per manubri, cavi e corpo libero non ha senso e resta nascosto.")));
+}
+
+// Un esercizio va caricato a bilanciere?
+const usaBilanciere = ex => {
+  const twin = BUILTIN_TWIN[ex.id] ? EXERCISE_DB[BUILTIN_TWIN[ex.id]] : null;
+  const eq = ex.equip || twin && twin.equip;
+  if (eq) return eq === 'Bilanciere' || eq === 'Bilanciere EZ';
+  return /bilanciere|panca|squat|stacco|rematore con bilanciere|military|lento/i.test(ex.name || '');
+};
+
+// ============================================================
+// REGISTRO · LA SEDUTA DI OGGI
+// ============================================================
+function TodayCard(_ref79) {
+  let navigate = _ref79.navigate;
+  const log = storage.get(MAIN_CONFIG.storageKey) || {};
+  const settimane = MAIN_CONFIG.weeks;
+  // settimana corrente = la prima non completata del tutto
+  let week = settimane[0];
+  for (const w of settimane) {
+    const fatti = MAIN_CONFIG.days.filter(d => log[w] && log[w][d.id] && log[w][d.id].completato).length;
+    if (fatti < MAIN_CONFIG.days.length) {
+      week = w;
+      break;
+    }
+    week = w;
+  }
+  const oggi = ['DOM', 'LUN', 'MAR', 'MER', 'GIO', 'VEN', 'SAB'][new Date().getDay()];
+  const giorno = MAIN_CONFIG.days.find(d => d.dayName === oggi);
+  const fatto = giorno && log[week] && log[week][giorno.id] && log[week][giorno.id].completato;
+  const nEs = giorno ? (MAIN_CONFIG.exercises[giorno.id] || []).length : 0;
+  const nSerie = giorno ? (MAIN_CONFIG.exercises[giorno.id] || []).reduce((a, e) => a + (e.sets || 0), 0) : 0;
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      margin: '0 -12px 22px',
+      padding: '18px 14px 20px',
+      background: IRON.surface,
+      borderTop: '1px solid ' + IRON.edge,
+      borderBottom: '1px solid ' + IRON.edge
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      ...lblStyle
+    }
+  }, "Oggi \xB7 ", oggi, " \xB7 settimana ", week, " di ", settimane.length), giorno ? /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+    style: {
+      ...dispStyle,
+      fontSize: '44px',
+      margin: '9px 0 0',
+      color: IRON.chalk
+    }
+  }, giorno.label), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontFamily: monoFont,
+      fontSize: '11px',
+      color: IRON.dust,
+      marginTop: '7px'
+    }
+  }, giorno.subtitle), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      border: '1px solid ' + IRON.edge,
+      borderRadius: '3px',
+      overflow: 'hidden',
+      marginTop: '15px'
+    }
+  }, [[String(nEs).padStart(2, '0'), 'ESERCIZI'], [String(nSerie), 'SERIE'], [giorno.dur || '—', 'DURATA']].map((_ref80, i) => {
+    let _ref81 = _slicedToArray(_ref80, 2),
+      v = _ref81[0],
+      l = _ref81[1];
+    return /*#__PURE__*/React.createElement("div", {
+      key: l,
+      style: {
+        flex: 1,
+        padding: '10px 0',
+        textAlign: 'center',
+        borderLeft: i ? '1px solid ' + IRON.edge : 'none'
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        ...numStyle,
+        fontSize: '16px',
+        fontWeight: '600',
+        color: IRON.chalk
+      }
+    }, v), /*#__PURE__*/React.createElement("div", {
+      style: {
+        ...lblStyle,
+        fontSize: '8.5px'
+      }
+    }, l));
+  })), /*#__PURE__*/React.createElement("button", {
+    onClick: () => navigate('workout'),
+    style: {
+      marginTop: '15px',
+      width: '100%',
+      minHeight: '58px',
+      border: 'none',
+      borderRadius: '3px',
+      cursor: 'pointer',
+      background: fatto ? IRON.knurl : IRON.chalk,
+      color: fatto ? IRON.dust : IRON.bg,
+      fontFamily: displayFont,
+      fontVariationSettings: "'wdth' 112",
+      fontSize: '15px',
+      fontWeight: '800',
+      letterSpacing: '0.08em',
+      textTransform: 'uppercase'
+    }
+  }, fatto ? 'Sessione completata' : 'Inizia')) : /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+    style: {
+      ...dispStyle,
+      fontSize: '40px',
+      margin: '9px 0 0',
+      color: IRON.dust
+    }
+  }, "Riposo"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontFamily: monoFont,
+      fontSize: '11px',
+      color: IRON.dust,
+      marginTop: '7px'
+    }
+  }, "Nessuna seduta in programma. NEAT alto e proteine.")));
+}
+
 // ============= MAIN =============
 
 function App() {
-  const _useState153 = useState('home'),
-    _useState154 = _slicedToArray(_useState153, 2),
-    screen = _useState154[0],
-    setScreen = _useState154[1];
+  const _useState155 = useState('home'),
+    _useState156 = _slicedToArray(_useState155, 2),
+    screen = _useState156[0],
+    setScreen = _useState156[1];
   const goHome = useCallback(() => setScreen('home'), []);
   // Quando siamo fuori da home, intercetta il tasto indietro per tornare alla home
   useAndroidBack(goHome, screen !== 'home');
@@ -24223,6 +24834,8 @@ function App() {
   }), screen === 'volume' && /*#__PURE__*/React.createElement(VolumeScreen, {
     goBack: goHome
   }), screen === 'storico' && /*#__PURE__*/React.createElement(StoricoScreen, {
+    goBack: goHome
+  }), screen === 'bilanciere' && /*#__PURE__*/React.createElement(BilanciereScreen, {
     goBack: goHome
   }), /*#__PURE__*/React.createElement(ConfirmHost, null), /*#__PURE__*/React.createElement(StorageBanner, null), screen === 'tdee' && /*#__PURE__*/React.createElement(TdeeScreen, {
     goBack: goHome
