@@ -2818,6 +2818,18 @@ function HomeScreen(_ref12) {
     color: PLATE.yellow,
     desc: '4 giorni · solo manubri · viaggio'
   }, {
+    id: 'volume',
+    label: 'Volume settimanale',
+    IconComp: BarChart3,
+    color: '#F472B6',
+    desc: 'Serie per gruppo muscolare'
+  }, {
+    id: 'tdee',
+    label: 'TDEE adattivo',
+    IconComp: Flame,
+    color: '#FB923C',
+    desc: 'Mantenimento reale dai tuoi dati'
+  }, {
     id: 'exdb',
     label: 'Database esercizi',
     IconComp: Search,
@@ -3150,7 +3162,7 @@ function HomeScreen(_ref12) {
       letterSpacing: '0.04em',
       fontWeight: '500'
     }
-  }, "V8 Tracker v11.1 \xB7 Protocollo V8.3.4 \xB7 92 kg", /*#__PURE__*/React.createElement("br", null), "Dati salvati sul dispositivo")));
+  }, "V8 Tracker v11.3 \xB7 Protocollo V8.3.4 \xB7 92 kg", /*#__PURE__*/React.createElement("br", null), "Dati salvati sul dispositivo")));
 }
 
 // ============= EXERCISE DETAIL =============
@@ -3396,6 +3408,33 @@ function WorkoutScreen(_ref16) {
     _useState26 = _slicedToArray(_useState25, 2),
     detailExercise = _useState26[0],
     setDetailExercise = _useState26[1];
+  const _useState27 = useState(() => storage.get('swaps') || {}),
+    _useState28 = _slicedToArray(_useState27, 2),
+    swaps = _useState28[0],
+    setSwaps = _useState28[1];
+  const _useState29 = useState(null),
+    _useState30 = _slicedToArray(_useState29, 2),
+    swapFor = _useState30[0],
+    setSwapFor = _useState30[1];
+  const swapKey = (d, i) => storageKey + '|' + d + '|' + i;
+  const doSwap = (d, i, alt) => {
+    const n = {
+      ...swaps,
+      [swapKey(d, i)]: alt.id
+    };
+    setSwaps(n);
+    storage.set('swaps', n);
+    setSwapFor(null);
+  };
+  const undoSwap = (d, i) => {
+    const n = {
+      ...swaps
+    };
+    delete n[swapKey(d, i)];
+    setSwaps(n);
+    storage.set('swaps', n);
+    setSwapFor(null);
+  };
   const handleInternalBack = useCallback(() => {
     if (detailExercise) {
       setDetailExercise(null);
@@ -3709,7 +3748,18 @@ function WorkoutScreen(_ref16) {
     }))));
   }
   const day = DYS.find(d => d.id === selectedDay);
-  const exercises = EXS[selectedDay];
+  const exercises = (EXS[selectedDay] || []).map((ex, i) => {
+    const alt = EXERCISE_DB[swaps[swapKey(selectedDay, i)]];
+    return alt ? {
+      ...alt,
+      sets: ex.sets,
+      reps: ex.reps,
+      rir: ex.rir,
+      rest: ex.rest,
+      isCompound: ex.isCompound,
+      _orig: ex.name
+    } : ex;
+  });
   const block = getBlock(selectedWeek);
   const completed = isCompleted(selectedWeek, selectedDay);
   const isRotA = selectedWeek % 2 === 1;
@@ -3719,7 +3769,13 @@ function WorkoutScreen(_ref16) {
       background: 'transparent',
       paddingBottom: '140px'
     }
-  }, /*#__PURE__*/React.createElement(Header, {
+  }, swapFor != null && exercises[swapFor] && /*#__PURE__*/React.createElement(SwapModal, {
+    exercise: exercises[swapFor],
+    hasSwap: !!exercises[swapFor]._orig,
+    onPick: alt => doSwap(selectedDay, swapFor, alt),
+    onReset: () => undoSwap(selectedDay, swapFor),
+    onClose: () => setSwapFor(null)
+  }), /*#__PURE__*/React.createElement(Header, {
     title: `S${selectedWeek} · ${day.dayName} · ${day.label}`,
     subtitle: `${block.label} · ${day.subtitle}`,
     onBack: () => setView('select')
@@ -3777,7 +3833,15 @@ function WorkoutScreen(_ref16) {
       height: 140
     })), /*#__PURE__*/React.createElement("div", {
       style: {
+        display: 'flex',
+        alignItems: 'center',
+        gap: '8px',
         marginBottom: '6px'
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        flex: 1,
+        minWidth: 0
       }
     }, ex.tags.map(t => /*#__PURE__*/React.createElement(Tag, {
       key: t,
@@ -3786,6 +3850,35 @@ function WorkoutScreen(_ref16) {
       key: b,
       name: b
     }))), /*#__PURE__*/React.createElement("button", {
+      onClick: () => setSwapFor(idx),
+      title: "Sostituisci",
+      style: {
+        background: ex._orig ? 'rgba(232,180,60,0.16)' : 'rgba(255,255,255,0.05)',
+        border: '1px solid ' + (ex._orig ? 'rgba(232,180,60,0.45)' : 'rgba(255,255,255,0.1)'),
+        borderRadius: '9px',
+        padding: '5px 9px',
+        cursor: 'pointer',
+        flexShrink: 0,
+        display: 'flex',
+        alignItems: 'center',
+        gap: '5px'
+      }
+    }, /*#__PURE__*/React.createElement(CopyIcon, {
+      size: 12,
+      color: ex._orig ? '#E8B43C' : '#908AA0'
+    }), /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontSize: '9.5px',
+        fontWeight: '700',
+        color: ex._orig ? '#E8B43C' : '#908AA0'
+      }
+    }, ex._orig ? 'sostituito' : 'cambia'))), ex._orig && /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: '9.5px',
+        color: '#E8B43C',
+        marginBottom: '7px'
+      }
+    }, "al posto di: ", ex._orig), /*#__PURE__*/React.createElement("button", {
       onClick: () => setDetailExercise(ex),
       style: {
         width: '100%',
@@ -4124,26 +4217,26 @@ function WorkoutScreen(_ref16) {
 
 function PesoScreen(_ref17) {
   let goBack = _ref17.goBack;
-  const _useState27 = useState({}),
-    _useState28 = _slicedToArray(_useState27, 2),
-    data = _useState28[0],
-    setData = _useState28[1];
-  const _useState29 = useState(92),
-    _useState30 = _slicedToArray(_useState29, 2),
-    pesoIniziale = _useState30[0],
-    setPesoIniziale = _useState30[1];
   const _useState31 = useState({}),
     _useState32 = _slicedToArray(_useState31, 2),
-    misure = _useState32[0],
-    setMisure = _useState32[1];
-  const _useState33 = useState({}),
+    data = _useState32[0],
+    setData = _useState32[1];
+  const _useState33 = useState(92),
     _useState34 = _slicedToArray(_useState33, 2),
-    foto = _useState34[0],
-    setFoto = _useState34[1];
-  const _useState35 = useState('peso'),
+    pesoIniziale = _useState34[0],
+    setPesoIniziale = _useState34[1];
+  const _useState35 = useState({}),
     _useState36 = _slicedToArray(_useState35, 2),
-    tab = _useState36[0],
-    setTab = _useState36[1];
+    misure = _useState36[0],
+    setMisure = _useState36[1];
+  const _useState37 = useState({}),
+    _useState38 = _slicedToArray(_useState37, 2),
+    foto = _useState38[0],
+    setFoto = _useState38[1];
+  const _useState39 = useState('peso'),
+    _useState40 = _slicedToArray(_useState39, 2),
+    tab = _useState40[0],
+    setTab = _useState40[1];
   useEffect(() => {
     setData(storage.get('peso') || {});
     const init = storage.get('pesoIniziale');
@@ -4525,18 +4618,18 @@ function PesoScreen(_ref17) {
 
 function DashboardScreen(_ref18) {
   let goBack = _ref18.goBack;
-  const _useState37 = useState({}),
-    _useState38 = _slicedToArray(_useState37, 2),
-    workouts = _useState38[0],
-    setWorkouts = _useState38[1];
-  const _useState39 = useState({}),
-    _useState40 = _slicedToArray(_useState39, 2),
-    pesoData = _useState40[0],
-    setPesoData = _useState40[1];
-  const _useState41 = useState(92),
+  const _useState41 = useState({}),
     _useState42 = _slicedToArray(_useState41, 2),
-    pesoIniziale = _useState42[0],
-    setPesoIniziale = _useState42[1];
+    workouts = _useState42[0],
+    setWorkouts = _useState42[1];
+  const _useState43 = useState({}),
+    _useState44 = _slicedToArray(_useState43, 2),
+    pesoData = _useState44[0],
+    setPesoData = _useState44[1];
+  const _useState45 = useState(92),
+    _useState46 = _slicedToArray(_useState45, 2),
+    pesoIniziale = _useState46[0],
+    setPesoIniziale = _useState46[1];
   useEffect(() => {
     setWorkouts(storage.get('workouts') || {});
     setPesoData(storage.get('peso') || {});
@@ -4876,10 +4969,10 @@ function DashboardScreen(_ref18) {
 
 function RecoveryScreen(_ref21) {
   let goBack = _ref21.goBack;
-  const _useState43 = useState({}),
-    _useState44 = _slicedToArray(_useState43, 2),
-    data = _useState44[0],
-    setData = _useState44[1];
+  const _useState47 = useState({}),
+    _useState48 = _slicedToArray(_useState47, 2),
+    data = _useState48[0],
+    setData = _useState48[1];
   useEffect(() => {
     setData(storage.get('recovery') || {});
   }, []);
@@ -5317,10 +5410,10 @@ function GuideScreen(_ref22) {
 
 function SettingsScreen(_ref23) {
   let goBack = _ref23.goBack;
-  const _useState45 = useState(null),
-    _useState46 = _slicedToArray(_useState45, 2),
-    msg = _useState46[0],
-    setMsg = _useState46[1];
+  const _useState49 = useState(null),
+    _useState50 = _slicedToArray(_useState49, 2),
+    msg = _useState50[0],
+    setMsg = _useState50[1];
   const fileInputRef = useRef(null);
   const exportData = () => {
     const data = storage.exportAll();
@@ -5441,7 +5534,52 @@ function SettingsScreen(_ref23) {
     }
   }, /*#__PURE__*/React.createElement(Download, {
     size: 16
-  }), " Esporta backup JSON"), /*#__PURE__*/React.createElement("input", {
+  }), " Esporta backup JSON"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      gap: '7px',
+      marginBottom: '10px'
+    }
+  }, /*#__PURE__*/React.createElement("button", {
+    onClick: () => exportAllenamentiCSV(),
+    style: {
+      flex: 1,
+      padding: '11px 4px',
+      background: 'rgba(77,130,232,0.14)',
+      border: '1px solid rgba(77,130,232,0.4)',
+      color: '#4D82E8',
+      borderRadius: '11px',
+      fontSize: '11px',
+      fontWeight: '700',
+      cursor: 'pointer'
+    }
+  }, "CSV allenamenti"), /*#__PURE__*/React.createElement("button", {
+    onClick: () => exportPesoCSV(),
+    style: {
+      flex: 1,
+      padding: '11px 4px',
+      background: 'rgba(77,130,232,0.14)',
+      border: '1px solid rgba(77,130,232,0.4)',
+      color: '#4D82E8',
+      borderRadius: '11px',
+      fontSize: '11px',
+      fontWeight: '700',
+      cursor: 'pointer'
+    }
+  }, "CSV peso"), /*#__PURE__*/React.createElement("button", {
+    onClick: () => exportDieteCSV(),
+    style: {
+      flex: 1,
+      padding: '11px 4px',
+      background: 'rgba(77,130,232,0.14)',
+      border: '1px solid rgba(77,130,232,0.4)',
+      color: '#4D82E8',
+      borderRadius: '11px',
+      fontSize: '11px',
+      fontWeight: '700',
+      cursor: 'pointer'
+    }
+  }, "CSV diete")), /*#__PURE__*/React.createElement("input", {
     ref: fileInputRef,
     type: "file",
     accept: "application/json",
@@ -5527,7 +5665,7 @@ function SettingsScreen(_ref23) {
     style: {
       color: '#F4F2F8'
     }
-  }, "V8 Tracker v11.1 \xABVetro & Viola\xBB \xB7 Protocollo V8.3.4"), /*#__PURE__*/React.createElement("br", null), "Programma: V8 Block Cutting \xB7 8 Settimane \xB7 92kg (progressione a singola variabile)", /*#__PURE__*/React.createElement("br", null), "Storage: localStorage del browser", /*#__PURE__*/React.createElement("br", null), "Funziona offline dopo la prima apertura", /*#__PURE__*/React.createElement("br", null), "Immagini esercizi: Wikimedia Commons (con fallback SVG)"))));
+  }, "V8 Tracker v11.3 \xABVetro & Viola\xBB \xB7 Protocollo V8.3.4"), /*#__PURE__*/React.createElement("br", null), "Programma: V8 Block Cutting \xB7 8 Settimane \xB7 92kg (progressione a singola variabile)", /*#__PURE__*/React.createElement("br", null), "Storage: localStorage del browser", /*#__PURE__*/React.createElement("br", null), "Funziona offline dopo la prima apertura", /*#__PURE__*/React.createElement("br", null), "Immagini esercizi: Wikimedia Commons (con fallback SVG)"))));
 }
 
 // ============= ESTATE / VIAGGIO =============
@@ -6013,11 +6151,11 @@ const EXERCISE_PACK = {
       "id": "3_4_Sit-Up",
       "name": "Sit-up a tre quarti",
       "nameEn": "3/4 Sit-Up",
-      "sets": 4,
-      "reps": "6-10",
-      "rir": "1-2",
-      "rest": "2:00",
-      "isCompound": true,
+      "sets": 3,
+      "reps": "12-20",
+      "rir": "0-1",
+      "rest": "60s",
+      "isCompound": false,
       "tags": ["CORE"],
       "badges": ["C"],
       "equip": "Corpo libero",
@@ -6034,9 +6172,9 @@ const EXERCISE_PACK = {
       "name": "Crunch addome alla macchina",
       "nameEn": "Ab Crunch Machine",
       "sets": 3,
-      "reps": "10-15",
+      "reps": "12-20",
       "rir": "0-1",
-      "rest": "75s",
+      "rest": "60s",
       "isCompound": false,
       "tags": ["CORE"],
       "badges": [],
@@ -6053,11 +6191,11 @@ const EXERCISE_PACK = {
       "id": "Ab_Roller",
       "name": "Addome",
       "nameEn": "Ab Roller",
-      "sets": 4,
-      "reps": "6-10",
-      "rir": "1-2",
-      "rest": "2:00",
-      "isCompound": true,
+      "sets": 3,
+      "reps": "12-20",
+      "rir": "0-1",
+      "rest": "60s",
+      "isCompound": false,
       "tags": ["CORE", "D.ANT"],
       "badges": ["C"],
       "equip": "Varie",
@@ -6073,11 +6211,11 @@ const EXERCISE_PACK = {
       "id": "Air_Bike",
       "name": "Bicicletta a terra",
       "nameEn": "Air Bike",
-      "sets": 4,
-      "reps": "6-10",
-      "rir": "1-2",
-      "rest": "2:00",
-      "isCompound": true,
+      "sets": 3,
+      "reps": "12-20",
+      "rir": "0-1",
+      "rest": "60s",
+      "isCompound": false,
       "tags": ["CORE"],
       "badges": ["C"],
       "equip": "Corpo libero",
@@ -6094,9 +6232,9 @@ const EXERCISE_PACK = {
       "name": "Curl a martello alternato",
       "nameEn": "Alternate Hammer Curl",
       "sets": 3,
-      "reps": "10-15",
+      "reps": "15-20",
       "rir": "0-1",
-      "rest": "75s",
+      "rest": "45s",
       "isCompound": false,
       "tags": ["BI", "AVB"],
       "badges": [],
@@ -6114,9 +6252,9 @@ const EXERCISE_PACK = {
       "name": "Tocco dei talloni alternato",
       "nameEn": "Alternate Heel Touchers",
       "sets": 3,
-      "reps": "10-15",
+      "reps": "12-20",
       "rir": "0-1",
-      "rest": "75s",
+      "rest": "60s",
       "isCompound": false,
       "tags": ["CORE"],
       "badges": [],
@@ -6134,9 +6272,9 @@ const EXERCISE_PACK = {
       "name": "Curl alternato su panca inclinata",
       "nameEn": "Alternate Incline Dumbbell Curl",
       "sets": 3,
-      "reps": "10-15",
+      "reps": "15-20",
       "rir": "0-1",
-      "rest": "75s",
+      "rest": "45s",
       "isCompound": false,
       "tags": ["BI", "AVB"],
       "badges": [],
@@ -6274,10 +6412,10 @@ const EXERCISE_PACK = {
       "name": "Equilibrio tavola",
       "nameEn": "Balance Board",
       "sets": 4,
-      "reps": "6-10",
-      "rir": "1-2",
-      "rest": "2:00",
-      "isCompound": true,
+      "reps": "12-20",
+      "rir": "0-1",
+      "rest": "60s",
+      "isCompound": false,
       "tags": ["POLP", "HAM"],
       "badges": ["C"],
       "equip": "Varie",
@@ -6293,11 +6431,11 @@ const EXERCISE_PACK = {
       "id": "Band_Assisted_Pull-Up",
       "name": "Trazioni con elastici assistito",
       "nameEn": "Band Assisted Pull-Up",
-      "sets": 4,
-      "reps": "6-10",
-      "rir": "1-2",
-      "rest": "2:00",
-      "isCompound": true,
+      "sets": 3,
+      "reps": "12-20",
+      "rir": "0-1",
+      "rest": "60s",
+      "isCompound": false,
       "tags": ["DORSO", "CORE"],
       "badges": ["C"],
       "equip": "Varie",
@@ -6413,11 +6551,11 @@ const EXERCISE_PACK = {
       "id": "Barbell_Ab_Rollout",
       "name": "Rollout con bilanciere in piedi",
       "nameEn": "Barbell Ab Rollout",
-      "sets": 4,
-      "reps": "6-10",
-      "rir": "1-2",
-      "rest": "2:00",
-      "isCompound": true,
+      "sets": 3,
+      "reps": "12-20",
+      "rir": "0-1",
+      "rest": "60s",
+      "isCompound": false,
       "tags": ["CORE", "D.ANT"],
       "badges": ["C"],
       "equip": "Bilanciere",
@@ -6433,11 +6571,11 @@ const EXERCISE_PACK = {
       "id": "Barbell_Ab_Rollout_-_On_Knees",
       "name": "Rollout con bilanciere in ginocchio",
       "nameEn": "Barbell Ab Rollout - On Knees",
-      "sets": 4,
-      "reps": "6-10",
-      "rir": "1-2",
-      "rest": "2:00",
-      "isCompound": true,
+      "sets": 3,
+      "reps": "12-20",
+      "rir": "0-1",
+      "rest": "60s",
+      "isCompound": false,
       "tags": ["CORE", "D.ANT"],
       "badges": ["C"],
       "equip": "Bilanciere",
@@ -6474,9 +6612,9 @@ const EXERCISE_PACK = {
       "name": "Curl con bilanciere",
       "nameEn": "Barbell Curl",
       "sets": 3,
-      "reps": "10-15",
+      "reps": "15-20",
       "rir": "0-1",
-      "rest": "75s",
+      "rest": "45s",
       "isCompound": false,
       "tags": ["BI", "AVB"],
       "badges": [],
@@ -6534,10 +6672,10 @@ const EXERCISE_PACK = {
       "name": "Squat completo con bilanciere",
       "nameEn": "Barbell Full Squat",
       "sets": 4,
-      "reps": "6-10",
-      "rir": "1-2",
-      "rest": "2:00",
-      "isCompound": true,
+      "reps": "12-20",
+      "rir": "0-1",
+      "rest": "60s",
+      "isCompound": false,
       "tags": ["QUAD", "POLP"],
       "badges": ["C"],
       "equip": "Bilanciere",
@@ -6553,11 +6691,11 @@ const EXERCISE_PACK = {
       "id": "Barbell_Glute_Bridge",
       "name": "Ponte per glutei con bilanciere",
       "nameEn": "Barbell Glute Bridge",
-      "sets": 4,
-      "reps": "6-10",
-      "rir": "1-2",
-      "rest": "2:00",
-      "isCompound": true,
+      "sets": 3,
+      "reps": "30-60s",
+      "rir": "—",
+      "rest": "45s",
+      "isCompound": false,
       "tags": ["GLUTE", "POLP"],
       "badges": ["C"],
       "equip": "Bilanciere",
@@ -6594,10 +6732,10 @@ const EXERCISE_PACK = {
       "name": "Hack squat con bilanciere",
       "nameEn": "Barbell Hack Squat",
       "sets": 4,
-      "reps": "6-10",
-      "rir": "1-2",
-      "rest": "2:00",
-      "isCompound": true,
+      "reps": "12-20",
+      "rir": "0-1",
+      "rest": "60s",
+      "isCompound": false,
       "tags": ["QUAD", "POLP"],
       "badges": ["C"],
       "equip": "Bilanciere",
@@ -6614,10 +6752,10 @@ const EXERCISE_PACK = {
       "name": "Hip thrust con bilanciere",
       "nameEn": "Barbell Hip Thrust",
       "sets": 4,
-      "reps": "6-10",
-      "rir": "1-2",
-      "rest": "2:00",
-      "isCompound": true,
+      "reps": "12-20",
+      "rir": "0-1",
+      "rest": "60s",
+      "isCompound": false,
       "tags": ["GLUTE", "POLP"],
       "badges": ["C"],
       "equip": "Bilanciere",
@@ -6674,10 +6812,10 @@ const EXERCISE_PACK = {
       "name": "Affondo con bilanciere",
       "nameEn": "Barbell Lunge",
       "sets": 4,
-      "reps": "6-10",
-      "rir": "1-2",
-      "rest": "2:00",
-      "isCompound": true,
+      "reps": "12-20",
+      "rir": "0-1",
+      "rest": "60s",
+      "isCompound": false,
       "tags": ["QUAD", "POLP"],
       "badges": ["C"],
       "equip": "Bilanciere",
@@ -6713,11 +6851,11 @@ const EXERCISE_PACK = {
       "id": "Barbell_Rollout_from_Bench",
       "name": "Rollout con bilanciere dalla panca",
       "nameEn": "Barbell Rollout from Bench",
-      "sets": 4,
-      "reps": "6-10",
-      "rir": "1-2",
-      "rest": "2:00",
-      "isCompound": true,
+      "sets": 3,
+      "reps": "12-20",
+      "rir": "0-1",
+      "rest": "60s",
+      "isCompound": false,
       "tags": ["CORE", "GLUTE"],
       "badges": ["C"],
       "equip": "Bilanciere",
@@ -6733,10 +6871,10 @@ const EXERCISE_PACK = {
       "id": "Barbell_Seated_Calf_Raise",
       "name": "Calf raise seduto con bilanciere",
       "nameEn": "Barbell Seated Calf Raise",
-      "sets": 3,
-      "reps": "10-15",
+      "sets": 4,
+      "reps": "12-20",
       "rir": "0-1",
-      "rest": "75s",
+      "rest": "60s",
       "isCompound": false,
       "tags": ["POLP"],
       "badges": [],
@@ -6794,9 +6932,9 @@ const EXERCISE_PACK = {
       "name": "Scrollate con bilanciere dietro la schiena",
       "nameEn": "Barbell Shrug Behind The Back",
       "sets": 3,
-      "reps": "10-15",
+      "reps": "15-20",
       "rir": "0-1",
-      "rest": "75s",
+      "rest": "45s",
       "isCompound": false,
       "tags": ["DORSO", "AVB"],
       "badges": [],
@@ -6814,9 +6952,9 @@ const EXERCISE_PACK = {
       "name": "Flessioni laterali con bilanciere",
       "nameEn": "Barbell Side Bend",
       "sets": 3,
-      "reps": "10-15",
+      "reps": "12-20",
       "rir": "0-1",
-      "rest": "75s",
+      "rest": "60s",
       "isCompound": false,
       "tags": ["CORE"],
       "badges": [],
@@ -6834,10 +6972,10 @@ const EXERCISE_PACK = {
       "name": "Affondo laterale con bilanciere",
       "nameEn": "Barbell Side Split Squat",
       "sets": 4,
-      "reps": "6-10",
-      "rir": "1-2",
-      "rest": "2:00",
-      "isCompound": true,
+      "reps": "12-20",
+      "rir": "0-1",
+      "rest": "60s",
+      "isCompound": false,
       "tags": ["QUAD", "POLP"],
       "badges": ["C"],
       "equip": "Bilanciere",
@@ -6854,10 +6992,10 @@ const EXERCISE_PACK = {
       "name": "Squat con bilanciere",
       "nameEn": "Barbell Squat",
       "sets": 4,
-      "reps": "6-10",
-      "rir": "1-2",
-      "rest": "2:00",
-      "isCompound": true,
+      "reps": "12-20",
+      "rir": "0-1",
+      "rest": "60s",
+      "isCompound": false,
       "tags": ["QUAD", "POLP"],
       "badges": ["C"],
       "equip": "Bilanciere",
@@ -6874,10 +7012,10 @@ const EXERCISE_PACK = {
       "name": "Squat su panca con bilanciere",
       "nameEn": "Barbell Squat To A Bench",
       "sets": 4,
-      "reps": "6-10",
-      "rir": "1-2",
-      "rest": "2:00",
-      "isCompound": true,
+      "reps": "12-20",
+      "rir": "0-1",
+      "rest": "60s",
+      "isCompound": false,
       "tags": ["QUAD", "POLP"],
       "badges": ["C"],
       "equip": "Bilanciere",
@@ -6894,10 +7032,10 @@ const EXERCISE_PACK = {
       "name": "Step-up con bilanciere",
       "nameEn": "Barbell Step Ups",
       "sets": 4,
-      "reps": "6-10",
-      "rir": "1-2",
-      "rest": "2:00",
-      "isCompound": true,
+      "reps": "12-20",
+      "rir": "0-1",
+      "rest": "60s",
+      "isCompound": false,
       "tags": ["QUAD", "POLP"],
       "badges": ["C"],
       "equip": "Bilanciere",
@@ -6914,10 +7052,10 @@ const EXERCISE_PACK = {
       "name": "Affondo in camminata con bilanciere",
       "nameEn": "Barbell Walking Lunge",
       "sets": 4,
-      "reps": "6-10",
-      "rir": "1-2",
-      "rest": "2:00",
-      "isCompound": true,
+      "reps": "12-20",
+      "rir": "0-1",
+      "rest": "60s",
+      "isCompound": false,
       "tags": ["QUAD", "POLP"],
       "badges": ["C"],
       "equip": "Bilanciere",
@@ -7073,11 +7211,11 @@ const EXERCISE_PACK = {
       "id": "Bent-Knee_Hip_Raise",
       "name": "Sollevamento bacino a ginocchia piegate",
       "nameEn": "Bent-Knee Hip Raise",
-      "sets": 4,
-      "reps": "6-10",
-      "rir": "1-2",
-      "rest": "2:00",
-      "isCompound": true,
+      "sets": 3,
+      "reps": "12-20",
+      "rir": "0-1",
+      "rest": "60s",
+      "isCompound": false,
       "tags": ["CORE"],
       "badges": ["C"],
       "equip": "Corpo libero",
@@ -7134,9 +7272,9 @@ const EXERCISE_PACK = {
       "name": "Alzate laterali ai cavi bassi busto in avanti",
       "nameEn": "Bent Over Low-Pulley Side Lateral",
       "sets": 3,
-      "reps": "10-15",
+      "reps": "12-20",
       "rir": "0-1",
-      "rest": "75s",
+      "rest": "60s",
       "isCompound": false,
       "tags": ["D.MED", "CORE"],
       "badges": [],
@@ -7254,9 +7392,9 @@ const EXERCISE_PACK = {
       "name": "Body-up dal plank",
       "nameEn": "Body-Up",
       "sets": 3,
-      "reps": "10-15",
-      "rir": "0-1",
-      "rest": "75s",
+      "reps": "30-60s",
+      "rir": "—",
+      "rest": "45s",
       "isCompound": false,
       "tags": ["TRI", "CORE"],
       "badges": [],
@@ -7294,9 +7432,9 @@ const EXERCISE_PACK = {
       "name": "Croci a corpo libero sui bilancieri",
       "nameEn": "Bodyweight Flyes",
       "sets": 3,
-      "reps": "10-15",
+      "reps": "12-20",
       "rir": "0-1",
-      "rest": "75s",
+      "rest": "60s",
       "isCompound": false,
       "tags": ["PETTO", "CORE"],
       "badges": [],
@@ -7354,10 +7492,10 @@ const EXERCISE_PACK = {
       "name": "Affondo a corpo libero in camminata",
       "nameEn": "Bodyweight Walking Lunge",
       "sets": 4,
-      "reps": "6-10",
-      "rir": "1-2",
-      "rest": "2:00",
-      "isCompound": true,
+      "reps": "12-20",
+      "rir": "0-1",
+      "rest": "60s",
+      "isCompound": false,
       "tags": ["QUAD", "POLP"],
       "badges": ["C"],
       "equip": "Varie",
@@ -7374,9 +7512,9 @@ const EXERCISE_PACK = {
       "name": "Crunch ai cavi su Bosu con flessioni laterali",
       "nameEn": "Bosu Ball Cable Crunch With Side Bends",
       "sets": 3,
-      "reps": "10-15",
+      "reps": "12-20",
       "rir": "0-1",
-      "rest": "75s",
+      "rest": "60s",
       "isCompound": false,
       "tags": ["CORE"],
       "badges": [],
@@ -7393,11 +7531,11 @@ const EXERCISE_PACK = {
       "id": "Bottoms_Up",
       "name": "Bottoms up",
       "nameEn": "Bottoms Up",
-      "sets": 4,
-      "reps": "6-10",
-      "rir": "1-2",
-      "rest": "2:00",
-      "isCompound": true,
+      "sets": 3,
+      "reps": "12-20",
+      "rir": "0-1",
+      "rest": "60s",
+      "isCompound": false,
       "tags": ["CORE"],
       "badges": ["C"],
       "equip": "Corpo libero",
@@ -7493,11 +7631,11 @@ const EXERCISE_PACK = {
       "id": "Butt-Ups",
       "name": "Butt-up dal plank",
       "nameEn": "Butt-Ups",
-      "sets": 4,
-      "reps": "6-10",
-      "rir": "1-2",
-      "rest": "2:00",
-      "isCompound": true,
+      "sets": 3,
+      "reps": "30-60s",
+      "rir": "—",
+      "rest": "45s",
+      "isCompound": false,
       "tags": ["CORE"],
       "badges": ["C"],
       "equip": "Corpo libero",
@@ -7514,9 +7652,9 @@ const EXERCISE_PACK = {
       "name": "Ponte per glutei a corpo libero",
       "nameEn": "Butt Lift (Bridge)",
       "sets": 3,
-      "reps": "10-15",
-      "rir": "0-1",
-      "rest": "75s",
+      "reps": "30-60s",
+      "rir": "—",
+      "rest": "45s",
       "isCompound": false,
       "tags": ["GLUTE", "HAM"],
       "badges": [],
@@ -7594,9 +7732,9 @@ const EXERCISE_PACK = {
       "name": "Crunch ai cavi in ginocchio",
       "nameEn": "Cable Crunch",
       "sets": 3,
-      "reps": "10-15",
+      "reps": "12-20",
       "rir": "0-1",
-      "rest": "75s",
+      "rest": "60s",
       "isCompound": false,
       "tags": ["CORE"],
       "badges": [],
@@ -7713,11 +7851,11 @@ const EXERCISE_PACK = {
       "id": "Cable_Internal_Rotation",
       "name": "Rotazione interna ai cavi",
       "nameEn": "Cable Internal Rotation",
-      "sets": 4,
-      "reps": "6-10",
-      "rir": "1-2",
-      "rest": "2:00",
-      "isCompound": true,
+      "sets": 3,
+      "reps": "15-20",
+      "rir": "2-3",
+      "rest": "45s",
+      "isCompound": false,
       "tags": ["D.ANT"],
       "badges": ["C"],
       "equip": "Cavi",
@@ -7753,11 +7891,11 @@ const EXERCISE_PACK = {
       "id": "Cable_Judo_Flip",
       "name": "Judo flip ai cavi",
       "nameEn": "Cable Judo Flip",
-      "sets": 4,
-      "reps": "6-10",
-      "rir": "1-2",
-      "rest": "2:00",
-      "isCompound": true,
+      "sets": 3,
+      "reps": "12-20",
+      "rir": "0-1",
+      "rest": "60s",
+      "isCompound": false,
       "tags": ["CORE"],
       "badges": ["C"],
       "equip": "Cavi",
@@ -7814,9 +7952,9 @@ const EXERCISE_PACK = {
       "name": "Curl ai cavi su panca Scott",
       "nameEn": "Cable Preacher Curl",
       "sets": 3,
-      "reps": "10-15",
+      "reps": "15-20",
       "rir": "0-1",
-      "rest": "75s",
+      "rest": "45s",
       "isCompound": false,
       "tags": ["BI", "AVB"],
       "badges": [],
@@ -7854,9 +7992,9 @@ const EXERCISE_PACK = {
       "name": "Crunch inverso ai cavi con cavigliere",
       "nameEn": "Cable Reverse Crunch",
       "sets": 3,
-      "reps": "10-15",
+      "reps": "12-20",
       "rir": "0-1",
-      "rest": "75s",
+      "rest": "60s",
       "isCompound": false,
       "tags": ["CORE"],
       "badges": [],
@@ -7913,11 +8051,11 @@ const EXERCISE_PACK = {
       "id": "Cable_Russian_Twists",
       "name": "Russian twist ai cavi",
       "nameEn": "Cable Russian Twists",
-      "sets": 4,
-      "reps": "6-10",
-      "rir": "1-2",
-      "rest": "2:00",
-      "isCompound": true,
+      "sets": 3,
+      "reps": "12-20",
+      "rir": "0-1",
+      "rest": "60s",
+      "isCompound": false,
       "tags": ["CORE"],
       "badges": ["C"],
       "equip": "Cavi",
@@ -7934,9 +8072,9 @@ const EXERCISE_PACK = {
       "name": "Crunch ai cavi seduto",
       "nameEn": "Cable Seated Crunch",
       "sets": 3,
-      "reps": "10-15",
+      "reps": "12-20",
       "rir": "0-1",
-      "rest": "75s",
+      "rest": "60s",
       "isCompound": false,
       "tags": ["CORE"],
       "badges": [],
@@ -8014,9 +8152,9 @@ const EXERCISE_PACK = {
       "name": "Curl dei polsi ai cavi",
       "nameEn": "Cable Wrist Curl",
       "sets": 3,
-      "reps": "10-15",
+      "reps": "15-20",
       "rir": "0-1",
-      "rest": "75s",
+      "rest": "45s",
       "isCompound": false,
       "tags": ["AVB"],
       "badges": [],
@@ -8053,10 +8191,10 @@ const EXERCISE_PACK = {
       "id": "Calf_Press",
       "name": "Calf press",
       "nameEn": "Calf Press",
-      "sets": 3,
-      "reps": "10-15",
+      "sets": 4,
+      "reps": "12-20",
       "rir": "0-1",
-      "rest": "75s",
+      "rest": "60s",
       "isCompound": false,
       "tags": ["POLP"],
       "badges": [],
@@ -8073,10 +8211,10 @@ const EXERCISE_PACK = {
       "id": "Calf_Press_On_The_Leg_Press_Machine",
       "name": "Calf press alla macchina",
       "nameEn": "Calf Press On The Leg Press Machine",
-      "sets": 3,
-      "reps": "10-15",
+      "sets": 4,
+      "reps": "12-20",
       "rir": "0-1",
-      "rest": "75s",
+      "rest": "60s",
       "isCompound": false,
       "tags": ["POLP"],
       "badges": [],
@@ -8093,10 +8231,10 @@ const EXERCISE_PACK = {
       "id": "Calf_Raise_On_A_Dumbbell",
       "name": "Calf raise sul manico del manubrio",
       "nameEn": "Calf Raise On A Dumbbell",
-      "sets": 3,
-      "reps": "10-15",
+      "sets": 4,
+      "reps": "12-20",
       "rir": "0-1",
-      "rest": "75s",
+      "rest": "60s",
       "isCompound": false,
       "tags": ["POLP"],
       "badges": [],
@@ -8113,10 +8251,10 @@ const EXERCISE_PACK = {
       "id": "Calf_Raises_-_With_Bands",
       "name": "Calf raise con elastici",
       "nameEn": "Calf Raises - With Bands",
-      "sets": 3,
-      "reps": "10-15",
+      "sets": 4,
+      "reps": "12-20",
       "rir": "0-1",
-      "rest": "75s",
+      "rest": "60s",
       "isCompound": false,
       "tags": ["POLP"],
       "badges": [],
@@ -8134,9 +8272,9 @@ const EXERCISE_PACK = {
       "name": "Car driver con disco",
       "nameEn": "Car Drivers",
       "sets": 3,
-      "reps": "10-15",
+      "reps": "15-20",
       "rir": "0-1",
-      "rest": "75s",
+      "rest": "45s",
       "isCompound": false,
       "tags": ["D.ANT", "AVB"],
       "badges": [],
@@ -8194,10 +8332,10 @@ const EXERCISE_PACK = {
       "name": "Squat sedia",
       "nameEn": "Chair Squat",
       "sets": 4,
-      "reps": "6-10",
-      "rir": "1-2",
-      "rest": "2:00",
-      "isCompound": true,
+      "reps": "12-20",
+      "rir": "0-1",
+      "rest": "60s",
+      "isCompound": false,
       "tags": ["QUAD", "POLP"],
       "badges": ["C"],
       "equip": "Macchina",
@@ -8233,10 +8371,10 @@ const EXERCISE_PACK = {
       "id": "Clean_and_Press",
       "name": "Clean and press",
       "nameEn": "Clean and Press",
-      "sets": 4,
-      "reps": "6-10",
-      "rir": "1-2",
-      "rest": "2:00",
+      "sets": 5,
+      "reps": "3",
+      "rir": "2-3",
+      "rest": "2:30",
       "isCompound": true,
       "tags": ["D.ANT", "CORE"],
       "badges": ["C"],
@@ -8314,9 +8452,9 @@ const EXERCISE_PACK = {
       "name": "Curl EZ presa stretta con elastico",
       "nameEn": "Close-Grip EZ-Bar Curl with Band",
       "sets": 3,
-      "reps": "10-15",
+      "reps": "15-20",
       "rir": "0-1",
-      "rest": "75s",
+      "rest": "45s",
       "isCompound": false,
       "tags": ["BI", "AVB"],
       "badges": [],
@@ -8354,9 +8492,9 @@ const EXERCISE_PACK = {
       "name": "Curl con bilanciere EZ presa stretta",
       "nameEn": "Close-Grip EZ Bar Curl",
       "sets": 3,
-      "reps": "10-15",
+      "reps": "15-20",
       "rir": "0-1",
-      "rest": "75s",
+      "rest": "45s",
       "isCompound": false,
       "tags": ["BI", "AVB"],
       "badges": [],
@@ -8393,11 +8531,11 @@ const EXERCISE_PACK = {
       "id": "Close-Grip_Push-Up_off_of_a_Dumbbell",
       "name": "Piegamenti presa stretta su manubrio",
       "nameEn": "Close-Grip Push-Up off of a Dumbbell",
-      "sets": 4,
-      "reps": "6-10",
-      "rir": "1-2",
-      "rest": "2:00",
-      "isCompound": true,
+      "sets": 3,
+      "reps": "12-20",
+      "rir": "0-1",
+      "rest": "60s",
+      "isCompound": false,
       "tags": ["TRI", "CORE"],
       "badges": ["C"],
       "equip": "Corpo libero",
@@ -8414,9 +8552,9 @@ const EXERCISE_PACK = {
       "name": "Curl con bilanciere presa stretta",
       "nameEn": "Close-Grip Standing Barbell Curl",
       "sets": 3,
-      "reps": "10-15",
+      "reps": "15-20",
       "rir": "0-1",
-      "rest": "75s",
+      "rest": "45s",
       "isCompound": false,
       "tags": ["BI", "AVB"],
       "badges": [],
@@ -8433,11 +8571,11 @@ const EXERCISE_PACK = {
       "id": "Cocoons",
       "name": "Cocoon",
       "nameEn": "Cocoons",
-      "sets": 4,
-      "reps": "6-10",
-      "rir": "1-2",
-      "rest": "2:00",
-      "isCompound": true,
+      "sets": 3,
+      "reps": "12-20",
+      "rir": "0-1",
+      "rest": "60s",
+      "isCompound": false,
       "tags": ["CORE"],
       "badges": ["C"],
       "equip": "Corpo libero",
@@ -8454,9 +8592,9 @@ const EXERCISE_PACK = {
       "name": "Curl di concentrazione",
       "nameEn": "Concentration Curls",
       "sets": 3,
-      "reps": "10-15",
+      "reps": "15-20",
       "rir": "0-1",
-      "rest": "75s",
+      "rest": "45s",
       "isCompound": false,
       "tags": ["BI", "AVB"],
       "badges": [],
@@ -8473,11 +8611,11 @@ const EXERCISE_PACK = {
       "id": "Cross-Body_Crunch",
       "name": "Crunch incrociato",
       "nameEn": "Cross-Body Crunch",
-      "sets": 4,
-      "reps": "6-10",
-      "rir": "1-2",
-      "rest": "2:00",
-      "isCompound": true,
+      "sets": 3,
+      "reps": "12-20",
+      "rir": "0-1",
+      "rest": "60s",
+      "isCompound": false,
       "tags": ["CORE"],
       "badges": ["C"],
       "equip": "Corpo libero",
@@ -8494,9 +8632,9 @@ const EXERCISE_PACK = {
       "name": "Curl a martello incrociato",
       "nameEn": "Cross Body Hammer Curl",
       "sets": 3,
-      "reps": "10-15",
+      "reps": "15-20",
       "rir": "0-1",
-      "rest": "75s",
+      "rest": "45s",
       "isCompound": false,
       "tags": ["BI", "AVB"],
       "badges": [],
@@ -8534,9 +8672,9 @@ const EXERCISE_PACK = {
       "name": "Crunch con braccia sopra la testa",
       "nameEn": "Crunch - Hands Overhead",
       "sets": 3,
-      "reps": "10-15",
+      "reps": "12-20",
       "rir": "0-1",
-      "rest": "75s",
+      "rest": "60s",
       "isCompound": false,
       "tags": ["CORE"],
       "badges": [],
@@ -8554,9 +8692,9 @@ const EXERCISE_PACK = {
       "name": "Crunch con gambe sulla fitball",
       "nameEn": "Crunch - Legs On Exercise Ball",
       "sets": 3,
-      "reps": "10-15",
+      "reps": "12-20",
       "rir": "0-1",
-      "rest": "75s",
+      "rest": "60s",
       "isCompound": false,
       "tags": ["CORE"],
       "badges": [],
@@ -8574,9 +8712,9 @@ const EXERCISE_PACK = {
       "name": "Crunch",
       "nameEn": "Crunches",
       "sets": 3,
-      "reps": "10-15",
+      "reps": "12-20",
       "rir": "0-1",
-      "rest": "75s",
+      "rest": "60s",
       "isCompound": false,
       "tags": ["CORE"],
       "badges": [],
@@ -8593,11 +8731,11 @@ const EXERCISE_PACK = {
       "id": "Cuban_Press",
       "name": "Cuban press con manubri",
       "nameEn": "Cuban Press",
-      "sets": 4,
-      "reps": "6-10",
-      "rir": "1-2",
-      "rest": "2:00",
-      "isCompound": true,
+      "sets": 3,
+      "reps": "15-20",
+      "rir": "2-3",
+      "rest": "45s",
+      "isCompound": false,
       "tags": ["D.ANT", "DORSO"],
       "badges": ["C"],
       "equip": "Manubri",
@@ -8613,11 +8751,11 @@ const EXERCISE_PACK = {
       "id": "Dead_Bug",
       "name": "Dead bug",
       "nameEn": "Dead Bug",
-      "sets": 4,
-      "reps": "6-10",
-      "rir": "1-2",
-      "rest": "2:00",
-      "isCompound": true,
+      "sets": 3,
+      "reps": "30-60s",
+      "rir": "—",
+      "rest": "45s",
+      "isCompound": false,
       "tags": ["CORE"],
       "badges": ["C"],
       "equip": "Corpo libero",
@@ -8714,9 +8852,9 @@ const EXERCISE_PACK = {
       "name": "Crunch su panca declinata",
       "nameEn": "Decline Crunch",
       "sets": 3,
-      "reps": "10-15",
+      "reps": "12-20",
       "rir": "0-1",
-      "rest": "75s",
+      "rest": "60s",
       "isCompound": false,
       "tags": ["CORE"],
       "badges": [],
@@ -8813,11 +8951,11 @@ const EXERCISE_PACK = {
       "id": "Decline_Oblique_Crunch",
       "name": "Crunch obliquo su panca declinata",
       "nameEn": "Decline Oblique Crunch",
-      "sets": 4,
-      "reps": "6-10",
-      "rir": "1-2",
-      "rest": "2:00",
-      "isCompound": true,
+      "sets": 3,
+      "reps": "12-20",
+      "rir": "0-1",
+      "rest": "60s",
+      "isCompound": false,
       "tags": ["CORE"],
       "badges": ["C"],
       "equip": "Corpo libero",
@@ -8853,11 +8991,11 @@ const EXERCISE_PACK = {
       "id": "Decline_Reverse_Crunch",
       "name": "Crunch inverso su panca declinata",
       "nameEn": "Decline Reverse Crunch",
-      "sets": 4,
-      "reps": "6-10",
-      "rir": "1-2",
-      "rest": "2:00",
-      "isCompound": true,
+      "sets": 3,
+      "reps": "12-20",
+      "rir": "0-1",
+      "rest": "60s",
+      "isCompound": false,
       "tags": ["CORE"],
       "badges": ["C"],
       "equip": "Corpo libero",
@@ -8973,10 +9111,10 @@ const EXERCISE_PACK = {
       "id": "Donkey_Calf_Raises",
       "name": "Calf raise donkey",
       "nameEn": "Donkey Calf Raises",
-      "sets": 3,
-      "reps": "10-15",
+      "sets": 4,
+      "reps": "12-20",
       "rir": "0-1",
-      "rest": "75s",
+      "rest": "60s",
       "isCompound": false,
       "tags": ["POLP"],
       "badges": [],
@@ -8993,11 +9131,11 @@ const EXERCISE_PACK = {
       "id": "Drag_Curl",
       "name": "Drag curl con bilanciere",
       "nameEn": "Drag Curl",
-      "sets": 4,
-      "reps": "6-10",
-      "rir": "1-2",
-      "rest": "2:00",
-      "isCompound": true,
+      "sets": 3,
+      "reps": "15-20",
+      "rir": "0-1",
+      "rest": "45s",
+      "isCompound": false,
       "tags": ["BI", "AVB"],
       "badges": ["C"],
       "equip": "Bilanciere",
@@ -9014,9 +9152,9 @@ const EXERCISE_PACK = {
       "name": "Curl alternato con manubri",
       "nameEn": "Dumbbell Alternate Bicep Curl",
       "sets": 3,
-      "reps": "10-15",
+      "reps": "15-20",
       "rir": "0-1",
-      "rest": "75s",
+      "rest": "45s",
       "isCompound": false,
       "tags": ["BI", "AVB"],
       "badges": [],
@@ -9074,9 +9212,9 @@ const EXERCISE_PACK = {
       "name": "Curl con manubri",
       "nameEn": "Dumbbell Bicep Curl",
       "sets": 3,
-      "reps": "10-15",
+      "reps": "15-20",
       "rir": "0-1",
-      "rest": "75s",
+      "rest": "45s",
       "isCompound": false,
       "tags": ["BI", "AVB"],
       "badges": [],
@@ -9093,10 +9231,10 @@ const EXERCISE_PACK = {
       "id": "Dumbbell_Clean",
       "name": "Clean con manubri",
       "nameEn": "Dumbbell Clean",
-      "sets": 4,
-      "reps": "6-10",
-      "rir": "1-2",
-      "rest": "2:00",
+      "sets": 5,
+      "reps": "3",
+      "rir": "2-3",
+      "rest": "2:30",
       "isCompound": true,
       "tags": ["HAM", "POLP"],
       "badges": ["C"],
@@ -9194,10 +9332,10 @@ const EXERCISE_PACK = {
       "name": "Affondo con manubri",
       "nameEn": "Dumbbell Lunges",
       "sets": 4,
-      "reps": "6-10",
-      "rir": "1-2",
-      "rest": "2:00",
-      "isCompound": true,
+      "reps": "12-20",
+      "rir": "0-1",
+      "rest": "60s",
+      "isCompound": false,
       "tags": ["QUAD", "POLP"],
       "badges": ["C"],
       "equip": "Manubri",
@@ -9234,9 +9372,9 @@ const EXERCISE_PACK = {
       "name": "Pronazione con manubrio prono su panca",
       "nameEn": "Dumbbell Lying Pronation",
       "sets": 3,
-      "reps": "10-15",
-      "rir": "0-1",
-      "rest": "75s",
+      "reps": "15-20",
+      "rir": "2-3",
+      "rest": "45s",
       "isCompound": false,
       "tags": ["AVB"],
       "badges": [],
@@ -9274,9 +9412,9 @@ const EXERCISE_PACK = {
       "name": "Supinazione con manubrio sdraiato di fianco",
       "nameEn": "Dumbbell Lying Supination",
       "sets": 3,
-      "reps": "10-15",
-      "rir": "0-1",
-      "rest": "75s",
+      "reps": "15-20",
+      "rir": "2-3",
+      "rest": "45s",
       "isCompound": false,
       "tags": ["AVB"],
       "badges": [],
@@ -9394,10 +9532,10 @@ const EXERCISE_PACK = {
       "name": "Affondo all'indietro con manubri",
       "nameEn": "Dumbbell Rear Lunge",
       "sets": 4,
-      "reps": "6-10",
-      "rir": "1-2",
-      "rest": "2:00",
-      "isCompound": true,
+      "reps": "12-20",
+      "rir": "0-1",
+      "rest": "60s",
+      "isCompound": false,
       "tags": ["QUAD", "POLP"],
       "badges": ["C"],
       "equip": "Manubri",
@@ -9414,9 +9552,9 @@ const EXERCISE_PACK = {
       "name": "Scaption con manubri",
       "nameEn": "Dumbbell Scaption",
       "sets": 3,
-      "reps": "10-15",
-      "rir": "0-1",
-      "rest": "75s",
+      "reps": "15-20",
+      "rir": "2-3",
+      "rest": "45s",
       "isCompound": false,
       "tags": ["D.ANT", "DORSO"],
       "badges": [],
@@ -9433,10 +9571,10 @@ const EXERCISE_PACK = {
       "id": "Dumbbell_Seated_One-Leg_Calf_Raise",
       "name": "Calf raise seduto a una gamba con manubrio",
       "nameEn": "Dumbbell Seated One-Leg Calf Raise",
-      "sets": 3,
-      "reps": "10-15",
+      "sets": 4,
+      "reps": "12-20",
       "rir": "0-1",
-      "rest": "75s",
+      "rest": "60s",
       "isCompound": false,
       "tags": ["POLP"],
       "badges": [],
@@ -9494,9 +9632,9 @@ const EXERCISE_PACK = {
       "name": "Flessioni laterali con manubrio",
       "nameEn": "Dumbbell Side Bend",
       "sets": 3,
-      "reps": "10-15",
+      "reps": "12-20",
       "rir": "0-1",
-      "rest": "75s",
+      "rest": "60s",
       "isCompound": false,
       "tags": ["CORE"],
       "badges": [],
@@ -9514,10 +9652,10 @@ const EXERCISE_PACK = {
       "name": "Squat con manubri",
       "nameEn": "Dumbbell Squat",
       "sets": 4,
-      "reps": "6-10",
-      "rir": "1-2",
-      "rest": "2:00",
-      "isCompound": true,
+      "reps": "12-20",
+      "rir": "0-1",
+      "rest": "60s",
+      "isCompound": false,
       "tags": ["QUAD", "POLP"],
       "badges": ["C"],
       "equip": "Manubri",
@@ -9534,10 +9672,10 @@ const EXERCISE_PACK = {
       "name": "Squat con manubri su panca",
       "nameEn": "Dumbbell Squat To A Bench",
       "sets": 4,
-      "reps": "6-10",
-      "rir": "1-2",
-      "rest": "2:00",
-      "isCompound": true,
+      "reps": "12-20",
+      "rir": "0-1",
+      "rest": "60s",
+      "isCompound": false,
       "tags": ["QUAD", "POLP"],
       "badges": ["C"],
       "equip": "Manubri",
@@ -9554,10 +9692,10 @@ const EXERCISE_PACK = {
       "name": "Step-up con manubri",
       "nameEn": "Dumbbell Step Ups",
       "sets": 4,
-      "reps": "6-10",
-      "rir": "1-2",
-      "rest": "2:00",
-      "isCompound": true,
+      "reps": "12-20",
+      "rir": "0-1",
+      "rest": "60s",
+      "isCompound": false,
       "tags": ["QUAD", "POLP"],
       "badges": ["C"],
       "equip": "Manubri",
@@ -9614,9 +9752,9 @@ const EXERCISE_PACK = {
       "name": "French press con bilanciere EZ",
       "nameEn": "EZ-Bar Skullcrusher",
       "sets": 3,
-      "reps": "10-15",
+      "reps": "15-20",
       "rir": "0-1",
-      "rest": "75s",
+      "rest": "45s",
       "isCompound": false,
       "tags": ["TRI", "AVB"],
       "badges": [],
@@ -9633,11 +9771,11 @@ const EXERCISE_PACK = {
       "id": "Elbow_to_Knee",
       "name": "Crunch gomito-ginocchio incrociato",
       "nameEn": "Elbow to Knee",
-      "sets": 4,
-      "reps": "6-10",
-      "rir": "1-2",
-      "rest": "2:00",
-      "isCompound": true,
+      "sets": 3,
+      "reps": "12-20",
+      "rir": "0-1",
+      "rest": "60s",
+      "isCompound": false,
       "tags": ["CORE"],
       "badges": ["C"],
       "equip": "Corpo libero",
@@ -9694,9 +9832,9 @@ const EXERCISE_PACK = {
       "name": "Rotazione esterna con manubrio sdraiato",
       "nameEn": "External Rotation",
       "sets": 3,
-      "reps": "10-15",
-      "rir": "0-1",
-      "rest": "75s",
+      "reps": "15-20",
+      "rir": "2-3",
+      "rest": "45s",
       "isCompound": false,
       "tags": ["D.ANT"],
       "badges": [],
@@ -9713,11 +9851,11 @@ const EXERCISE_PACK = {
       "id": "External_Rotation_with_Band",
       "name": "Esercizio con elastici rotazione esterna",
       "nameEn": "External Rotation with Band",
-      "sets": 4,
-      "reps": "6-10",
-      "rir": "1-2",
-      "rest": "2:00",
-      "isCompound": true,
+      "sets": 3,
+      "reps": "15-20",
+      "rir": "2-3",
+      "rest": "45s",
+      "isCompound": false,
       "tags": ["D.ANT"],
       "badges": ["C"],
       "equip": "Elastici",
@@ -9734,9 +9872,9 @@ const EXERCISE_PACK = {
       "name": "Rotazione esterna ai cavi",
       "nameEn": "External Rotation with Cable",
       "sets": 3,
-      "reps": "10-15",
-      "rir": "0-1",
-      "rest": "75s",
+      "reps": "15-20",
+      "rir": "2-3",
+      "rest": "45s",
       "isCompound": false,
       "tags": ["D.ANT"],
       "badges": [],
@@ -9774,9 +9912,9 @@ const EXERCISE_PACK = {
       "name": "Curl delle dita con bilanciere",
       "nameEn": "Finger Curls",
       "sets": 3,
-      "reps": "10-15",
+      "reps": "15-20",
       "rir": "0-1",
-      "rest": "75s",
+      "rest": "45s",
       "isCompound": false,
       "tags": ["AVB"],
       "badges": [],
@@ -9813,11 +9951,11 @@ const EXERCISE_PACK = {
       "id": "Flat_Bench_Leg_Pull-In",
       "name": "Leg pull-in su panca piana",
       "nameEn": "Flat Bench Leg Pull-In",
-      "sets": 4,
-      "reps": "6-10",
-      "rir": "1-2",
-      "rest": "2:00",
-      "isCompound": true,
+      "sets": 3,
+      "reps": "12-20",
+      "rir": "0-1",
+      "rest": "60s",
+      "isCompound": false,
       "tags": ["CORE"],
       "badges": ["C"],
       "equip": "Corpo libero",
@@ -9834,9 +9972,9 @@ const EXERCISE_PACK = {
       "name": "Alzate delle gambe sdraiato su panca",
       "nameEn": "Flat Bench Lying Leg Raise",
       "sets": 3,
-      "reps": "10-15",
+      "reps": "12-20",
       "rir": "0-1",
-      "rest": "75s",
+      "rest": "60s",
       "isCompound": false,
       "tags": ["CORE"],
       "badges": [],
@@ -9873,10 +10011,10 @@ const EXERCISE_PACK = {
       "id": "Floor_Glute-Ham_Raise",
       "name": "Alzate glutei a terra femorali",
       "nameEn": "Floor Glute-Ham Raise",
-      "sets": 3,
-      "reps": "10-15",
+      "sets": 4,
+      "reps": "12-20",
       "rir": "0-1",
-      "rest": "75s",
+      "rest": "60s",
       "isCompound": false,
       "tags": ["HAM", "POLP"],
       "badges": [],
@@ -9954,8 +10092,8 @@ const EXERCISE_PACK = {
       "name": "Squat con salto a corpo libero",
       "nameEn": "Freehand Jump Squat",
       "sets": 4,
-      "reps": "6-10",
-      "rir": "1-2",
+      "reps": "3-5",
+      "rir": "2-3",
       "rest": "2:00",
       "isCompound": true,
       "tags": ["QUAD", "POLP"],
@@ -9974,9 +10112,9 @@ const EXERCISE_PACK = {
       "name": "Sit-up a rana",
       "nameEn": "Frog Sit-Ups",
       "sets": 3,
-      "reps": "10-15",
+      "reps": "12-20",
       "rir": "0-1",
-      "rest": "75s",
+      "rest": "60s",
       "isCompound": false,
       "tags": ["CORE"],
       "badges": [],
@@ -9994,10 +10132,10 @@ const EXERCISE_PACK = {
       "name": "Front squat con bilanciere",
       "nameEn": "Front Barbell Squat",
       "sets": 4,
-      "reps": "6-10",
-      "rir": "1-2",
-      "rest": "2:00",
-      "isCompound": true,
+      "reps": "12-20",
+      "rir": "0-1",
+      "rest": "60s",
+      "isCompound": false,
       "tags": ["QUAD", "POLP"],
       "badges": ["C"],
       "equip": "Bilanciere",
@@ -10014,10 +10152,10 @@ const EXERCISE_PACK = {
       "name": "Front squat su panca",
       "nameEn": "Front Barbell Squat To A Bench",
       "sets": 4,
-      "reps": "6-10",
-      "rir": "1-2",
-      "rest": "2:00",
-      "isCompound": true,
+      "reps": "12-20",
+      "rir": "0-1",
+      "rest": "60s",
+      "isCompound": false,
       "tags": ["QUAD", "POLP"],
       "badges": ["C"],
       "equip": "Bilanciere",
@@ -10133,10 +10271,10 @@ const EXERCISE_PACK = {
       "id": "Front_Squat_Clean_Grip",
       "name": "Front squat presa clean",
       "nameEn": "Front Squat (Clean Grip)",
-      "sets": 4,
-      "reps": "6-10",
-      "rir": "1-2",
-      "rest": "2:00",
+      "sets": 5,
+      "reps": "3",
+      "rir": "2-3",
+      "rest": "2:30",
       "isCompound": true,
       "tags": ["QUAD", "CORE"],
       "badges": ["C"],
@@ -10214,10 +10352,10 @@ const EXERCISE_PACK = {
       "name": "Alzate glutei femorali",
       "nameEn": "Glute Ham Raise",
       "sets": 4,
-      "reps": "6-10",
-      "rir": "1-2",
-      "rest": "2:00",
-      "isCompound": true,
+      "reps": "12-20",
+      "rir": "0-1",
+      "rest": "60s",
+      "isCompound": false,
       "tags": ["HAM", "POLP"],
       "badges": ["C"],
       "equip": "Macchina",
@@ -10253,11 +10391,11 @@ const EXERCISE_PACK = {
       "id": "Good_Morning",
       "name": "Good morning con bilanciere",
       "nameEn": "Good Morning",
-      "sets": 4,
-      "reps": "6-10",
-      "rir": "1-2",
-      "rest": "2:00",
-      "isCompound": true,
+      "sets": 3,
+      "reps": "12-20",
+      "rir": "0-1",
+      "rest": "60s",
+      "isCompound": false,
       "tags": ["HAM", "CORE"],
       "badges": ["C"],
       "equip": "Bilanciere",
@@ -10273,11 +10411,11 @@ const EXERCISE_PACK = {
       "id": "Good_Morning_off_Pins",
       "name": "Good morning dai pin",
       "nameEn": "Good Morning off Pins",
-      "sets": 4,
-      "reps": "6-10",
-      "rir": "1-2",
-      "rest": "2:00",
-      "isCompound": true,
+      "sets": 3,
+      "reps": "12-20",
+      "rir": "0-1",
+      "rest": "60s",
+      "isCompound": false,
       "tags": ["HAM", "CORE"],
       "badges": ["C"],
       "equip": "Bilanciere",
@@ -10293,11 +10431,11 @@ const EXERCISE_PACK = {
       "id": "Gorilla_Chin_Crunch",
       "name": "Gorilla chin",
       "nameEn": "Gorilla Chin/Crunch",
-      "sets": 4,
-      "reps": "6-10",
-      "rir": "1-2",
-      "rest": "2:00",
-      "isCompound": true,
+      "sets": 3,
+      "reps": "12-20",
+      "rir": "0-1",
+      "rest": "60s",
+      "isCompound": false,
       "tags": ["CORE", "BI"],
       "badges": ["C"],
       "equip": "Corpo libero",
@@ -10314,10 +10452,10 @@ const EXERCISE_PACK = {
       "name": "Hack squat",
       "nameEn": "Hack Squat",
       "sets": 4,
-      "reps": "6-10",
-      "rir": "1-2",
-      "rest": "2:00",
-      "isCompound": true,
+      "reps": "12-20",
+      "rir": "0-1",
+      "rest": "60s",
+      "isCompound": false,
       "tags": ["QUAD", "POLP"],
       "badges": ["C"],
       "equip": "Macchina",
@@ -10393,11 +10531,11 @@ const EXERCISE_PACK = {
       "id": "Hanging_Bar_Good_Morning",
       "name": "Good morning con bilanciere sospeso",
       "nameEn": "Hanging Bar Good Morning",
-      "sets": 4,
-      "reps": "6-10",
-      "rir": "1-2",
-      "rest": "2:00",
-      "isCompound": true,
+      "sets": 3,
+      "reps": "12-20",
+      "rir": "0-1",
+      "rest": "60s",
+      "isCompound": false,
       "tags": ["HAM", "CORE"],
       "badges": ["C"],
       "equip": "Bilanciere",
@@ -10414,9 +10552,9 @@ const EXERCISE_PACK = {
       "name": "Alzate delle gambe alla sbarra",
       "nameEn": "Hanging Leg Raise",
       "sets": 3,
-      "reps": "10-15",
+      "reps": "12-20",
       "rir": "0-1",
-      "rest": "75s",
+      "rest": "60s",
       "isCompound": false,
       "tags": ["CORE"],
       "badges": [],
@@ -10433,11 +10571,11 @@ const EXERCISE_PACK = {
       "id": "Hanging_Pike",
       "name": "Alzate delle gambe alla sbarra a ginocchia piegate",
       "nameEn": "Hanging Pike",
-      "sets": 4,
-      "reps": "6-10",
-      "rir": "1-2",
-      "rest": "2:00",
-      "isCompound": true,
+      "sets": 3,
+      "reps": "12-20",
+      "rir": "0-1",
+      "rest": "60s",
+      "isCompound": false,
       "tags": ["CORE"],
       "badges": ["C"],
       "equip": "Corpo libero",
@@ -10514,10 +10652,10 @@ const EXERCISE_PACK = {
       "name": "Dell'anca con elastici",
       "nameEn": "Hip Lift with Band",
       "sets": 4,
-      "reps": "6-10",
-      "rir": "1-2",
-      "rest": "2:00",
-      "isCompound": true,
+      "reps": "12-20",
+      "rir": "0-1",
+      "rest": "60s",
+      "isCompound": false,
       "tags": ["GLUTE", "POLP"],
       "badges": ["C"],
       "equip": "Elastici",
@@ -10534,9 +10672,9 @@ const EXERCISE_PACK = {
       "name": "Iperestensioni",
       "nameEn": "Hyperextensions (Back Extensions)",
       "sets": 3,
-      "reps": "10-15",
+      "reps": "12-20",
       "rir": "0-1",
-      "rest": "75s",
+      "rest": "60s",
       "isCompound": false,
       "tags": ["CORE", "GLUTE"],
       "badges": [],
@@ -10553,11 +10691,11 @@ const EXERCISE_PACK = {
       "id": "Hyperextensions_With_No_Hyperextension_Bench",
       "name": "Iperestensioni su panca piana",
       "nameEn": "Hyperextensions With No Hyperextension Bench",
-      "sets": 4,
-      "reps": "6-10",
-      "rir": "1-2",
-      "rest": "2:00",
-      "isCompound": true,
+      "sets": 3,
+      "reps": "12-20",
+      "rir": "0-1",
+      "rest": "60s",
+      "isCompound": false,
       "tags": ["CORE", "GLUTE"],
       "badges": ["C"],
       "equip": "Corpo libero",
@@ -10574,9 +10712,9 @@ const EXERCISE_PACK = {
       "name": "French press con bilanciere su panca inclinata",
       "nameEn": "Incline Barbell Triceps Extension",
       "sets": 3,
-      "reps": "10-15",
+      "reps": "15-20",
       "rir": "0-1",
-      "rest": "75s",
+      "rest": "45s",
       "isCompound": false,
       "tags": ["TRI", "AVB"],
       "badges": [],
@@ -10833,11 +10971,11 @@ const EXERCISE_PACK = {
       "id": "Incline_Push-Up_Medium",
       "name": "Piegamenti in appoggio alto presa media",
       "nameEn": "Incline Push-Up Medium",
-      "sets": 4,
-      "reps": "6-10",
-      "rir": "1-2",
-      "rest": "2:00",
-      "isCompound": true,
+      "sets": 3,
+      "reps": "12-20",
+      "rir": "0-1",
+      "rest": "60s",
+      "isCompound": false,
       "tags": ["PETTO", "CORE"],
       "badges": ["C"],
       "equip": "Corpo libero",
@@ -10853,11 +10991,11 @@ const EXERCISE_PACK = {
       "id": "Incline_Push-Up_Reverse_Grip",
       "name": "Piegamenti in appoggio alto presa supina",
       "nameEn": "Incline Push-Up Reverse Grip",
-      "sets": 4,
-      "reps": "6-10",
-      "rir": "1-2",
-      "rest": "2:00",
-      "isCompound": true,
+      "sets": 3,
+      "reps": "12-20",
+      "rir": "0-1",
+      "rest": "60s",
+      "isCompound": false,
       "tags": ["PETTO", "CORE"],
       "badges": ["C"],
       "equip": "Corpo libero",
@@ -10873,11 +11011,11 @@ const EXERCISE_PACK = {
       "id": "Incline_Push-Up_Wide",
       "name": "Piegamenti in appoggio alto presa larga",
       "nameEn": "Incline Push-Up Wide",
-      "sets": 4,
-      "reps": "6-10",
-      "rir": "1-2",
-      "rest": "2:00",
-      "isCompound": true,
+      "sets": 3,
+      "reps": "12-20",
+      "rir": "0-1",
+      "rest": "60s",
+      "isCompound": false,
       "tags": ["PETTO", "CORE"],
       "badges": ["C"],
       "equip": "Corpo libero",
@@ -10894,9 +11032,9 @@ const EXERCISE_PACK = {
       "name": "Esercizio con elastici rotazione interna",
       "nameEn": "Internal Rotation with Band",
       "sets": 3,
-      "reps": "10-15",
-      "rir": "0-1",
-      "rest": "75s",
+      "reps": "15-20",
+      "rir": "2-3",
+      "rest": "45s",
       "isCompound": false,
       "tags": ["D.ANT"],
       "badges": [],
@@ -10974,9 +11112,9 @@ const EXERCISE_PACK = {
       "name": "Isometria del collo avanti e indietro",
       "nameEn": "Isometric Neck Exercise - Front And Back",
       "sets": 3,
-      "reps": "10-15",
-      "rir": "0-1",
-      "rest": "75s",
+      "reps": "15-20",
+      "rir": "2-3",
+      "rest": "45s",
       "isCompound": false,
       "tags": ["CORE"],
       "badges": [],
@@ -10994,9 +11132,9 @@ const EXERCISE_PACK = {
       "name": "Isometria del collo laterale",
       "nameEn": "Isometric Neck Exercise - Sides",
       "sets": 3,
-      "reps": "10-15",
-      "rir": "0-1",
-      "rest": "75s",
+      "reps": "15-20",
+      "rir": "2-3",
+      "rest": "45s",
       "isCompound": false,
       "tags": ["CORE"],
       "badges": [],
@@ -11013,11 +11151,11 @@ const EXERCISE_PACK = {
       "id": "Isometric_Wipers",
       "name": "Wiper isometrici dal plank",
       "nameEn": "Isometric Wipers",
-      "sets": 4,
-      "reps": "6-10",
-      "rir": "1-2",
-      "rest": "2:00",
-      "isCompound": true,
+      "sets": 3,
+      "reps": "30-60s",
+      "rir": "—",
+      "rest": "45s",
+      "isCompound": false,
       "tags": ["PETTO", "CORE"],
       "badges": ["C"],
       "equip": "Corpo libero",
@@ -11053,11 +11191,11 @@ const EXERCISE_PACK = {
       "id": "Jackknife_Sit-Up",
       "name": "Jackknife sit-up",
       "nameEn": "Jackknife Sit-Up",
-      "sets": 4,
-      "reps": "6-10",
-      "rir": "1-2",
-      "rest": "2:00",
-      "isCompound": true,
+      "sets": 3,
+      "reps": "12-20",
+      "rir": "0-1",
+      "rest": "60s",
+      "isCompound": false,
       "tags": ["CORE"],
       "badges": ["C"],
       "equip": "Corpo libero",
@@ -11074,9 +11212,9 @@ const EXERCISE_PACK = {
       "name": "Janda sit-up",
       "nameEn": "Janda Sit-Up",
       "sets": 3,
-      "reps": "10-15",
+      "reps": "12-20",
       "rir": "0-1",
-      "rest": "75s",
+      "rest": "60s",
       "isCompound": false,
       "tags": ["CORE"],
       "badges": [],
@@ -11094,10 +11232,10 @@ const EXERCISE_PACK = {
       "name": "Jefferson squat",
       "nameEn": "Jefferson Squats",
       "sets": 4,
-      "reps": "6-10",
-      "rir": "1-2",
-      "rest": "2:00",
-      "isCompound": true,
+      "reps": "12-20",
+      "rir": "0-1",
+      "rest": "60s",
+      "isCompound": false,
       "tags": ["QUAD", "POLP"],
       "badges": ["C"],
       "equip": "Bilanciere",
@@ -11113,11 +11251,11 @@ const EXERCISE_PACK = {
       "id": "Kipping_Muscle_Up",
       "name": "Kipping",
       "nameEn": "Kipping Muscle Up",
-      "sets": 4,
-      "reps": "6-10",
-      "rir": "1-2",
-      "rest": "2:00",
-      "isCompound": true,
+      "sets": 3,
+      "reps": "12-20",
+      "rir": "0-1",
+      "rest": "60s",
+      "isCompound": false,
       "tags": ["DORSO", "CORE"],
       "badges": ["C"],
       "equip": "Varie",
@@ -11134,9 +11272,9 @@ const EXERCISE_PACK = {
       "name": "Alzate dell'anca alle parallele bars",
       "nameEn": "Knee/Hip Raise On Parallel Bars",
       "sets": 3,
-      "reps": "10-15",
+      "reps": "12-20",
       "rir": "0-1",
-      "rest": "75s",
+      "rest": "60s",
       "isCompound": false,
       "tags": ["CORE"],
       "badges": [],
@@ -11154,9 +11292,9 @@ const EXERCISE_PACK = {
       "name": "Crunch ai cavi in ginocchio con torsioni alternate",
       "nameEn": "Kneeling Cable Crunch With Alternating Oblique Twists",
       "sets": 3,
-      "reps": "10-15",
+      "reps": "12-20",
       "rir": "0-1",
-      "rest": "75s",
+      "rest": "60s",
       "isCompound": false,
       "tags": ["CORE"],
       "badges": [],
@@ -11233,11 +11371,11 @@ const EXERCISE_PACK = {
       "id": "Kneeling_Squat",
       "name": "Squat in ginocchio",
       "nameEn": "Kneeling Squat",
-      "sets": 4,
-      "reps": "6-10",
-      "rir": "1-2",
-      "rest": "2:00",
-      "isCompound": true,
+      "sets": 3,
+      "reps": "12-20",
+      "rir": "0-1",
+      "rest": "60s",
+      "isCompound": false,
       "tags": ["GLUTE", "CORE"],
       "badges": ["C"],
       "equip": "Bilanciere",
@@ -11253,11 +11391,11 @@ const EXERCISE_PACK = {
       "id": "Landmine_180s",
       "name": "Landmine 180",
       "nameEn": "Landmine 180's",
-      "sets": 4,
-      "reps": "6-10",
-      "rir": "1-2",
-      "rest": "2:00",
-      "isCompound": true,
+      "sets": 3,
+      "reps": "12-20",
+      "rir": "0-1",
+      "rest": "60s",
+      "isCompound": false,
       "tags": ["CORE", "GLUTE"],
       "badges": ["C"],
       "equip": "Bilanciere",
@@ -11273,11 +11411,11 @@ const EXERCISE_PACK = {
       "id": "Landmine_Linear_Jammer",
       "name": "Jammer press al landmine",
       "nameEn": "Landmine Linear Jammer",
-      "sets": 4,
-      "reps": "6-10",
-      "rir": "1-2",
-      "rest": "2:00",
-      "isCompound": true,
+      "sets": 3,
+      "reps": "12-20",
+      "rir": "0-1",
+      "rest": "60s",
+      "isCompound": false,
       "tags": ["D.ANT", "CORE"],
       "badges": ["C"],
       "equip": "Bilanciere",
@@ -11354,10 +11492,10 @@ const EXERCISE_PACK = {
       "name": "Leg press",
       "nameEn": "Leg Press",
       "sets": 4,
-      "reps": "6-10",
-      "rir": "1-2",
-      "rest": "2:00",
-      "isCompound": true,
+      "reps": "12-20",
+      "rir": "0-1",
+      "rest": "60s",
+      "isCompound": false,
       "tags": ["QUAD", "POLP"],
       "badges": ["C"],
       "equip": "Macchina",
@@ -11373,11 +11511,11 @@ const EXERCISE_PACK = {
       "id": "Leg_Pull-In",
       "name": "Leg pull-in a terra",
       "nameEn": "Leg Pull-In",
-      "sets": 4,
-      "reps": "6-10",
-      "rir": "1-2",
-      "rest": "2:00",
-      "isCompound": true,
+      "sets": 3,
+      "reps": "12-20",
+      "rir": "0-1",
+      "rest": "60s",
+      "isCompound": false,
       "tags": ["CORE"],
       "badges": ["C"],
       "equip": "Corpo libero",
@@ -11534,9 +11672,9 @@ const EXERCISE_PACK = {
       "name": "Scrollate alla macchina",
       "nameEn": "Leverage Shrug",
       "sets": 3,
-      "reps": "10-15",
+      "reps": "15-20",
       "rir": "0-1",
-      "rest": "75s",
+      "rest": "45s",
       "isCompound": false,
       "tags": ["DORSO", "AVB"],
       "badges": [],
@@ -11553,11 +11691,11 @@ const EXERCISE_PACK = {
       "id": "London_Bridges",
       "name": "Ponte london",
       "nameEn": "London Bridges",
-      "sets": 4,
-      "reps": "6-10",
-      "rir": "1-2",
-      "rest": "2:00",
-      "isCompound": true,
+      "sets": 3,
+      "reps": "30-60s",
+      "rir": "—",
+      "rest": "45s",
+      "isCompound": false,
       "tags": ["DORSO", "BI"],
       "badges": ["C"],
       "equip": "Varie",
@@ -11634,8 +11772,8 @@ const EXERCISE_PACK = {
       "name": "Affondo sprint",
       "nameEn": "Lunge Sprint",
       "sets": 4,
-      "reps": "6-10",
-      "rir": "1-2",
+      "reps": "3-5",
+      "rir": "2-3",
       "rest": "2:00",
       "isCompound": true,
       "tags": ["QUAD", "POLP"],
@@ -11774,9 +11912,9 @@ const EXERCISE_PACK = {
       "name": "Collo con disco sdraiato",
       "nameEn": "Lying Face Down Plate Neck Resistance",
       "sets": 3,
-      "reps": "10-15",
+      "reps": "12-20",
       "rir": "0-1",
-      "rest": "75s",
+      "rest": "60s",
       "isCompound": false,
       "tags": ["CORE"],
       "badges": [],
@@ -11794,9 +11932,9 @@ const EXERCISE_PACK = {
       "name": "Collo con disco sdraiato",
       "nameEn": "Lying Face Up Plate Neck Resistance",
       "sets": 3,
-      "reps": "10-15",
+      "reps": "12-20",
       "rir": "0-1",
-      "rest": "75s",
+      "rest": "60s",
       "isCompound": false,
       "tags": ["CORE"],
       "badges": [],
@@ -11854,10 +11992,10 @@ const EXERCISE_PACK = {
       "name": "Squat alla macchina sdraiato",
       "nameEn": "Lying Machine Squat",
       "sets": 4,
-      "reps": "6-10",
-      "rir": "1-2",
-      "rest": "2:00",
-      "isCompound": true,
+      "reps": "12-20",
+      "rir": "0-1",
+      "rest": "60s",
+      "isCompound": false,
       "tags": ["QUAD", "POLP"],
       "badges": ["C"],
       "equip": "Macchina",
@@ -12133,11 +12271,11 @@ const EXERCISE_PACK = {
       "id": "Muscle_Up",
       "name": "Esercizio",
       "nameEn": "Muscle Up",
-      "sets": 4,
-      "reps": "6-10",
-      "rir": "1-2",
-      "rest": "2:00",
-      "isCompound": true,
+      "sets": 3,
+      "reps": "12-20",
+      "rir": "0-1",
+      "rest": "60s",
+      "isCompound": false,
       "tags": ["DORSO", "CORE"],
       "badges": ["C"],
       "equip": "Varie",
@@ -12154,10 +12292,10 @@ const EXERCISE_PACK = {
       "name": "Hack squat stretta stance",
       "nameEn": "Narrow Stance Hack Squats",
       "sets": 4,
-      "reps": "6-10",
-      "rir": "1-2",
-      "rest": "2:00",
-      "isCompound": true,
+      "reps": "12-20",
+      "rir": "0-1",
+      "rest": "60s",
+      "isCompound": false,
       "tags": ["QUAD", "POLP"],
       "badges": ["C"],
       "equip": "Macchina",
@@ -12174,10 +12312,10 @@ const EXERCISE_PACK = {
       "name": "Leg press stretta stance",
       "nameEn": "Narrow Stance Leg Press",
       "sets": 4,
-      "reps": "6-10",
-      "rir": "1-2",
-      "rest": "2:00",
-      "isCompound": true,
+      "reps": "12-20",
+      "rir": "0-1",
+      "rest": "60s",
+      "isCompound": false,
       "tags": ["QUAD", "POLP"],
       "badges": ["C"],
       "equip": "Macchina",
@@ -12194,10 +12332,10 @@ const EXERCISE_PACK = {
       "name": "Squat stance stretta",
       "nameEn": "Narrow Stance Squats",
       "sets": 4,
-      "reps": "6-10",
-      "rir": "1-2",
-      "rest": "2:00",
-      "isCompound": true,
+      "reps": "12-20",
+      "rir": "0-1",
+      "rest": "60s",
+      "isCompound": false,
       "tags": ["QUAD", "POLP"],
       "badges": ["C"],
       "equip": "Bilanciere",
@@ -12214,10 +12352,10 @@ const EXERCISE_PACK = {
       "name": "Glute ham raise naturale",
       "nameEn": "Natural Glute Ham Raise",
       "sets": 4,
-      "reps": "6-10",
-      "rir": "1-2",
-      "rest": "2:00",
-      "isCompound": true,
+      "reps": "12-20",
+      "rir": "0-1",
+      "rest": "60s",
+      "isCompound": false,
       "tags": ["HAM", "POLP"],
       "badges": ["C"],
       "equip": "Corpo libero",
@@ -12254,9 +12392,9 @@ const EXERCISE_PACK = {
       "name": "Crunch obliqui gomito-ginocchio",
       "nameEn": "Oblique Crunches",
       "sets": 3,
-      "reps": "10-15",
+      "reps": "12-20",
       "rir": "0-1",
-      "rest": "75s",
+      "rest": "60s",
       "isCompound": false,
       "tags": ["CORE"],
       "badges": [],
@@ -12274,9 +12412,9 @@ const EXERCISE_PACK = {
       "name": "Crunch obliqui sul fianco",
       "nameEn": "Oblique Crunches - On The Floor",
       "sets": 3,
-      "reps": "10-15",
+      "reps": "12-20",
       "rir": "0-1",
-      "rest": "75s",
+      "rest": "60s",
       "isCompound": false,
       "tags": ["CORE"],
       "badges": [],
@@ -12334,9 +12472,9 @@ const EXERCISE_PACK = {
       "name": "Flessioni laterali ai cavi alti",
       "nameEn": "One-Arm High-Pulley Cable Side Bends",
       "sets": 3,
-      "reps": "10-15",
+      "reps": "12-20",
       "rir": "0-1",
-      "rest": "75s",
+      "rest": "60s",
       "isCompound": false,
       "tags": ["CORE"],
       "badges": [],
@@ -12393,11 +12531,11 @@ const EXERCISE_PACK = {
       "id": "One-Arm_Side_Deadlift",
       "name": "Stacco laterale a un braccio",
       "nameEn": "One-Arm Side Deadlift",
-      "sets": 4,
-      "reps": "6-10",
-      "rir": "1-2",
-      "rest": "2:00",
-      "isCompound": true,
+      "sets": 3,
+      "reps": "12-20",
+      "rir": "0-1",
+      "rest": "60s",
+      "isCompound": false,
       "tags": ["QUAD", "CORE"],
       "badges": ["C"],
       "equip": "Bilanciere",
@@ -12594,10 +12732,10 @@ const EXERCISE_PACK = {
       "name": "Affondo bulgaro con bilanciere",
       "nameEn": "One Leg Barbell Squat",
       "sets": 4,
-      "reps": "6-10",
-      "rir": "1-2",
-      "rest": "2:00",
-      "isCompound": true,
+      "reps": "12-20",
+      "rir": "0-1",
+      "rest": "60s",
+      "isCompound": false,
       "tags": ["QUAD", "POLP"],
       "badges": ["C"],
       "equip": "Bilanciere",
@@ -12613,11 +12751,11 @@ const EXERCISE_PACK = {
       "id": "Otis-Up",
       "name": "Otis",
       "nameEn": "Otis-Up",
-      "sets": 4,
-      "reps": "6-10",
-      "rir": "1-2",
-      "rest": "2:00",
-      "isCompound": true,
+      "sets": 3,
+      "reps": "12-20",
+      "rir": "0-1",
+      "rest": "60s",
+      "isCompound": false,
       "tags": ["CORE", "PETTO"],
       "badges": ["C"],
       "equip": "Varie",
@@ -12654,9 +12792,9 @@ const EXERCISE_PACK = {
       "name": "Pallof press",
       "nameEn": "Pallof Press",
       "sets": 3,
-      "reps": "10-15",
+      "reps": "12-20",
       "rir": "0-1",
-      "rest": "75s",
+      "rest": "60s",
       "isCompound": false,
       "tags": ["CORE", "PETTO"],
       "badges": [],
@@ -12673,11 +12811,11 @@ const EXERCISE_PACK = {
       "id": "Pallof_Press_With_Rotation",
       "name": "Pallof press con rotazione",
       "nameEn": "Pallof Press With Rotation",
-      "sets": 4,
-      "reps": "6-10",
-      "rir": "1-2",
-      "rest": "2:00",
-      "isCompound": true,
+      "sets": 3,
+      "reps": "12-20",
+      "rir": "0-1",
+      "rest": "60s",
+      "isCompound": false,
       "tags": ["CORE", "PETTO"],
       "badges": ["C"],
       "equip": "Cavi",
@@ -12694,9 +12832,9 @@ const EXERCISE_PACK = {
       "name": "Curl dei polsi con manubri sulla panca presa prona",
       "nameEn": "Palms-Down Dumbbell Wrist Curl Over A Bench",
       "sets": 3,
-      "reps": "10-15",
+      "reps": "15-20",
       "rir": "0-1",
-      "rest": "75s",
+      "rest": "45s",
       "isCompound": false,
       "tags": ["AVB"],
       "badges": [],
@@ -12714,9 +12852,9 @@ const EXERCISE_PACK = {
       "name": "Curl dei polsi con bilanciere sulla panca presa prona",
       "nameEn": "Palms-Down Wrist Curl Over A Bench",
       "sets": 3,
-      "reps": "10-15",
+      "reps": "15-20",
       "rir": "0-1",
-      "rest": "75s",
+      "rest": "45s",
       "isCompound": false,
       "tags": ["AVB"],
       "badges": [],
@@ -12734,9 +12872,9 @@ const EXERCISE_PACK = {
       "name": "Curl dei polsi con bilanciere sulla panca presa supina",
       "nameEn": "Palms-Up Barbell Wrist Curl Over A Bench",
       "sets": 3,
-      "reps": "10-15",
+      "reps": "15-20",
       "rir": "0-1",
-      "rest": "75s",
+      "rest": "45s",
       "isCompound": false,
       "tags": ["AVB"],
       "badges": [],
@@ -12754,9 +12892,9 @@ const EXERCISE_PACK = {
       "name": "Curl dei polsi con manubri sulla panca presa supina",
       "nameEn": "Palms-Up Dumbbell Wrist Curl Over A Bench",
       "sets": 3,
-      "reps": "10-15",
+      "reps": "15-20",
       "rir": "0-1",
-      "rest": "75s",
+      "rest": "45s",
       "isCompound": false,
       "tags": ["AVB"],
       "badges": [],
@@ -12814,9 +12952,9 @@ const EXERCISE_PACK = {
       "name": "Plank",
       "nameEn": "Plank",
       "sets": 3,
-      "reps": "10-15",
-      "rir": "0-1",
-      "rest": "75s",
+      "reps": "30-60s",
+      "rir": "—",
+      "rest": "45s",
       "isCompound": false,
       "tags": ["CORE"],
       "badges": [],
@@ -12834,9 +12972,9 @@ const EXERCISE_PACK = {
       "name": "In pinza con disco",
       "nameEn": "Plate Pinch",
       "sets": 3,
-      "reps": "10-15",
+      "reps": "15-20",
       "rir": "0-1",
-      "rest": "75s",
+      "rest": "45s",
       "isCompound": false,
       "tags": ["AVB"],
       "badges": [],
@@ -12853,11 +12991,11 @@ const EXERCISE_PACK = {
       "id": "Plate_Twist",
       "name": "Twist con disco",
       "nameEn": "Plate Twist",
-      "sets": 4,
-      "reps": "6-10",
-      "rir": "1-2",
-      "rest": "2:00",
-      "isCompound": true,
+      "sets": 3,
+      "reps": "12-20",
+      "rir": "0-1",
+      "rest": "60s",
+      "isCompound": false,
       "tags": ["CORE"],
       "badges": ["C"],
       "equip": "Varie",
@@ -12893,11 +13031,11 @@ const EXERCISE_PACK = {
       "id": "Plie_Dumbbell_Squat",
       "name": "Squat plié con manubrio",
       "nameEn": "Plie Dumbbell Squat",
-      "sets": 4,
-      "reps": "6-10",
-      "rir": "1-2",
-      "rest": "2:00",
-      "isCompound": true,
+      "sets": 3,
+      "reps": "12-20",
+      "rir": "0-1",
+      "rest": "60s",
+      "isCompound": false,
       "tags": ["QUAD", "CORE"],
       "badges": ["C"],
       "equip": "Manubri",
@@ -12913,10 +13051,10 @@ const EXERCISE_PACK = {
       "id": "Power_Clean",
       "name": "Power clean",
       "nameEn": "Power Clean",
-      "sets": 4,
-      "reps": "6-10",
-      "rir": "1-2",
-      "rest": "2:00",
+      "sets": 5,
+      "reps": "3",
+      "rir": "2-3",
+      "rest": "2:30",
       "isCompound": true,
       "tags": ["HAM", "POLP"],
       "badges": ["C"],
@@ -12974,9 +13112,9 @@ const EXERCISE_PACK = {
       "name": "Curl a martello su panca Scott",
       "nameEn": "Preacher Hammer Dumbbell Curl",
       "sets": 3,
-      "reps": "10-15",
+      "reps": "15-20",
       "rir": "0-1",
-      "rest": "75s",
+      "rest": "45s",
       "isCompound": false,
       "tags": ["BI", "AVB"],
       "badges": [],
@@ -12993,11 +13131,11 @@ const EXERCISE_PACK = {
       "id": "Press_Sit-Up",
       "name": "Sit-up con distensione del bilanciere",
       "nameEn": "Press Sit-Up",
-      "sets": 4,
-      "reps": "6-10",
-      "rir": "1-2",
-      "rest": "2:00",
-      "isCompound": true,
+      "sets": 3,
+      "reps": "12-20",
+      "rir": "0-1",
+      "rest": "60s",
+      "isCompound": false,
       "tags": ["CORE", "PETTO"],
       "badges": ["C"],
       "equip": "Bilanciere",
@@ -13073,11 +13211,11 @@ const EXERCISE_PACK = {
       "id": "Push-Up_Wide",
       "name": "Piegamenti presa larga",
       "nameEn": "Push-Up Wide",
-      "sets": 4,
-      "reps": "6-10",
-      "rir": "1-2",
-      "rest": "2:00",
-      "isCompound": true,
+      "sets": 3,
+      "reps": "12-20",
+      "rir": "0-1",
+      "rest": "60s",
+      "isCompound": false,
       "tags": ["PETTO", "CORE"],
       "badges": ["C"],
       "equip": "Corpo libero",
@@ -13133,11 +13271,11 @@ const EXERCISE_PACK = {
       "id": "Push_Up_to_Side_Plank",
       "name": "Piegamenti con plank laterale",
       "nameEn": "Push Up to Side Plank",
-      "sets": 4,
-      "reps": "6-10",
-      "rir": "1-2",
-      "rest": "2:00",
-      "isCompound": true,
+      "sets": 3,
+      "reps": "30-60s",
+      "rir": "—",
+      "rest": "45s",
+      "isCompound": false,
       "tags": ["PETTO", "CORE"],
       "badges": ["C"],
       "equip": "Corpo libero",
@@ -13334,9 +13472,9 @@ const EXERCISE_PACK = {
       "name": "Curl inverso con bilanciere",
       "nameEn": "Reverse Barbell Curl",
       "sets": 3,
-      "reps": "10-15",
+      "reps": "15-20",
       "rir": "0-1",
-      "rest": "75s",
+      "rest": "45s",
       "isCompound": false,
       "tags": ["BI", "AVB"],
       "badges": [],
@@ -13354,9 +13492,9 @@ const EXERCISE_PACK = {
       "name": "Curl inverso su panca Scott",
       "nameEn": "Reverse Barbell Preacher Curls",
       "sets": 3,
-      "reps": "10-15",
+      "reps": "15-20",
       "rir": "0-1",
-      "rest": "75s",
+      "rest": "45s",
       "isCompound": false,
       "tags": ["BI", "AVB"],
       "badges": [],
@@ -13374,9 +13512,9 @@ const EXERCISE_PACK = {
       "name": "Curl inverso ai cavi",
       "nameEn": "Reverse Cable Curl",
       "sets": 3,
-      "reps": "10-15",
+      "reps": "15-20",
       "rir": "0-1",
-      "rest": "75s",
+      "rest": "45s",
       "isCompound": false,
       "tags": ["BI", "AVB"],
       "badges": [],
@@ -13394,9 +13532,9 @@ const EXERCISE_PACK = {
       "name": "Crunch inverso",
       "nameEn": "Reverse Crunch",
       "sets": 3,
-      "reps": "10-15",
+      "reps": "12-20",
       "rir": "0-1",
-      "rest": "75s",
+      "rest": "60s",
       "isCompound": false,
       "tags": ["CORE"],
       "badges": [],
@@ -13434,9 +13572,9 @@ const EXERCISE_PACK = {
       "name": "Alzate posteriori con rotazione esterna",
       "nameEn": "Reverse Flyes With External Rotation",
       "sets": 3,
-      "reps": "10-15",
-      "rir": "0-1",
-      "rest": "75s",
+      "reps": "15-20",
+      "rir": "2-3",
+      "rest": "45s",
       "isCompound": false,
       "tags": ["D.POST"],
       "badges": [],
@@ -13493,10 +13631,10 @@ const EXERCISE_PACK = {
       "id": "Reverse_Hyperextension",
       "name": "Iperestensioni inverso",
       "nameEn": "Reverse Hyperextension",
-      "sets": 3,
-      "reps": "10-15",
+      "sets": 4,
+      "reps": "12-20",
       "rir": "0-1",
-      "rest": "75s",
+      "rest": "60s",
       "isCompound": false,
       "tags": ["HAM", "POLP"],
       "badges": [],
@@ -13534,9 +13672,9 @@ const EXERCISE_PACK = {
       "name": "Curl con disco inverso",
       "nameEn": "Reverse Plate Curls",
       "sets": 3,
-      "reps": "10-15",
+      "reps": "15-20",
       "rir": "0-1",
-      "rest": "75s",
+      "rest": "45s",
       "isCompound": false,
       "tags": ["BI", "AVB"],
       "badges": [],
@@ -13593,10 +13731,10 @@ const EXERCISE_PACK = {
       "id": "Rocking_Standing_Calf_Raise",
       "name": "Calf raise in piedi con oscillazione",
       "nameEn": "Rocking Standing Calf Raise",
-      "sets": 3,
-      "reps": "10-15",
+      "sets": 4,
+      "reps": "12-20",
       "rir": "0-1",
-      "rest": "75s",
+      "rest": "60s",
       "isCompound": false,
       "tags": ["POLP"],
       "badges": [],
@@ -13674,9 +13812,9 @@ const EXERCISE_PACK = {
       "name": "Crunch ai cavi con corda in ginocchio",
       "nameEn": "Rope Crunch",
       "sets": 3,
-      "reps": "10-15",
+      "reps": "12-20",
       "rir": "0-1",
-      "rest": "75s",
+      "rest": "60s",
       "isCompound": false,
       "tags": ["CORE"],
       "badges": [],
@@ -13713,11 +13851,11 @@ const EXERCISE_PACK = {
       "id": "Russian_Twist",
       "name": "Russian twist",
       "nameEn": "Russian Twist",
-      "sets": 4,
-      "reps": "6-10",
-      "rir": "1-2",
-      "rest": "2:00",
-      "isCompound": true,
+      "sets": 3,
+      "reps": "12-20",
+      "rir": "0-1",
+      "rest": "60s",
+      "isCompound": false,
       "tags": ["CORE"],
       "badges": ["C"],
       "equip": "Corpo libero",
@@ -13794,9 +13932,9 @@ const EXERCISE_PACK = {
       "name": "Torsioni con bilanciere seduto",
       "nameEn": "Seated Barbell Twist",
       "sets": 3,
-      "reps": "10-15",
+      "reps": "12-20",
       "rir": "0-1",
-      "rest": "75s",
+      "rest": "60s",
       "isCompound": false,
       "tags": ["CORE"],
       "badges": [],
@@ -13913,10 +14051,10 @@ const EXERCISE_PACK = {
       "id": "Seated_Calf_Raise",
       "name": "Calf raise seduto",
       "nameEn": "Seated Calf Raise",
-      "sets": 3,
-      "reps": "10-15",
+      "sets": 4,
+      "reps": "12-20",
       "rir": "0-1",
-      "rest": "75s",
+      "rest": "60s",
       "isCompound": false,
       "tags": ["POLP"],
       "badges": [],
@@ -13994,9 +14132,9 @@ const EXERCISE_PACK = {
       "name": "Curl dei polsi con manubri seduto presa prona",
       "nameEn": "Seated Dumbbell Palms-Down Wrist Curl",
       "sets": 3,
-      "reps": "10-15",
+      "reps": "15-20",
       "rir": "0-1",
-      "rest": "75s",
+      "rest": "45s",
       "isCompound": false,
       "tags": ["AVB"],
       "badges": [],
@@ -14014,9 +14152,9 @@ const EXERCISE_PACK = {
       "name": "Curl dei polsi con manubri seduto presa supina",
       "nameEn": "Seated Dumbbell Palms-Up Wrist Curl",
       "sets": 3,
-      "reps": "10-15",
+      "reps": "15-20",
       "rir": "0-1",
-      "rest": "75s",
+      "rest": "45s",
       "isCompound": false,
       "tags": ["AVB"],
       "badges": [],
@@ -14053,11 +14191,11 @@ const EXERCISE_PACK = {
       "id": "Seated_Flat_Bench_Leg_Pull-In",
       "name": "Leg pull-in seduto su panca",
       "nameEn": "Seated Flat Bench Leg Pull-In",
-      "sets": 4,
-      "reps": "6-10",
-      "rir": "1-2",
-      "rest": "2:00",
-      "isCompound": true,
+      "sets": 3,
+      "reps": "12-20",
+      "rir": "0-1",
+      "rest": "60s",
+      "isCompound": false,
       "tags": ["CORE"],
       "badges": ["C"],
       "equip": "Corpo libero",
@@ -14073,11 +14211,11 @@ const EXERCISE_PACK = {
       "id": "Seated_Good_Mornings",
       "name": "Good morning seduto",
       "nameEn": "Seated Good Mornings",
-      "sets": 4,
-      "reps": "6-10",
-      "rir": "1-2",
-      "rest": "2:00",
-      "isCompound": true,
+      "sets": 3,
+      "reps": "12-20",
+      "rir": "0-1",
+      "rest": "60s",
+      "isCompound": false,
       "tags": ["CORE", "GLUTE"],
       "badges": ["C"],
       "equip": "Bilanciere",
@@ -14094,9 +14232,9 @@ const EXERCISE_PACK = {
       "name": "Collo seduto harness",
       "nameEn": "Seated Head Harness Neck Resistance",
       "sets": 3,
-      "reps": "10-15",
+      "reps": "12-20",
       "rir": "0-1",
-      "rest": "75s",
+      "rest": "60s",
       "isCompound": false,
       "tags": ["CORE"],
       "badges": [],
@@ -14134,9 +14272,9 @@ const EXERCISE_PACK = {
       "name": "Leg tuck seduto su panca",
       "nameEn": "Seated Leg Tucks",
       "sets": 3,
-      "reps": "10-15",
+      "reps": "12-20",
       "rir": "0-1",
-      "rest": "75s",
+      "rest": "60s",
       "isCompound": false,
       "tags": ["CORE"],
       "badges": [],
@@ -14154,9 +14292,9 @@ const EXERCISE_PACK = {
       "name": "Curl del polso con manubrio presa prona",
       "nameEn": "Seated One-Arm Dumbbell Palms-Down Wrist Curl",
       "sets": 3,
-      "reps": "10-15",
+      "reps": "15-20",
       "rir": "0-1",
-      "rest": "75s",
+      "rest": "45s",
       "isCompound": false,
       "tags": ["AVB"],
       "badges": [],
@@ -14174,9 +14312,9 @@ const EXERCISE_PACK = {
       "name": "Curl del polso con manubrio presa supina",
       "nameEn": "Seated One-Arm Dumbbell Palms-Up Wrist Curl",
       "sets": 3,
-      "reps": "10-15",
+      "reps": "15-20",
       "rir": "0-1",
-      "rest": "75s",
+      "rest": "45s",
       "isCompound": false,
       "tags": ["AVB"],
       "badges": [],
@@ -14214,9 +14352,9 @@ const EXERCISE_PACK = {
       "name": "Curl dei polsi con bilanciere presa supina",
       "nameEn": "Seated Palm-Up Barbell Wrist Curl",
       "sets": 3,
-      "reps": "10-15",
+      "reps": "15-20",
       "rir": "0-1",
-      "rest": "75s",
+      "rest": "45s",
       "isCompound": false,
       "tags": ["AVB"],
       "badges": [],
@@ -14234,9 +14372,9 @@ const EXERCISE_PACK = {
       "name": "Curl dei polsi con bilanciere presa prona",
       "nameEn": "Seated Palms-Down Barbell Wrist Curl",
       "sets": 3,
-      "reps": "10-15",
+      "reps": "15-20",
       "rir": "0-1",
-      "rest": "75s",
+      "rest": "45s",
       "isCompound": false,
       "tags": ["AVB"],
       "badges": [],
@@ -14294,9 +14432,9 @@ const EXERCISE_PACK = {
       "name": "Curl dei polsi ai cavi bassi seduto presa supina",
       "nameEn": "Seated Two-Arm Palms-Up Low-Pulley Wrist Curl",
       "sets": 3,
-      "reps": "10-15",
+      "reps": "15-20",
       "rir": "0-1",
-      "rest": "75s",
+      "rest": "45s",
       "isCompound": false,
       "tags": ["AVB"],
       "badges": [],
@@ -14313,11 +14451,11 @@ const EXERCISE_PACK = {
       "id": "See-Saw_Press_Alternating_Side_Press",
       "name": "See-saw press con manubri",
       "nameEn": "See-Saw Press (Alternating Side Press)",
-      "sets": 4,
-      "reps": "6-10",
-      "rir": "1-2",
-      "rest": "2:00",
-      "isCompound": true,
+      "sets": 3,
+      "reps": "12-20",
+      "rir": "0-1",
+      "rest": "60s",
+      "isCompound": false,
       "tags": ["D.ANT", "CORE"],
       "badges": ["C"],
       "equip": "Manubri",
@@ -14374,9 +14512,9 @@ const EXERCISE_PACK = {
       "name": "Plank laterale",
       "nameEn": "Side Bridge",
       "sets": 3,
-      "reps": "10-15",
-      "rir": "0-1",
-      "rest": "75s",
+      "reps": "30-60s",
+      "rir": "—",
+      "rest": "45s",
       "isCompound": false,
       "tags": ["CORE", "D.ANT"],
       "badges": [],
@@ -14393,11 +14531,11 @@ const EXERCISE_PACK = {
       "id": "Side_Jackknife",
       "name": "Jackknife laterale",
       "nameEn": "Side Jackknife",
-      "sets": 4,
-      "reps": "6-10",
-      "rir": "1-2",
-      "rest": "2:00",
-      "isCompound": true,
+      "sets": 3,
+      "reps": "12-20",
+      "rir": "0-1",
+      "rest": "60s",
+      "isCompound": false,
       "tags": ["CORE"],
       "badges": ["C"],
       "equip": "Corpo libero",
@@ -14574,9 +14712,9 @@ const EXERCISE_PACK = {
       "name": "Alzate frontali con un manubrio a due mani",
       "nameEn": "Single Dumbbell Raise",
       "sets": 3,
-      "reps": "10-15",
+      "reps": "15-20",
       "rir": "0-1",
-      "rest": "75s",
+      "rest": "45s",
       "isCompound": false,
       "tags": ["D.ANT", "AVB"],
       "badges": [],
@@ -14594,9 +14732,9 @@ const EXERCISE_PACK = {
       "name": "Ponte per glutei a una gamba",
       "nameEn": "Single Leg Glute Bridge",
       "sets": 3,
-      "reps": "10-15",
-      "rir": "0-1",
-      "rest": "75s",
+      "reps": "30-60s",
+      "rir": "—",
+      "rest": "45s",
       "isCompound": false,
       "tags": ["GLUTE", "HAM"],
       "badges": [],
@@ -14614,9 +14752,9 @@ const EXERCISE_PACK = {
       "name": "Sit-up",
       "nameEn": "Sit-Up",
       "sets": 3,
-      "reps": "10-15",
+      "reps": "12-20",
       "rir": "0-1",
-      "rest": "75s",
+      "rest": "60s",
       "isCompound": false,
       "tags": ["CORE"],
       "badges": [],
@@ -14634,10 +14772,10 @@ const EXERCISE_PACK = {
       "name": "Indietro alla slitta sopra la testa walk",
       "nameEn": "Sled Overhead Backward Walk",
       "sets": 4,
-      "reps": "6-10",
-      "rir": "1-2",
-      "rest": "2:00",
-      "isCompound": true,
+      "reps": "12-20",
+      "rir": "0-1",
+      "rest": "60s",
+      "isCompound": false,
       "tags": ["D.ANT", "POLP"],
       "badges": ["C"],
       "equip": "Varie",
@@ -14793,10 +14931,10 @@ const EXERCISE_PACK = {
       "id": "Smith_Machine_Calf_Raise",
       "name": "Calf raise al multipower",
       "nameEn": "Smith Machine Calf Raise",
-      "sets": 3,
-      "reps": "10-15",
+      "sets": 4,
+      "reps": "12-20",
       "rir": "0-1",
-      "rest": "75s",
+      "rest": "60s",
       "isCompound": false,
       "tags": ["POLP"],
       "badges": [],
@@ -14853,10 +14991,10 @@ const EXERCISE_PACK = {
       "id": "Smith_Machine_Hang_Power_Clean",
       "name": "Power clean al multipower hang",
       "nameEn": "Smith Machine Hang Power Clean",
-      "sets": 4,
-      "reps": "6-10",
-      "rir": "1-2",
-      "rest": "2:00",
+      "sets": 5,
+      "reps": "3",
+      "rir": "2-3",
+      "rest": "2:30",
       "isCompound": true,
       "tags": ["HAM", "GLUTE"],
       "badges": ["C"],
@@ -14874,9 +15012,9 @@ const EXERCISE_PACK = {
       "name": "Alzate dell'anca al multipower",
       "nameEn": "Smith Machine Hip Raise",
       "sets": 3,
-      "reps": "10-15",
+      "reps": "12-20",
       "rir": "0-1",
-      "rest": "75s",
+      "rest": "60s",
       "isCompound": false,
       "tags": ["CORE"],
       "badges": [],
@@ -14914,10 +15052,10 @@ const EXERCISE_PACK = {
       "name": "Leg press al multipower",
       "nameEn": "Smith Machine Leg Press",
       "sets": 4,
-      "reps": "6-10",
-      "rir": "1-2",
-      "rest": "2:00",
-      "isCompound": true,
+      "reps": "12-20",
+      "rir": "0-1",
+      "rest": "60s",
+      "isCompound": false,
       "tags": ["QUAD", "POLP"],
       "badges": ["C"],
       "equip": "Macchina",
@@ -14974,10 +15112,10 @@ const EXERCISE_PACK = {
       "name": "Squat al multipower pistol",
       "nameEn": "Smith Machine Pistol Squat",
       "sets": 4,
-      "reps": "6-10",
-      "rir": "1-2",
-      "rest": "2:00",
-      "isCompound": true,
+      "reps": "12-20",
+      "rir": "0-1",
+      "rest": "60s",
+      "isCompound": false,
       "tags": ["QUAD", "POLP"],
       "badges": ["C"],
       "equip": "Macchina",
@@ -14993,10 +15131,10 @@ const EXERCISE_PACK = {
       "id": "Smith_Machine_Reverse_Calf_Raises",
       "name": "Calf raise al multipower inverso",
       "nameEn": "Smith Machine Reverse Calf Raises",
-      "sets": 3,
-      "reps": "10-15",
+      "sets": 4,
+      "reps": "12-20",
       "rir": "0-1",
-      "rest": "75s",
+      "rest": "60s",
       "isCompound": false,
       "tags": ["POLP"],
       "badges": [],
@@ -15014,10 +15152,10 @@ const EXERCISE_PACK = {
       "name": "Squat al multipower",
       "nameEn": "Smith Machine Squat",
       "sets": 4,
-      "reps": "6-10",
-      "rir": "1-2",
-      "rest": "2:00",
-      "isCompound": true,
+      "reps": "12-20",
+      "rir": "0-1",
+      "rest": "60s",
+      "isCompound": false,
       "tags": ["QUAD", "POLP"],
       "badges": ["C"],
       "equip": "Macchina",
@@ -15074,10 +15212,10 @@ const EXERCISE_PACK = {
       "name": "Affondo bulgaro al multipower a una gamba",
       "nameEn": "Smith Single-Leg Split Squat",
       "sets": 4,
-      "reps": "6-10",
-      "rir": "1-2",
-      "rest": "2:00",
-      "isCompound": true,
+      "reps": "12-20",
+      "rir": "0-1",
+      "rest": "60s",
+      "isCompound": false,
       "tags": ["QUAD", "POLP"],
       "badges": ["C"],
       "equip": "Macchina",
@@ -15093,10 +15231,10 @@ const EXERCISE_PACK = {
       "id": "Snatch_Pull",
       "name": "Snatch pull",
       "nameEn": "Snatch Pull",
-      "sets": 4,
-      "reps": "6-10",
-      "rir": "1-2",
-      "rest": "2:00",
+      "sets": 5,
+      "reps": "3",
+      "rir": "2-3",
+      "rest": "2:30",
       "isCompound": true,
       "tags": ["HAM", "POLP"],
       "badges": ["C"],
@@ -15134,10 +15272,10 @@ const EXERCISE_PACK = {
       "name": "Box squat veloce",
       "nameEn": "Speed Box Squat",
       "sets": 4,
-      "reps": "6-10",
-      "rir": "1-2",
-      "rest": "2:00",
-      "isCompound": true,
+      "reps": "12-20",
+      "rir": "0-1",
+      "rest": "60s",
+      "isCompound": false,
       "tags": ["QUAD", "POLP"],
       "badges": ["C"],
       "equip": "Bilanciere",
@@ -15154,10 +15292,10 @@ const EXERCISE_PACK = {
       "name": "Squat veloce",
       "nameEn": "Speed Squats",
       "sets": 4,
-      "reps": "6-10",
-      "rir": "1-2",
-      "rest": "2:00",
-      "isCompound": true,
+      "reps": "12-20",
+      "rir": "0-1",
+      "rest": "60s",
+      "isCompound": false,
       "tags": ["QUAD", "POLP"],
       "badges": ["C"],
       "equip": "Bilanciere",
@@ -15173,11 +15311,11 @@ const EXERCISE_PACK = {
       "id": "Spell_Caster",
       "name": "Spell caster con manubri",
       "nameEn": "Spell Caster",
-      "sets": 4,
-      "reps": "6-10",
-      "rir": "1-2",
-      "rest": "2:00",
-      "isCompound": true,
+      "sets": 3,
+      "reps": "12-20",
+      "rir": "0-1",
+      "rest": "60s",
+      "isCompound": false,
       "tags": ["CORE", "GLUTE"],
       "badges": ["C"],
       "equip": "Manubri",
@@ -15193,11 +15331,11 @@ const EXERCISE_PACK = {
       "id": "Spider_Crawl",
       "name": "Spider crawl",
       "nameEn": "Spider Crawl",
-      "sets": 4,
-      "reps": "6-10",
-      "rir": "1-2",
-      "rest": "2:00",
-      "isCompound": true,
+      "sets": 3,
+      "reps": "30-60s",
+      "rir": "—",
+      "rest": "45s",
+      "isCompound": false,
       "tags": ["CORE", "PETTO"],
       "badges": ["C"],
       "equip": "Corpo libero",
@@ -15253,10 +15391,10 @@ const EXERCISE_PACK = {
       "id": "Squat_Jerk",
       "name": "Squat jerk",
       "nameEn": "Squat Jerk",
-      "sets": 4,
-      "reps": "6-10",
-      "rir": "1-2",
-      "rest": "2:00",
+      "sets": 5,
+      "reps": "3",
+      "rir": "2-3",
+      "rest": "2:30",
       "isCompound": true,
       "tags": ["QUAD", "POLP"],
       "badges": ["C"],
@@ -15334,10 +15472,10 @@ const EXERCISE_PACK = {
       "name": "Squat con elastici",
       "nameEn": "Squats - With Bands",
       "sets": 4,
-      "reps": "6-10",
-      "rir": "1-2",
-      "rest": "2:00",
-      "isCompound": true,
+      "reps": "12-20",
+      "rir": "0-1",
+      "rest": "60s",
+      "isCompound": false,
       "tags": ["QUAD", "POLP"],
       "badges": ["C"],
       "equip": "Elastici",
@@ -15373,10 +15511,10 @@ const EXERCISE_PACK = {
       "id": "Standing_Barbell_Calf_Raise",
       "name": "Calf raise in piedi con bilanciere",
       "nameEn": "Standing Barbell Calf Raise",
-      "sets": 3,
-      "reps": "10-15",
+      "sets": 4,
+      "reps": "12-20",
       "rir": "0-1",
-      "rest": "75s",
+      "rest": "60s",
       "isCompound": false,
       "tags": ["POLP"],
       "badges": [],
@@ -15513,11 +15651,11 @@ const EXERCISE_PACK = {
       "id": "Standing_Cable_Lift",
       "name": "Lift ai cavi dal basso",
       "nameEn": "Standing Cable Lift",
-      "sets": 4,
-      "reps": "6-10",
-      "rir": "1-2",
-      "rest": "2:00",
-      "isCompound": true,
+      "sets": 3,
+      "reps": "12-20",
+      "rir": "0-1",
+      "rest": "60s",
+      "isCompound": false,
       "tags": ["CORE", "D.ANT"],
       "badges": ["C"],
       "equip": "Cavi",
@@ -15533,11 +15671,11 @@ const EXERCISE_PACK = {
       "id": "Standing_Cable_Wood_Chop",
       "name": "Wood chop ai cavi dall'alto",
       "nameEn": "Standing Cable Wood Chop",
-      "sets": 4,
-      "reps": "6-10",
-      "rir": "1-2",
-      "rest": "2:00",
-      "isCompound": true,
+      "sets": 3,
+      "reps": "12-20",
+      "rir": "0-1",
+      "rest": "60s",
+      "isCompound": false,
       "tags": ["CORE", "D.ANT"],
       "badges": ["C"],
       "equip": "Cavi",
@@ -15553,10 +15691,10 @@ const EXERCISE_PACK = {
       "id": "Standing_Calf_Raises",
       "name": "Calf raise in piedi",
       "nameEn": "Standing Calf Raises",
-      "sets": 3,
-      "reps": "10-15",
+      "sets": 4,
+      "reps": "12-20",
       "rir": "0-1",
-      "rest": "75s",
+      "rest": "60s",
       "isCompound": false,
       "tags": ["POLP"],
       "badges": [],
@@ -15574,9 +15712,9 @@ const EXERCISE_PACK = {
       "name": "Curl di concentrazione in piedi",
       "nameEn": "Standing Concentration Curl",
       "sets": 3,
-      "reps": "10-15",
+      "reps": "15-20",
       "rir": "0-1",
-      "rest": "75s",
+      "rest": "45s",
       "isCompound": false,
       "tags": ["BI", "AVB"],
       "badges": [],
@@ -15593,10 +15731,10 @@ const EXERCISE_PACK = {
       "id": "Standing_Dumbbell_Calf_Raise",
       "name": "Calf raise in piedi con manubri",
       "nameEn": "Standing Dumbbell Calf Raise",
-      "sets": 3,
-      "reps": "10-15",
+      "sets": 4,
+      "reps": "12-20",
       "rir": "0-1",
-      "rest": "75s",
+      "rest": "60s",
       "isCompound": false,
       "tags": ["POLP"],
       "badges": [],
@@ -15634,9 +15772,9 @@ const EXERCISE_PACK = {
       "name": "Curl inverso con manubri",
       "nameEn": "Standing Dumbbell Reverse Curl",
       "sets": 3,
-      "reps": "10-15",
+      "reps": "15-20",
       "rir": "0-1",
-      "rest": "75s",
+      "rest": "45s",
       "isCompound": false,
       "tags": ["BI", "AVB"],
       "badges": [],
@@ -15774,9 +15912,9 @@ const EXERCISE_PACK = {
       "name": "Alzate incrociate ai cavi bassi",
       "nameEn": "Standing Low-Pulley Deltoid Raise",
       "sets": 3,
-      "reps": "10-15",
+      "reps": "15-20",
       "rir": "0-1",
-      "rest": "75s",
+      "rest": "45s",
       "isCompound": false,
       "tags": ["D.ANT", "AVB"],
       "badges": [],
@@ -15834,9 +15972,9 @@ const EXERCISE_PACK = {
       "name": "Olimpico con disco in piedi hand squeeze",
       "nameEn": "Standing Olympic Plate Hand Squeeze",
       "sets": 3,
-      "reps": "10-15",
+      "reps": "15-20",
       "rir": "0-1",
-      "rest": "75s",
+      "rest": "45s",
       "isCompound": false,
       "tags": ["AVB", "BI"],
       "badges": [],
@@ -15974,9 +16112,9 @@ const EXERCISE_PACK = {
       "name": "Curl dei polsi con bilanciere dietro la schiena",
       "nameEn": "Standing Palms-Up Barbell Behind The Back Wrist Curl",
       "sets": 3,
-      "reps": "10-15",
+      "reps": "15-20",
       "rir": "0-1",
-      "rest": "75s",
+      "rest": "45s",
       "isCompound": false,
       "tags": ["AVB"],
       "badges": [],
@@ -15994,9 +16132,9 @@ const EXERCISE_PACK = {
       "name": "Crunch ai cavi in piedi",
       "nameEn": "Standing Rope Crunch",
       "sets": 3,
-      "reps": "10-15",
+      "reps": "12-20",
       "rir": "0-1",
-      "rest": "75s",
+      "rest": "60s",
       "isCompound": false,
       "tags": ["CORE"],
       "badges": [],
@@ -16093,11 +16231,11 @@ const EXERCISE_PACK = {
       "id": "Stiff_Leg_Barbell_Good_Morning",
       "name": "Good morning a gambe tese con bilanciere",
       "nameEn": "Stiff Leg Barbell Good Morning",
-      "sets": 4,
-      "reps": "6-10",
-      "rir": "1-2",
-      "rest": "2:00",
-      "isCompound": true,
+      "sets": 3,
+      "reps": "12-20",
+      "rir": "0-1",
+      "rest": "60s",
+      "isCompound": false,
       "tags": ["CORE", "GLUTE"],
       "badges": ["C"],
       "equip": "Bilanciere",
@@ -16254,9 +16392,9 @@ const EXERCISE_PACK = {
       "name": "Fallout in sospensione",
       "nameEn": "Suspended Fallout",
       "sets": 3,
-      "reps": "10-15",
+      "reps": "12-20",
       "rir": "0-1",
-      "rest": "75s",
+      "rest": "60s",
       "isCompound": false,
       "tags": ["CORE", "PETTO"],
       "badges": [],
@@ -16294,9 +16432,9 @@ const EXERCISE_PACK = {
       "name": "Crunch in sospensione inverso",
       "nameEn": "Suspended Reverse Crunch",
       "sets": 3,
-      "reps": "10-15",
+      "reps": "12-20",
       "rir": "0-1",
-      "rest": "75s",
+      "rest": "60s",
       "isCompound": false,
       "tags": ["CORE"],
       "badges": [],
@@ -16353,11 +16491,11 @@ const EXERCISE_PACK = {
       "id": "Svend_Press",
       "name": "Spinte svend",
       "nameEn": "Svend Press",
-      "sets": 4,
-      "reps": "6-10",
-      "rir": "1-2",
-      "rest": "2:00",
-      "isCompound": true,
+      "sets": 3,
+      "reps": "15-20",
+      "rir": "0-1",
+      "rest": "45s",
+      "isCompound": false,
       "tags": ["PETTO", "AVB"],
       "badges": ["C"],
       "equip": "Varie",
@@ -16574,9 +16712,9 @@ const EXERCISE_PACK = {
       "name": "Tuck crunch",
       "nameEn": "Tuck Crunch",
       "sets": 3,
-      "reps": "10-15",
+      "reps": "12-20",
       "rir": "0-1",
-      "rest": "75s",
+      "rest": "60s",
       "isCompound": false,
       "tags": ["CORE"],
       "badges": [],
@@ -16754,8 +16892,8 @@ const EXERCISE_PACK = {
       "name": "Squat con salto zavorrato",
       "nameEn": "Weighted Jump Squat",
       "sets": 4,
-      "reps": "6-10",
-      "rir": "1-2",
+      "reps": "3-5",
+      "rir": "2-3",
       "rest": "2:00",
       "isCompound": true,
       "tags": ["QUAD", "POLP"],
@@ -16794,10 +16932,10 @@ const EXERCISE_PACK = {
       "name": "Sissy squat zavorrato",
       "nameEn": "Weighted Sissy Squat",
       "sets": 4,
-      "reps": "6-10",
-      "rir": "1-2",
-      "rest": "2:00",
-      "isCompound": true,
+      "reps": "12-20",
+      "rir": "0-1",
+      "rest": "60s",
+      "isCompound": false,
       "tags": ["QUAD", "POLP"],
       "badges": ["C"],
       "equip": "Bilanciere",
@@ -16814,9 +16952,9 @@ const EXERCISE_PACK = {
       "name": "Sit-up con elastici",
       "nameEn": "Weighted Sit-Ups - With Bands",
       "sets": 3,
-      "reps": "10-15",
+      "reps": "12-20",
       "rir": "0-1",
-      "rest": "75s",
+      "rest": "60s",
       "isCompound": false,
       "tags": ["CORE"],
       "badges": [],
@@ -16834,10 +16972,10 @@ const EXERCISE_PACK = {
       "name": "Squat zavorrato",
       "nameEn": "Weighted Squat",
       "sets": 4,
-      "reps": "6-10",
-      "rir": "1-2",
-      "rest": "2:00",
-      "isCompound": true,
+      "reps": "12-20",
+      "rir": "0-1",
+      "rest": "60s",
+      "isCompound": false,
       "tags": ["QUAD", "POLP"],
       "badges": ["C"],
       "equip": "Varie",
@@ -16994,10 +17132,10 @@ const EXERCISE_PACK = {
       "name": "Squat stance larga",
       "nameEn": "Wide Stance Barbell Squat",
       "sets": 4,
-      "reps": "6-10",
-      "rir": "1-2",
-      "rest": "2:00",
-      "isCompound": true,
+      "reps": "12-20",
+      "rir": "0-1",
+      "rest": "60s",
+      "isCompound": false,
       "tags": ["QUAD", "POLP"],
       "badges": ["C"],
       "equip": "Bilanciere",
@@ -17014,8 +17152,8 @@ const EXERCISE_PACK = {
       "name": "Wind sprint alla sbarra",
       "nameEn": "Wind Sprints",
       "sets": 4,
-      "reps": "6-10",
-      "rir": "1-2",
+      "reps": "3-5",
+      "rir": "2-3",
       "rest": "2:00",
       "isCompound": true,
       "tags": ["CORE"],
@@ -17034,9 +17172,9 @@ const EXERCISE_PACK = {
       "name": "Ruota polso",
       "nameEn": "Wrist Roller",
       "sets": 3,
-      "reps": "10-15",
+      "reps": "15-20",
       "rir": "0-1",
-      "rest": "75s",
+      "rest": "45s",
       "isCompound": false,
       "tags": ["AVB", "D.ANT"],
       "badges": [],
@@ -17054,9 +17192,9 @@ const EXERCISE_PACK = {
       "name": "Rotazioni dei polsi con bilanciere",
       "nameEn": "Wrist Rotations with Straight Bar",
       "sets": 3,
-      "reps": "10-15",
+      "reps": "15-20",
       "rir": "0-1",
-      "rest": "75s",
+      "rest": "45s",
       "isCompound": false,
       "tags": ["AVB"],
       "badges": [],
@@ -17074,10 +17212,10 @@ const EXERCISE_PACK = {
       "name": "Zercher squat",
       "nameEn": "Zercher Squats",
       "sets": 4,
-      "reps": "6-10",
-      "rir": "1-2",
-      "rest": "2:00",
-      "isCompound": true,
+      "reps": "12-20",
+      "rir": "0-1",
+      "rest": "60s",
+      "isCompound": false,
       "tags": ["QUAD", "POLP"],
       "badges": ["C"],
       "equip": "Bilanciere",
@@ -17094,9 +17232,9 @@ const EXERCISE_PACK = {
       "name": "Zottman curl",
       "nameEn": "Zottman Curl",
       "sets": 3,
-      "reps": "10-15",
+      "reps": "15-20",
       "rir": "0-1",
-      "rest": "75s",
+      "rest": "45s",
       "isCompound": false,
       "tags": ["BI", "AVB"],
       "badges": [],
@@ -17114,9 +17252,9 @@ const EXERCISE_PACK = {
       "name": "Zottman curl su panca Scott",
       "nameEn": "Zottman Preacher Curl",
       "sets": 3,
-      "reps": "10-15",
+      "reps": "15-20",
       "rir": "0-1",
-      "rest": "75s",
+      "rest": "45s",
       "isCompound": false,
       "tags": ["BI", "AVB"],
       "badges": [],
@@ -17131,7 +17269,7 @@ const EXERCISE_PACK = {
     }
   }
 };
-// Ogni esercizio originale eredita le foto del corrispondente del pacchetto
+/*BUILTIN_TWIN_START*/
 const BUILTIN_TWIN = {
   "lun_1": "Incline_Dumbbell_Press",
   "lun_2": "Dumbbell_Shoulder_Press",
@@ -17204,6 +17342,7 @@ const BUILTIN_TWIN = {
   "s2u_6": "Dumbbell_Flyes",
   "gio_4": "Seated_Leg_Curl"
 };
+/*BUILTIN_TWIN_END*/
 Object.values(EXERCISE_PACK.exercises).forEach(ex => {
   if (!EXERCISE_DB[ex.id]) EXERCISE_DB[ex.id] = ex; // le schede fatte a mano hanno precedenza
   if (ex.img) EXERCISE_IMAGES[ex.id] = [ex.img].concat(ex.img2 ? [ex.img2] : []);
@@ -17365,10 +17504,10 @@ function InfoBox(_ref26) {
 }
 function SummerScreen(_ref27) {
   let goBack = _ref27.goBack;
-  const _useState47 = useState('info'),
-    _useState48 = _slicedToArray(_useState47, 2),
-    mode = _useState48[0],
-    setMode = _useState48[1]; // 'info' | 'train'
+  const _useState51 = useState('info'),
+    _useState52 = _slicedToArray(_useState51, 2),
+    mode = _useState52[0],
+    setMode = _useState52[1]; // 'info' | 'train'
 
   if (mode === 'train') {
     return /*#__PURE__*/React.createElement(WorkoutScreen, {
@@ -17699,10 +17838,10 @@ const SUPP_STACK = [{
 }];
 function NutritionScreen(_ref28) {
   let goBack = _ref28.goBack;
-  const _useState49 = useState('dieta'),
-    _useState50 = _slicedToArray(_useState49, 2),
-    tab = _useState50[0],
-    setTab = _useState50[1];
+  const _useState53 = useState('dieta'),
+    _useState54 = _slicedToArray(_useState53, 2),
+    tab = _useState54[0],
+    setTab = _useState54[1];
   const tabs = [{
     id: 'dieta',
     label: 'Dieta'
@@ -18129,10 +18268,10 @@ const XIcon = p => /*#__PURE__*/React.createElement(Icon, _extends({
 // ============= ESTATE V2 · 4 GIORNI =============
 function Summer2Screen(_ref33) {
   let goBack = _ref33.goBack;
-  const _useState51 = useState('info'),
-    _useState52 = _slicedToArray(_useState51, 2),
-    mode = _useState52[0],
-    setMode = _useState52[1];
+  const _useState55 = useState('info'),
+    _useState56 = _slicedToArray(_useState55, 2),
+    mode = _useState56[0],
+    setMode = _useState56[1];
   if (mode === 'train') return /*#__PURE__*/React.createElement(WorkoutScreen, {
     goBack: () => setMode('info'),
     config: SUMMER2_CONFIG
@@ -18254,26 +18393,26 @@ function Summer2Screen(_ref33) {
 // ============= LIBRERIA SCHEDE (import .v8w) =============
 function LibraryScreenLegacy(_ref36) {
   let goBack = _ref36.goBack;
-  const _useState53 = useState(() => storage.get('custom_schedules') || []),
-    _useState54 = _slicedToArray(_useState53, 2),
-    schedules = _useState54[0],
-    setSchedules = _useState54[1];
-  const _useState55 = useState(null),
-    _useState56 = _slicedToArray(_useState55, 2),
-    selected = _useState56[0],
-    setSelected = _useState56[1];
-  const _useState57 = useState(false),
+  const _useState57 = useState(() => storage.get('custom_schedules') || []),
     _useState58 = _slicedToArray(_useState57, 2),
-    panel = _useState58[0],
-    setPanel = _useState58[1];
-  const _useState59 = useState(''),
+    schedules = _useState58[0],
+    setSchedules = _useState58[1];
+  const _useState59 = useState(null),
     _useState60 = _slicedToArray(_useState59, 2),
-    paste = _useState60[0],
-    setPaste = _useState60[1];
-  const _useState61 = useState(null),
+    selected = _useState60[0],
+    setSelected = _useState60[1];
+  const _useState61 = useState(false),
     _useState62 = _slicedToArray(_useState61, 2),
-    msg = _useState62[0],
-    setMsg = _useState62[1];
+    panel = _useState62[0],
+    setPanel = _useState62[1];
+  const _useState63 = useState(''),
+    _useState64 = _slicedToArray(_useState63, 2),
+    paste = _useState64[0],
+    setPaste = _useState64[1];
+  const _useState65 = useState(null),
+    _useState66 = _slicedToArray(_useState65, 2),
+    msg = _useState66[0],
+    setMsg = _useState66[1];
   const fileRef = useRef(null);
   const persist = list => {
     setSchedules(list);
@@ -19550,14 +19689,14 @@ function MacroBar(_ref42) {
 function ExercisePicker(_ref43) {
   let onPick = _ref43.onPick,
     onClose = _ref43.onClose;
-  const _useState63 = useState(''),
-    _useState64 = _slicedToArray(_useState63, 2),
-    q = _useState64[0],
-    setQ = _useState64[1];
-  const _useState65 = useState(null),
-    _useState66 = _slicedToArray(_useState65, 2),
-    tag = _useState66[0],
-    setTag = _useState66[1];
+  const _useState67 = useState(''),
+    _useState68 = _slicedToArray(_useState67, 2),
+    q = _useState68[0],
+    setQ = _useState68[1];
+  const _useState69 = useState(null),
+    _useState70 = _slicedToArray(_useState69, 2),
+    tag = _useState70[0],
+    setTag = _useState70[1];
   const all = Object.values(EXERCISE_DB).filter(e => !BUILTIN_TWIN[e.id]);
   const tags = [];
   all.forEach(e => (e.tags || []).forEach(t => {
@@ -19721,14 +19860,14 @@ function ExercisePicker(_ref43) {
 function FoodPicker(_ref44) {
   let onPick = _ref44.onPick,
     onClose = _ref44.onClose;
-  const _useState67 = useState(''),
-    _useState68 = _slicedToArray(_useState67, 2),
-    q = _useState68[0],
-    setQ = _useState68[1];
-  const _useState69 = useState(null),
-    _useState70 = _slicedToArray(_useState69, 2),
-    cat = _useState70[0],
-    setCat = _useState70[1];
+  const _useState71 = useState(''),
+    _useState72 = _slicedToArray(_useState71, 2),
+    q = _useState72[0],
+    setQ = _useState72[1];
+  const _useState73 = useState(null),
+    _useState74 = _slicedToArray(_useState73, 2),
+    cat = _useState74[0],
+    setCat = _useState74[1];
   const ql = q.trim().toLowerCase();
   const list = FOOD_DB.filter(f => (!ql || f.n.toLowerCase().indexOf(ql) >= 0) && (!cat || f.cat === cat));
   const addCustom = () => onPick({
@@ -20025,22 +20164,22 @@ function ScheduleEditorScreen(_ref45) {
   let initial = _ref45.initial,
     onSave = _ref45.onSave,
     goBack = _ref45.goBack;
-  const _useState71 = useState(() => toEditableSched(initial)),
-    _useState72 = _slicedToArray(_useState71, 2),
-    ed = _useState72[0],
-    setEd = _useState72[1];
-  const _useState73 = useState(0),
-    _useState74 = _slicedToArray(_useState73, 2),
-    open = _useState74[0],
-    setOpen = _useState74[1];
-  const _useState75 = useState(null),
+  const _useState75 = useState(() => toEditableSched(initial)),
     _useState76 = _slicedToArray(_useState75, 2),
-    picker = _useState76[0],
-    setPicker = _useState76[1]; // indice giorno
-  const _useState77 = useState(null),
+    ed = _useState76[0],
+    setEd = _useState76[1];
+  const _useState77 = useState(0),
     _useState78 = _slicedToArray(_useState77, 2),
-    msg = _useState78[0],
-    setMsg = _useState78[1];
+    open = _useState78[0],
+    setOpen = _useState78[1];
+  const _useState79 = useState(null),
+    _useState80 = _slicedToArray(_useState79, 2),
+    picker = _useState80[0],
+    setPicker = _useState80[1]; // indice giorno
+  const _useState81 = useState(null),
+    _useState82 = _slicedToArray(_useState81, 2),
+    msg = _useState82[0],
+    setMsg = _useState82[1];
   useAndroidBack(goBack, true);
   const setField = (k, v) => setEd(p => ({
     ...p,
@@ -20501,30 +20640,30 @@ function ScheduleEditorScreen(_ref45) {
 // ============================================================
 function LibraryScreen(_ref46) {
   let goBack = _ref46.goBack;
-  const _useState79 = useState(() => storage.get('custom_schedules') || []),
-    _useState80 = _slicedToArray(_useState79, 2),
-    schedules = _useState80[0],
-    setSchedules = _useState80[1];
-  const _useState81 = useState('list'),
-    _useState82 = _slicedToArray(_useState81, 2),
-    view = _useState82[0],
-    setView = _useState82[1];
-  const _useState83 = useState(null),
+  const _useState83 = useState(() => storage.get('custom_schedules') || []),
     _useState84 = _slicedToArray(_useState83, 2),
-    current = _useState84[0],
-    setCurrent = _useState84[1];
-  const _useState85 = useState(false),
+    schedules = _useState84[0],
+    setSchedules = _useState84[1];
+  const _useState85 = useState('list'),
     _useState86 = _slicedToArray(_useState85, 2),
-    panel = _useState86[0],
-    setPanel = _useState86[1];
-  const _useState87 = useState(''),
+    view = _useState86[0],
+    setView = _useState86[1];
+  const _useState87 = useState(null),
     _useState88 = _slicedToArray(_useState87, 2),
-    paste = _useState88[0],
-    setPaste = _useState88[1];
-  const _useState89 = useState(null),
+    current = _useState88[0],
+    setCurrent = _useState88[1];
+  const _useState89 = useState(false),
     _useState90 = _slicedToArray(_useState89, 2),
-    msg = _useState90[0],
-    setMsg = _useState90[1];
+    panel = _useState90[0],
+    setPanel = _useState90[1];
+  const _useState91 = useState(''),
+    _useState92 = _slicedToArray(_useState91, 2),
+    paste = _useState92[0],
+    setPaste = _useState92[1];
+  const _useState93 = useState(null),
+    _useState94 = _slicedToArray(_useState93, 2),
+    msg = _useState94[0],
+    setMsg = _useState94[1];
   const fileRef = useRef(null);
   const persist = list => {
     setSchedules(list);
@@ -21030,22 +21169,22 @@ function DietEditorScreen(_ref47) {
   let initial = _ref47.initial,
     onSave = _ref47.onSave,
     goBack = _ref47.goBack;
-  const _useState91 = useState(() => JSON.parse(JSON.stringify(initial))),
-    _useState92 = _slicedToArray(_useState91, 2),
-    d = _useState92[0],
-    setD = _useState92[1];
-  const _useState93 = useState(null),
-    _useState94 = _slicedToArray(_useState93, 2),
-    picker = _useState94[0],
-    setPicker = _useState94[1]; // indice pasto
-  const _useState95 = useState(0),
+  const _useState95 = useState(() => JSON.parse(JSON.stringify(initial))),
     _useState96 = _slicedToArray(_useState95, 2),
-    openMeal = _useState96[0],
-    setOpenMeal = _useState96[1];
+    d = _useState96[0],
+    setD = _useState96[1];
   const _useState97 = useState(null),
     _useState98 = _slicedToArray(_useState97, 2),
-    msg = _useState98[0],
-    setMsg = _useState98[1];
+    picker = _useState98[0],
+    setPicker = _useState98[1]; // indice pasto
+  const _useState99 = useState(0),
+    _useState100 = _slicedToArray(_useState99, 2),
+    openMeal = _useState100[0],
+    setOpenMeal = _useState100[1];
+  const _useState101 = useState(null),
+    _useState102 = _slicedToArray(_useState101, 2),
+    msg = _useState102[0],
+    setMsg = _useState102[1];
   useAndroidBack(goBack, true);
   const setField = (k, v) => setD(p => ({
     ...p,
@@ -21581,38 +21720,38 @@ function DietEditorScreen(_ref47) {
 // ============================================================
 function DietScreen(_ref48) {
   let goBack = _ref48.goBack;
-  const _useState99 = useState(() => storage.get('custom_diets') || []),
-    _useState100 = _slicedToArray(_useState99, 2),
-    diets = _useState100[0],
-    setDiets = _useState100[1];
-  const _useState101 = useState('list'),
-    _useState102 = _slicedToArray(_useState101, 2),
-    view = _useState102[0],
-    setView = _useState102[1];
-  const _useState103 = useState(null),
+  const _useState103 = useState(() => storage.get('custom_diets') || []),
     _useState104 = _slicedToArray(_useState103, 2),
-    current = _useState104[0],
-    setCurrent = _useState104[1];
-  const _useState105 = useState(null),
+    diets = _useState104[0],
+    setDiets = _useState104[1];
+  const _useState105 = useState('list'),
     _useState106 = _slicedToArray(_useState105, 2),
-    shop = _useState106[0],
-    setShop = _useState106[1];
-  const _useState107 = useState(7),
+    view = _useState106[0],
+    setView = _useState106[1];
+  const _useState107 = useState(null),
     _useState108 = _slicedToArray(_useState107, 2),
-    days = _useState108[0],
-    setDays = _useState108[1];
-  const _useState109 = useState(false),
+    current = _useState108[0],
+    setCurrent = _useState108[1];
+  const _useState109 = useState(null),
     _useState110 = _slicedToArray(_useState109, 2),
-    panel = _useState110[0],
-    setPanel = _useState110[1];
-  const _useState111 = useState(''),
+    shop = _useState110[0],
+    setShop = _useState110[1];
+  const _useState111 = useState(7),
     _useState112 = _slicedToArray(_useState111, 2),
-    paste = _useState112[0],
-    setPaste = _useState112[1];
-  const _useState113 = useState(null),
+    days = _useState112[0],
+    setDays = _useState112[1];
+  const _useState113 = useState(false),
     _useState114 = _slicedToArray(_useState113, 2),
-    msg = _useState114[0],
-    setMsg = _useState114[1];
+    panel = _useState114[0],
+    setPanel = _useState114[1];
+  const _useState115 = useState(''),
+    _useState116 = _slicedToArray(_useState115, 2),
+    paste = _useState116[0],
+    setPaste = _useState116[1];
+  const _useState117 = useState(null),
+    _useState118 = _slicedToArray(_useState117, 2),
+    msg = _useState118[0],
+    setMsg = _useState118[1];
   const fileRef = useRef(null);
   const persist = list => {
     setDiets(list);
@@ -22109,10 +22248,10 @@ function Thumb(_ref53) {
     _ref53$size = _ref53.size,
     size = _ref53$size === void 0 ? 58 : _ref53$size;
   const urls = EXERCISE_IMAGES[id] || [];
-  const _useState115 = useState(0),
-    _useState116 = _slicedToArray(_useState115, 2),
-    i = _useState116[0],
-    setI = _useState116[1];
+  const _useState119 = useState(0),
+    _useState120 = _slicedToArray(_useState119, 2),
+    i = _useState120[0],
+    setI = _useState120[1];
   useEffect(() => {
     setI(0);
   }, [id]);
@@ -22337,26 +22476,26 @@ function ExDetailModal(_ref54) {
 }
 function ExerciseDBScreen(_ref57) {
   let goBack = _ref57.goBack;
-  const _useState117 = useState(''),
-    _useState118 = _slicedToArray(_useState117, 2),
-    q = _useState118[0],
-    setQ = _useState118[1];
-  const _useState119 = useState(null),
-    _useState120 = _slicedToArray(_useState119, 2),
-    tag = _useState120[0],
-    setTag = _useState120[1];
-  const _useState121 = useState(null),
+  const _useState121 = useState(''),
     _useState122 = _slicedToArray(_useState121, 2),
-    eq = _useState122[0],
-    setEq = _useState122[1];
+    q = _useState122[0],
+    setQ = _useState122[1];
   const _useState123 = useState(null),
     _useState124 = _slicedToArray(_useState123, 2),
-    sel = _useState124[0],
-    setSel = _useState124[1];
-  const _useState125 = useState(30),
+    tag = _useState124[0],
+    setTag = _useState124[1];
+  const _useState125 = useState(null),
     _useState126 = _slicedToArray(_useState125, 2),
-    limit = _useState126[0],
-    setLimit = _useState126[1];
+    eq = _useState126[0],
+    setEq = _useState126[1];
+  const _useState127 = useState(null),
+    _useState128 = _slicedToArray(_useState127, 2),
+    sel = _useState128[0],
+    setSel = _useState128[1];
+  const _useState129 = useState(30),
+    _useState130 = _slicedToArray(_useState129, 2),
+    limit = _useState130[0],
+    setLimit = _useState130[1];
   const all = Object.values(EXERCISE_DB).filter(e => !BUILTIN_TWIN[e.id]);
   const ql = q.trim().toLowerCase();
   const list = all.filter(e => (!ql || (e.name || '').toLowerCase().indexOf(ql) >= 0 || (e.nameEn || '').toLowerCase().indexOf(ql) >= 0) && (!tag || (e.tags || []).indexOf(tag) >= 0) && (!eq || e.equip === eq));
@@ -22577,13 +22716,773 @@ function ExerciseDBScreen(_ref57) {
   }, "Fonte dati: free-exercise-db \u2014 Unlicense (pubblico dominio).", /*#__PURE__*/React.createElement("br", null), "Le immagini vanno copiate nella cartella ", /*#__PURE__*/React.createElement("b", null, "exercises/"), " del repo.")));
 }
 
+// ============================================================
+// V11.2 · VOLUME SETTIMANALE PER GRUPPO MUSCOLARE
+// ============================================================
+// Convenzione: il primo tag dell'esercizio prende 1 serie piena,
+// i tag successivi mezza serie (pratica standard per il volume indiretto).
+const VOL_RANGES = {
+  min: 10,
+  max: 20
+};
+const VOL_MUSCLES = ['PETTO', 'DORSO', 'D.ANT', 'D.MED', 'D.POST', 'BI', 'TRI', 'QUAD', 'HAM', 'GLUTE', 'POLP', 'CORE', 'AVB'];
+function computeVolume(config, weekLog) {
+  const out = {};
+  VOL_MUSCLES.forEach(m => {
+    out[m] = 0;
+  });
+  if (!weekLog) return out;
+  (config.days || []).forEach(day => {
+    const dayLog = weekLog[day.id];
+    if (!dayLog || !dayLog.esercizi) return;
+    const list = config.exercises[day.id] || [];
+    Object.entries(dayLog.esercizi).forEach(_ref58 => {
+      let _ref59 = _slicedToArray(_ref58, 2),
+        idx = _ref59[0],
+        rec = _ref59[1];
+      const ex = list[parseInt(idx, 10)];
+      if (!ex) return;
+      const done = (rec.sets_done || []).filter(Boolean).length;
+      if (!done) return;
+      (ex.tags || []).forEach((t, i) => {
+        if (out[t] === undefined) return;
+        out[t] += done * (i === 0 ? 1 : 0.5);
+      });
+    });
+  });
+  return out;
+}
+function VolumeScreen(_ref60) {
+  let goBack = _ref60.goBack;
+  const programs = [{
+    id: 'main',
+    label: 'V8.3.4',
+    config: MAIN_CONFIG
+  }, {
+    id: 'summer2',
+    label: 'Estate',
+    config: SUMMER2_CONFIG
+  }].concat((storage.get('custom_schedules') || []).map(s => {
+    let cfg = null;
+    try {
+      cfg = rehydrateSchedule(s);
+    } catch (e) {
+      cfg = null;
+    }
+    return cfg ? {
+      id: s.id,
+      label: s.name || 'Scheda',
+      config: cfg
+    } : null;
+  }).filter(Boolean));
+  const _useState131 = useState(0),
+    _useState132 = _slicedToArray(_useState131, 2),
+    progIdx = _useState132[0],
+    setProgIdx = _useState132[1];
+  const prog = programs[progIdx] || programs[0];
+  const log = storage.get(prog.config.storageKey) || {};
+  const weeksWithData = (prog.config.weeks || []).filter(w => log[w]);
+  const _useState133 = useState(weeksWithData.length ? weeksWithData[weeksWithData.length - 1] : (prog.config.weeks || [1])[0]),
+    _useState134 = _slicedToArray(_useState133, 2),
+    week = _useState134[0],
+    setWeek = _useState134[1];
+  useEffect(() => {
+    const l = storage.get(prog.config.storageKey) || {};
+    const ws = (prog.config.weeks || []).filter(w => l[w]);
+    setWeek(ws.length ? ws[ws.length - 1] : (prog.config.weeks || [1])[0]);
+  }, [progIdx]);
+  const vol = computeVolume(prog.config, log[week]);
+  const totale = Object.values(vol).reduce((a, b) => a + b, 0);
+  const attivi = VOL_MUSCLES.filter(m => vol[m] > 0);
+  const maxVal = Math.max(VOL_RANGES.max, ...VOL_MUSCLES.map(m => vol[m]));
+  const statoOf = v => v === 0 ? {
+    c: '#3A3545',
+    t: '—'
+  } : v < VOL_RANGES.min ? {
+    c: '#E8B43C',
+    t: 'sotto'
+  } : v <= VOL_RANGES.max ? {
+    c: '#3FB66C',
+    t: 'ok'
+  } : {
+    c: '#E0524A',
+    t: 'sopra'
+  };
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      minHeight: '100vh',
+      background: 'transparent',
+      paddingBottom: '120px'
+    }
+  }, /*#__PURE__*/React.createElement(Header, {
+    title: "Volume settimanale",
+    subtitle: "Serie per gruppo muscolare",
+    onBack: goBack
+  }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: '0 12px'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      gap: '5px',
+      overflowX: 'auto',
+      paddingBottom: '10px'
+    }
+  }, programs.map((p, i) => /*#__PURE__*/React.createElement("button", {
+    key: p.id,
+    onClick: () => setProgIdx(i),
+    style: {
+      flexShrink: 0,
+      padding: '8px 13px',
+      borderRadius: '20px',
+      fontSize: '11.5px',
+      fontWeight: '700',
+      cursor: 'pointer',
+      background: i === progIdx ? VIOLET : 'rgba(255,255,255,0.06)',
+      color: i === progIdx ? '#fff' : '#908AA0',
+      border: '1px solid ' + (i === progIdx ? VIOLET : 'rgba(255,255,255,0.1)')
+    }
+  }, p.label))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      gap: '4px',
+      overflowX: 'auto',
+      paddingBottom: '12px'
+    }
+  }, (prog.config.weeks || []).map(w => {
+    const has = !!log[w];
+    return /*#__PURE__*/React.createElement("button", {
+      key: w,
+      onClick: () => setWeek(w),
+      style: {
+        flexShrink: 0,
+        minWidth: '36px',
+        padding: '7px 0',
+        borderRadius: '10px',
+        fontSize: '12px',
+        fontWeight: '700',
+        cursor: 'pointer',
+        background: w === week ? '#4D82E8' : 'rgba(255,255,255,0.05)',
+        color: w === week ? '#fff' : has ? '#C7C2D0' : '#3A3545',
+        border: '1px solid ' + (w === week ? '#4D82E8' : 'rgba(255,255,255,0.08)')
+      }
+    }, w);
+  })), totale === 0 ? /*#__PURE__*/React.createElement("div", {
+    style: {
+      ...glassCard,
+      padding: '22px 16px',
+      textAlign: 'center'
+    }
+  }, /*#__PURE__*/React.createElement(BarChart3, {
+    size: 30,
+    color: "#5A5468"
+  }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: '13px',
+      color: '#C7C2D0',
+      fontWeight: '600',
+      marginTop: '10px'
+    }
+  }, "Nessuna serie registrata"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: '11px',
+      color: '#908AA0',
+      marginTop: '6px',
+      lineHeight: 1.5
+    }
+  }, "Il volume si calcola dalle serie che spunti durante l'allenamento nella settimana ", week, ".")) : /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+    style: {
+      ...glassCard,
+      padding: '13px',
+      marginBottom: '12px',
+      textAlign: 'center'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontFamily: displayFont,
+      fontSize: '26px',
+      fontWeight: '800',
+      color: '#F4F2F8'
+    }
+  }, Math.round(totale)), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: '10.5px',
+      color: '#908AA0',
+      marginTop: '2px'
+    }
+  }, "serie totali \xB7 settimana ", week, " \xB7 ", attivi.length, " gruppi allenati")), VOL_MUSCLES.filter(m => vol[m] > 0).sort((a, b) => vol[b] - vol[a]).map(m => {
+    const v = vol[m];
+    const st = statoOf(v);
+    const col = TAG_COLORS[m] && TAG_COLORS[m].text || '#908AA0';
+    return /*#__PURE__*/React.createElement("div", {
+      key: m,
+      style: {
+        marginBottom: '11px'
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'baseline',
+        marginBottom: '4px'
+      }
+    }, /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontSize: '11px',
+        fontWeight: '800',
+        color: col,
+        letterSpacing: '0.4px'
+      }
+    }, m), /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontSize: '11.5px',
+        fontWeight: '700',
+        color: '#F4F2F8'
+      }
+    }, v % 1 === 0 ? v : v.toFixed(1), " ", /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontSize: '9.5px',
+        color: st.c,
+        fontWeight: '700'
+      }
+    }, st.t))), /*#__PURE__*/React.createElement("div", {
+      style: {
+        position: 'relative',
+        height: '7px',
+        background: 'rgba(255,255,255,0.06)',
+        borderRadius: '4px',
+        overflow: 'hidden'
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        position: 'absolute',
+        left: 100 * VOL_RANGES.min / maxVal + '%',
+        width: 100 * (VOL_RANGES.max - VOL_RANGES.min) / maxVal + '%',
+        top: 0,
+        bottom: 0,
+        background: 'rgba(63,182,108,0.16)'
+      }
+    }), /*#__PURE__*/React.createElement("div", {
+      style: {
+        width: Math.min(100, 100 * v / maxVal) + '%',
+        height: '100%',
+        background: st.c,
+        borderRadius: '4px'
+      }
+    })));
+  }), /*#__PURE__*/React.createElement(InfoBox, {
+    color: "#4D82E8",
+    title: "Come si legge"
+  }, "La fascia verde \xE8 ", /*#__PURE__*/React.createElement("b", {
+    style: {
+      color: '#F4F2F8'
+    }
+  }, "10-20 serie a settimana"), ", il range con pi\xF9 supporto in letteratura per l'ipertrofia. Il primo gruppo muscolare di ogni esercizio conta ", /*#__PURE__*/React.createElement("b", {
+    style: {
+      color: '#F4F2F8'
+    }
+  }, "una serie piena"), ", i successivi ", /*#__PURE__*/React.createElement("b", {
+    style: {
+      color: '#F4F2F8'
+    }
+  }, "mezza"), ": il petto nella panca vale 1, i tricipiti 0,5."), /*#__PURE__*/React.createElement(InfoBox, {
+    color: "#E8B43C",
+    title: "Attenzione al contesto"
+  }, "In deficit calorico stare nella parte bassa del range \xE8 normale e sensato: il volume serve a mantenere, non a crescere. \"Sotto\" non significa automaticamente sbagliato."))));
+}
+
+// ============================================================
+// V11.2 · TDEE ADATTIVO
+// ============================================================
+const KCAL_PER_KG = 7700; // ~7700 kcal per kg di massa persa/guadagnata
+
+function TdeeScreen(_ref61) {
+  let goBack = _ref61.goBack;
+  const pesoLog = storage.get('peso') || {};
+  const diets = storage.get('custom_diets') || [];
+  const _useState135 = useState(() => storage.get('tdee_giorni') || {}),
+    _useState136 = _slicedToArray(_useState135, 2),
+    assign = _useState136[0],
+    setAssign = _useState136[1];
+  const _useState137 = useState(() => storage.get('tdee_manuale') || ''),
+    _useState138 = _slicedToArray(_useState137, 2),
+    manual = _useState138[0],
+    setManual = _useState138[1];
+  const setDays = (id, n) => {
+    const next = {
+      ...assign,
+      [id]: n
+    };
+    setAssign(next);
+    storage.set('tdee_giorni', next);
+  };
+
+  // settimane con media peso valida, in ordine
+  const weeks = Object.keys(pesoLog).map(Number).filter(w => (pesoLog[w] || {}).media > 0).sort((a, b) => a - b);
+  const serie = weeks.map(w => ({
+    w,
+    kg: pesoLog[w].media
+  }));
+
+  // intake medio giornaliero dalle diete assegnate
+  let giorniTot = 0,
+    kcalTot = 0;
+  diets.forEach(d => {
+    const n = parseFloat(assign[d.id]) || 0;
+    if (!n) return;
+    const t = dietTotals(d);
+    giorniTot += n;
+    kcalTot += t.kcal * n;
+  });
+  const intakeDiete = giorniTot > 0 ? kcalTot / Math.min(7, giorniTot || 7) * (giorniTot >= 7 ? 1 : 1) : 0;
+  const intakeMedio = giorniTot >= 1 ? kcalTot / giorniTot : parseFloat(manual) || 0;
+  const usaManuale = giorniTot < 1;
+
+  // variazione peso: confronto prima e ultima settimana disponibili
+  const n = serie.length;
+  const finestra = Math.min(n, 4);
+  const primo = n >= 2 ? serie[n - finestra] : null;
+  const ultimo = n >= 2 ? serie[n - 1] : null;
+  const settimane = primo && ultimo ? ultimo.w - primo.w : 0;
+  const deltaKg = primo && ultimo ? ultimo.kg - primo.kg : 0;
+  const kgSett = settimane > 0 ? deltaKg / settimane : 0;
+  const scartoGiorno = kgSett * KCAL_PER_KG / 7;
+  const tdee = intakeMedio > 0 && settimane > 0 ? Math.round(intakeMedio - scartoGiorno) : 0;
+  const pctSett = ultimo && ultimo.kg > 0 ? kgSett / ultimo.kg * 100 : 0;
+  const affidabile = settimane >= 2 && intakeMedio > 0;
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      minHeight: '100vh',
+      background: 'transparent',
+      paddingBottom: '120px'
+    }
+  }, /*#__PURE__*/React.createElement(Header, {
+    title: "TDEE adattivo",
+    subtitle: "Il tuo mantenimento reale, dai tuoi dati",
+    onBack: goBack
+  }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: '0 12px'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      ...glassCard,
+      padding: '13px',
+      marginBottom: '12px'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: '11px',
+      fontWeight: '700',
+      color: '#908AA0',
+      letterSpacing: '0.4px',
+      textTransform: 'uppercase',
+      marginBottom: '9px'
+    }
+  }, "Quanti giorni a settimana per dieta"), diets.length === 0 && /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: '11.5px',
+      color: '#908AA0',
+      lineHeight: 1.5
+    }
+  }, "Nessuna dieta salvata. Creane una in \"Le mie diete\", oppure inserisci sotto la media calorica a mano."), diets.map(d => {
+    const t = dietTotals(d);
+    return /*#__PURE__*/React.createElement("div", {
+      key: d.id,
+      style: {
+        display: 'flex',
+        alignItems: 'center',
+        gap: '9px',
+        marginBottom: '8px'
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        flex: 1,
+        minWidth: 0
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: '12.5px',
+        fontWeight: '700',
+        color: '#F4F2F8'
+      }
+    }, d.name), /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: '10px',
+        color: '#908AA0'
+      }
+    }, r0(t.kcal), " kcal")), /*#__PURE__*/React.createElement("div", {
+      style: {
+        display: 'flex',
+        gap: '3px'
+      }
+    }, [0, 1, 2, 3, 4, 5, 6, 7].map(nn => /*#__PURE__*/React.createElement("button", {
+      key: nn,
+      onClick: () => setDays(d.id, nn),
+      style: {
+        width: '25px',
+        height: '25px',
+        borderRadius: '7px',
+        fontSize: '11px',
+        fontWeight: '700',
+        cursor: 'pointer',
+        background: (parseFloat(assign[d.id]) || 0) === nn ? '#3FB66C' : 'rgba(255,255,255,0.05)',
+        color: (parseFloat(assign[d.id]) || 0) === nn ? '#fff' : '#5A5468',
+        border: 'none'
+      }
+    }, nn))));
+  }), usaManuale && /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginTop: '10px'
+    }
+  }, /*#__PURE__*/React.createElement(Fld, {
+    label: "Oppure: kcal medie al giorno",
+    type: "number",
+    value: manual,
+    onChange: v => {
+      setManual(v);
+      storage.set('tdee_manuale', v);
+    },
+    ph: "2000"
+  }))), !affidabile ? /*#__PURE__*/React.createElement("div", {
+    style: {
+      ...glassCard,
+      padding: '20px 16px',
+      textAlign: 'center'
+    }
+  }, /*#__PURE__*/React.createElement(Flame, {
+    size: 28,
+    color: "#5A5468"
+  }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: '13px',
+      color: '#C7C2D0',
+      fontWeight: '600',
+      marginTop: '10px'
+    }
+  }, "Dati insufficienti"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: '11.5px',
+      color: '#908AA0',
+      marginTop: '7px',
+      lineHeight: 1.6
+    }
+  }, "Servono ", /*#__PURE__*/React.createElement("b", {
+    style: {
+      color: '#F4F2F8'
+    }
+  }, "almeno 2 settimane"), " di medie peso in \"Peso & Misure\" e le calorie giornaliere qui sopra.", /*#__PURE__*/React.createElement("br", null), "Al momento hai ", n, " settiman", n === 1 ? 'a' : 'e', " con media peso", intakeMedio > 0 ? '' : ' e nessun dato calorico', ".")) : /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+    style: {
+      ...glassCard,
+      padding: '16px',
+      marginBottom: '12px',
+      textAlign: 'center',
+      borderLeft: '3px solid #E0524A'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: '10.5px',
+      color: '#908AA0',
+      fontWeight: '700',
+      letterSpacing: '0.4px'
+    }
+  }, "MANTENIMENTO STIMATO"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontFamily: displayFont,
+      fontSize: '34px',
+      fontWeight: '800',
+      color: '#F4F2F8',
+      lineHeight: 1.1,
+      marginTop: '4px'
+    }
+  }, tdee), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: '11px',
+      color: '#908AA0'
+    }
+  }, "kcal al giorno")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      ...glassCard,
+      padding: '13px',
+      marginBottom: '12px'
+    }
+  }, [['Intake medio', Math.round(intakeMedio) + ' kcal/g'], ['Finestra analizzata', settimane + ' settimane (S' + primo.w + '→S' + ultimo.w + ')'], ['Variazione peso', (deltaKg > 0 ? '+' : '') + deltaKg.toFixed(2) + ' kg'], ['Ritmo settimanale', (kgSett > 0 ? '+' : '') + kgSett.toFixed(2) + ' kg/sett (' + (pctSett > 0 ? '+' : '') + pctSett.toFixed(2) + '%)'], ['Scarto calorico', (scartoGiorno > 0 ? '+' : '') + Math.round(scartoGiorno) + ' kcal/g']].map(_ref62 => {
+    let _ref63 = _slicedToArray(_ref62, 2),
+      k = _ref63[0],
+      v = _ref63[1];
+    return /*#__PURE__*/React.createElement("div", {
+      key: k,
+      style: {
+        display: 'flex',
+        justifyContent: 'space-between',
+        padding: '6px 0',
+        borderBottom: '1px solid rgba(255,255,255,0.05)'
+      }
+    }, /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontSize: '11.5px',
+        color: '#908AA0'
+      }
+    }, k), /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontSize: '11.5px',
+        color: '#F4F2F8',
+        fontWeight: '700'
+      }
+    }, v));
+  })), (() => {
+    const target = -0.0065; // ~0.65%/sett, ritmo prudente in definizione
+    const troppoLento = kgSett > -0.2 && kgSett < 0.2;
+    const troppoVeloce = pctSett < -1.0;
+    const suggerito = Math.round(tdee - Math.abs(target) * ultimo.kg * KCAL_PER_KG / 7);
+    return /*#__PURE__*/React.createElement(InfoBox, {
+      color: troppoVeloce ? '#E0524A' : troppoLento ? '#E8B43C' : '#3FB66C',
+      title: troppoVeloce ? 'Stai calando troppo in fretta' : troppoLento ? 'Il calo si è fermato' : 'Ritmo nella norma'
+    }, troppoVeloce && /*#__PURE__*/React.createElement(React.Fragment, null, "Oltre l'1% a settimana aumenta la perdita di massa magra. Alza di ", /*#__PURE__*/React.createElement("b", {
+      style: {
+        color: '#F4F2F8'
+      }
+    }, "150-250 kcal"), " e rivaluta tra due settimane."), troppoLento && /*#__PURE__*/React.createElement(React.Fragment, null, "Col mantenimento stimato a ", tdee, " kcal, per riprendere a ~0,65%/sett dovresti stare intorno a ", /*#__PURE__*/React.createElement("b", {
+      style: {
+        color: '#F4F2F8'
+      }
+    }, suggerito, " kcal"), ". Prima di tagliare, controlla NEAT e precisione delle pesate."), !troppoVeloce && !troppoLento && /*#__PURE__*/React.createElement(React.Fragment, null, "Stai calando a ", Math.abs(pctSett).toFixed(2), "% a settimana: un ritmo che preserva bene la massa magra. Non cambiare nulla finch\xE9 regge."));
+  })(), /*#__PURE__*/React.createElement(InfoBox, {
+    color: "#78909c",
+    title: "Come funziona il calcolo"
+  }, "Mantenimento = calorie medie \u2212 (variazione peso \xD7 7700 kcal/kg \xF7 7). Usa i dati reali invece di una formula, quindi include gi\xE0 il tuo NEAT e l'adattamento metabolico. Serve per\xF2 che ", /*#__PURE__*/React.createElement("b", {
+    style: {
+      color: '#F4F2F8'
+    }
+  }, "pesate e porzioni siano precise"), ": se l'intake dichiarato \xE8 pi\xF9 basso del reale, il mantenimento risulta pi\xF9 basso del vero."))));
+}
+
+// ============================================================
+// V11.2 · SOSTITUZIONE ESERCIZIO AL VOLO
+// ============================================================
+const SWAP_EQUIP = ['Manubri', 'Bilanciere', 'Bilanciere EZ', 'Cavi', 'Corpo libero'];
+function SwapModal(_ref64) {
+  let exercise = _ref64.exercise,
+    onPick = _ref64.onPick,
+    onClose = _ref64.onClose,
+    onReset = _ref64.onReset,
+    hasSwap = _ref64.hasSwap;
+  const _useState139 = useState(null),
+    _useState140 = _slicedToArray(_useState139, 2),
+    eq = _useState140[0],
+    setEq = _useState140[1];
+  const primary = (exercise.tags || [])[0];
+  // gli esercizi dei programmi non hanno il campo attrezzo: lo prendo dal gemello del pacchetto
+  const twinId = BUILTIN_TWIN[exercise.id];
+  const twin = twinId ? EXERCISE_DB[twinId] : null;
+  const refEquip = exercise.equip || twin && twin.equip;
+  const refTags = twin && twin.tags && twin.tags.length ? twin.tags : exercise.tags || [];
+  // parola-chiave del movimento: privilegia le varianti dello stesso gesto
+  const refWord = (twin && twin.name || exercise.name || '').toLowerCase().split(' ')[0];
+  const alts = Object.values(EXERCISE_DB).filter(e => e.id !== exercise.id && e.id !== twinId && !BUILTIN_TWIN[e.id] && (e.tags || []).indexOf(primary) === 0 && (!eq || e.equip === eq) && SWAP_EQUIP.indexOf(e.equip) >= 0).map(e => {
+    // punteggio di pertinenza: stesso attrezzo, stessa natura, stessi gruppi secondari
+    let s = 0;
+    if (refEquip && e.equip === refEquip) s -= 60;
+    if (!!e.isCompound === !!exercise.isCompound) s -= 20;
+    const t2 = refTags.slice(1);
+    s -= (e.tags || []).slice(1).filter(t => t2.indexOf(t) >= 0).length * 8;
+    if (refWord && refWord.length > 3 && e.name.toLowerCase().indexOf(refWord) === 0) s -= 45;
+    if (e.lang !== 'it') s += 15;
+    return {
+      e: e,
+      s: s
+    };
+  }).sort((a, b) => a.s - b.s || a.e.name.localeCompare(b.e.name)).map(x => x.e);
+  return /*#__PURE__*/React.createElement(Modal, {
+    title: "Sostituisci esercizio",
+    subtitle: primary ? 'Alternative per ' + primary : '',
+    onClose: onClose
+  }, hasSwap && /*#__PURE__*/React.createElement("button", {
+    onClick: onReset,
+    style: {
+      width: '100%',
+      padding: '11px',
+      marginBottom: '11px',
+      background: 'rgba(232,180,60,0.14)',
+      border: '1px solid rgba(232,180,60,0.4)',
+      color: '#E8B43C',
+      borderRadius: '12px',
+      fontSize: '12.5px',
+      fontWeight: '700',
+      cursor: 'pointer'
+    }
+  }, "Ripristina l'esercizio originale"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      gap: '5px',
+      overflowX: 'auto',
+      paddingBottom: '10px'
+    }
+  }, /*#__PURE__*/React.createElement("button", {
+    onClick: () => setEq(null),
+    style: {
+      flexShrink: 0,
+      padding: '6px 11px',
+      borderRadius: '20px',
+      fontSize: '10.5px',
+      fontWeight: '700',
+      cursor: 'pointer',
+      background: !eq ? VIOLET : 'rgba(255,255,255,0.06)',
+      color: !eq ? '#fff' : '#908AA0',
+      border: '1px solid ' + (!eq ? VIOLET : 'rgba(255,255,255,0.1)')
+    }
+  }, "Tutti"), SWAP_EQUIP.map(x => /*#__PURE__*/React.createElement("button", {
+    key: x,
+    onClick: () => setEq(eq === x ? null : x),
+    style: {
+      flexShrink: 0,
+      padding: '6px 11px',
+      borderRadius: '20px',
+      fontSize: '10.5px',
+      fontWeight: '700',
+      cursor: 'pointer',
+      background: eq === x ? VIOLET : 'rgba(255,255,255,0.06)',
+      color: eq === x ? '#fff' : '#908AA0',
+      border: '1px solid ' + (eq === x ? VIOLET : 'rgba(255,255,255,0.1)')
+    }
+  }, x))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: '10.5px',
+      color: '#908AA0',
+      marginBottom: '10px'
+    }
+  }, alts.length, " alternative sullo stesso gruppo primario"), alts.slice(0, 60).map(e => /*#__PURE__*/React.createElement("button", {
+    key: e.id,
+    onClick: () => onPick(e),
+    style: {
+      width: '100%',
+      textAlign: 'left',
+      ...glassCard,
+      borderRadius: '13px',
+      padding: '10px',
+      marginBottom: '7px',
+      cursor: 'pointer',
+      display: 'flex',
+      alignItems: 'center',
+      gap: '10px'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      width: '52px',
+      height: '42px',
+      borderRadius: '9px',
+      overflow: 'hidden',
+      background: '#14120E',
+      flexShrink: 0,
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center'
+    }
+  }, /*#__PURE__*/React.createElement(Thumb, {
+    id: e.id
+  })), /*#__PURE__*/React.createElement("div", {
+    style: {
+      flex: 1,
+      minWidth: 0
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: '12.5px',
+      fontWeight: '700',
+      color: '#F4F2F8',
+      lineHeight: 1.25
+    }
+  }, e.name), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: '9.5px',
+      color: '#908AA0',
+      marginTop: '2px'
+    }
+  }, e.equip, " \xB7 ", e.sets, "\xD7", e.reps)))), alts.length === 0 && /*#__PURE__*/React.createElement("div", {
+    style: {
+      textAlign: 'center',
+      color: '#5A5468',
+      fontSize: '12px',
+      padding: '20px 0'
+    }
+  }, "Nessuna alternativa trovata con questi filtri."));
+}
+
+// ============================================================
+// V11.2 · EXPORT CSV
+// ============================================================
+const csvEsc = v => {
+  const s = v == null ? '' : String(v);
+  return /[";\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+};
+const toCSV = rows => '\uFEFF' + rows.map(r => r.map(csvEsc).join(';')).join('\r\n');
+function exportAllenamentiCSV() {
+  const rows = [['Programma', 'Settimana', 'Giorno', 'N', 'Esercizio', 'Gruppi', 'Kg', 'Rep1', 'Rep2', 'Rep3', 'Rep4', 'RIR', 'SerieFatte', 'Completato']];
+  const progs = [{
+    label: 'V8.3.4',
+    config: MAIN_CONFIG
+  }, {
+    label: 'Estate',
+    config: SUMMER2_CONFIG
+  }].concat((storage.get('custom_schedules') || []).map(s => {
+    try {
+      return {
+        label: s.name || 'Scheda',
+        config: rehydrateSchedule(s)
+      };
+    } catch (e) {
+      return null;
+    }
+  }).filter(Boolean));
+  progs.forEach(p => {
+    const log = storage.get(p.config.storageKey) || {};
+    Object.keys(log).sort((a, b) => a - b).forEach(week => {
+      (p.config.days || []).forEach(day => {
+        const dl = log[week][day.id];
+        if (!dl || !dl.esercizi) return;
+        const list = p.config.exercises[day.id] || [];
+        Object.keys(dl.esercizi).sort((a, b) => a - b).forEach(idx => {
+          const rec = dl.esercizi[idx];
+          const ex = list[parseInt(idx, 10)];
+          if (!ex) return;
+          const reps = rec.reps || [];
+          rows.push([p.label, week, day.label, parseInt(idx, 10) + 1, ex.name, (ex.tags || []).join('/'), rec.kg || '', reps[0] || '', reps[1] || '', reps[2] || '', reps[3] || '', rec.rir || '', (rec.sets_done || []).filter(Boolean).length, dl.completato ? 'si' : 'no']);
+        });
+      });
+    });
+  });
+  downloadFile('v8_allenamenti.csv', toCSV(rows), 'text/csv');
+  return rows.length - 1;
+}
+function exportPesoCSV() {
+  const log = storage.get('peso') || {};
+  const rows = [['Settimana', 'Lun', 'Mer', 'Ven', 'Dom', 'Media', 'Note']];
+  Object.keys(log).map(Number).sort((a, b) => a - b).forEach(w => {
+    const r = log[w] || {};
+    rows.push([w, r.lun || '', r.mer || '', r.ven || '', r.dom || '', r.media ? r.media.toFixed(2) : '', r.note || '']);
+  });
+  downloadFile('v8_peso.csv', toCSV(rows), 'text/csv');
+  return rows.length - 1;
+}
+function exportDieteCSV() {
+  const diets = storage.get('custom_diets') || [];
+  const rows = [['Dieta', 'Tipo', 'Pasto', 'Ora', 'Alimento', 'Grammi', 'Proteine', 'Carboidrati', 'Grassi', 'Kcal']];
+  diets.forEach(d => (d.meals || []).forEach(m => (m.items || []).forEach(it => {
+    const mm = macrosOf(it);
+    rows.push([d.name, d.dayType || '', m.name, m.time || '', nameOf(it), it.g, r1(mm.p), r1(mm.c), r1(mm.f), r0(mm.kcal)]);
+  })));
+  downloadFile('v8_diete.csv', toCSV(rows), 'text/csv');
+  return rows.length - 1;
+}
+
 // ============= MAIN =============
 
 function App() {
-  const _useState127 = useState('home'),
-    _useState128 = _slicedToArray(_useState127, 2),
-    screen = _useState128[0],
-    setScreen = _useState128[1];
+  const _useState141 = useState('home'),
+    _useState142 = _slicedToArray(_useState141, 2),
+    screen = _useState142[0],
+    setScreen = _useState142[1];
   const goHome = useCallback(() => setScreen('home'), []);
   // Quando siamo fuori da home, intercetta il tasto indietro per tornare alla home
   useAndroidBack(goHome, screen !== 'home');
@@ -22605,6 +23504,10 @@ function App() {
   }), screen === 'library' && /*#__PURE__*/React.createElement(LibraryScreen, {
     goBack: goHome
   }), screen === 'exdb' && /*#__PURE__*/React.createElement(ExerciseDBScreen, {
+    goBack: goHome
+  }), screen === 'volume' && /*#__PURE__*/React.createElement(VolumeScreen, {
+    goBack: goHome
+  }), screen === 'tdee' && /*#__PURE__*/React.createElement(TdeeScreen, {
     goBack: goHome
   }), screen === 'nutrition' && /*#__PURE__*/React.createElement(NutritionScreen, {
     goBack: goHome
