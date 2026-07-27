@@ -2936,10 +2936,10 @@ function HomeScreen(_ref12) {
     desc: 'Dieta 92 kg · stack · refeed'
   }, {
     id: 'peso',
-    label: 'Peso & Misure',
+    label: 'Corpo',
     IconComp: Scale,
     color: PLATE.blue,
-    desc: 'Peso 4×/sett + misure'
+    desc: 'Peso, composizione e misure'
   }, {
     id: 'dashboard',
     label: 'Dashboard',
@@ -4393,414 +4393,646 @@ function PesoScreen(_ref19) {
     _useState34 = _slicedToArray(_useState33, 2),
     data = _useState34[0],
     setData = _useState34[1];
-  const _useState35 = useState(92),
+  const _useState35 = useState({}),
     _useState36 = _slicedToArray(_useState35, 2),
-    pesoIniziale = _useState36[0],
-    setPesoIniziale = _useState36[1];
-  const _useState37 = useState({}),
+    misure = _useState36[0],
+    setMisure = _useState36[1];
+  const _useState37 = useState(''),
     _useState38 = _slicedToArray(_useState37, 2),
-    misure = _useState38[0],
-    setMisure = _useState38[1];
-  const _useState39 = useState({}),
+    h = _useState38[0],
+    setH = _useState38[1];
+  const _useState39 = useState('ora'),
     _useState40 = _slicedToArray(_useState39, 2),
-    foto = _useState40[0],
-    setFoto = _useState40[1];
-  const _useState41 = useState('peso'),
+    vista = _useState40[0],
+    setVista = _useState40[1]; // ora · misure · storico
+  const _useState41 = useState(''),
     _useState42 = _slicedToArray(_useState41, 2),
-    tab = _useState42[0],
-    setTab = _useState42[1];
+    nuovo = _useState42[0],
+    setNuovo = _useState42[1];
+  const _useState43 = useState(false),
+    _useState44 = _slicedToArray(_useState43, 2),
+    editMis = _useState44[0],
+    setEditMis = _useState44[1];
   useEffect(() => {
     setData(storage.get('peso') || {});
-    const init = storage.get('pesoIniziale');
-    if (init) setPesoIniziale(init);
     setMisure(storage.get('misure') || {});
-    setFoto(storage.get('foto') || {});
+    setH(storage.get('altezza') || '');
   }, []);
-  const updatePeso = (week, day, value) => {
-    const newData = JSON.parse(JSON.stringify(data));
-    if (!newData[week]) newData[week] = {
+
+  // ---------- scrittura ----------
+  const scriviPeso = (week, day, value) => {
+    const d = JSON.parse(JSON.stringify(data));
+    if (!d[week]) d[week] = {
       media: 0,
       note: ''
     };
-    newData[week][day] = value;
-    newData[week].media = mediaSett(newData[week]);
-    setData(newData);
-    storage.set('peso', newData);
+    d[week][day] = value;
+    d[week].media = mediaSett(d[week]);
+    setData(d);
+    storage.set('peso', d);
   };
-  const updateNote = (week, value) => {
-    const newData = JSON.parse(JSON.stringify(data));
-    if (!newData[week]) newData[week] = {
-      lun: '',
-      mer: '',
-      ven: '',
-      dom: '',
-      media: 0,
-      note: ''
-    };
-    newData[week].note = value;
-    setData(newData);
-    storage.set('peso', newData);
+  const registraOggi = () => {
+    const n = parseFloat(String(nuovo).replace(',', '.'));
+    if (isNaN(n) || n <= 0) return;
+    scriviPeso(settimanaCorrente(), GIORNI_SETT[new Date().getDay()], String(Math.round(n * 10) / 10));
+    setNuovo('');
   };
-  const updatePesoIniziale = value => {
-    const v = parseFloat(value) || 92;
-    setPesoIniziale(v);
-    storage.set('pesoIniziale', v);
+  const scriviMisura = (blocco, punto, value) => {
+    const m = JSON.parse(JSON.stringify(misure));
+    if (!m[blocco]) m[blocco] = {};
+    m[blocco][punto] = value;
+    setMisure(m);
+    storage.set('misure', m);
   };
-  const updateMisura = (block, point, value) => {
-    const newM = {
-      ...misure
-    };
-    if (!newM[block]) newM[block] = {};
-    newM[block][point] = value;
-    setMisure(newM);
-    storage.set('misure', newM);
+  const nuovaRilevazione = () => {
+    const d = new Date();
+    const k = String(d.getDate()).padStart(2, '0') + '/' + String(d.getMonth() + 1).padStart(2, '0') + '/' + d.getFullYear();
+    if (!misure[k]) scriviMisura(k, PUNTI[0], '');
+    setEditMis(true);
+    setVista('misure');
   };
-  const toggleFoto = key => {
-    const newF = {
-      ...foto,
-      [key]: !foto[key]
-    };
-    setFoto(newF);
-    storage.set('foto', newF);
-  };
-  const getDelta = week => {
-    var _data$week2, _data;
-    if (!((_data$week2 = data[week]) !== null && _data$week2 !== void 0 && _data$week2.media)) return null;
-    if (week === 1) return data[week].media - pesoIniziale;
-    if ((_data = data[week - 1]) !== null && _data !== void 0 && _data.media) return data[week].media - data[week - 1].media;
-    return null;
-  };
-  const getStatusColor = delta => {
-    if (delta === null) return '#908AA0';
-    if (delta <= -0.5 && delta >= -0.8) return '#3FB66C';
-    if (delta < -0.8) return '#E8B43C';
-    if (delta > 0.3) return '#E0524A';
-    return '#908AA0';
-  };
-  const punti = ['Vita ombelicale', 'Collo', 'Petto', 'Coscia (max)', 'Polpaccio', 'Braccio (flesso)', 'Avambraccio'];
+
+  // ---------- lettura ----------
+  const serie = Object.keys(data).map(Number).sort((a, b) => a - b).map(w => ({
+    w,
+    m: mediaSett(data[w])
+  })).filter(x => x.m > 0);
+  const peso = serie.length ? serie[serie.length - 1].m : null;
+  const trend = serie.length > 1 ? (serie[serie.length - 1].m - serie[Math.max(0, serie.length - 4)].m) / Math.max(1, serie[serie.length - 1].w - serie[Math.max(0, serie.length - 4)].w) : null;
+  const blocchiMis = Object.keys(misure);
+  const ultimo = blocchiMis.length ? misure[blocchiMis[blocchiMis.length - 1]] : {};
+  const primo = blocchiMis.length ? misure[blocchiMis[0]] : {};
+  const comp = stimaComposizione({
+    peso,
+    vita: ultimo['Vita ombelicale'],
+    collo: ultimo['Collo'],
+    altezza: h
+  });
+  const oggi = GIORNI_SETT[new Date().getDay()];
+  const dt = new Date();
+  const oggiTxt = NOMI_GIORNI[oggi] + ' ' + String(dt.getDate()).padStart(2, '0') + '/' + String(dt.getMonth() + 1).padStart(2, '0');
+  const giaOggi = (data[settimanaCorrente()] || {})[oggi] || '';
   return /*#__PURE__*/React.createElement("div", {
     style: {
       minHeight: '100vh',
-      background: 'transparent',
       paddingBottom: '120px'
     }
   }, /*#__PURE__*/React.createElement(Header, {
-    title: "Peso & Misure",
+    title: "Corpo",
+    subtitle: "Peso, composizione e misure",
     onBack: goBack
   }), /*#__PURE__*/React.createElement("div", {
     style: {
-      ...glassCard,
-      margin: '0 12px 14px 12px',
-      padding: '6px',
-      display: 'flex'
-    }
-  }, [{
-    id: 'peso',
-    label: 'Peso'
-  }, {
-    id: 'corpo',
-    label: 'Corpo'
-  }, {
-    id: 'misure',
-    label: 'Misure'
-  }, {
-    id: 'foto',
-    label: 'Foto'
-  }].map(t => /*#__PURE__*/React.createElement("button", {
-    key: t.id,
-    onClick: () => setTab(t.id),
-    style: {
-      flex: 1,
-      padding: '10px 4px',
-      border: 'none',
-      background: tab === t.id ? 'linear-gradient(135deg, #4D82E8 0%, #1e88e5 100%)' : 'transparent',
-      color: tab === t.id ? 'white' : '#908AA0',
-      fontSize: '12px',
-      fontWeight: tab === t.id ? '700' : '500',
-      cursor: 'pointer',
-      borderRadius: '10px'
-    }
-  }, t.label))), /*#__PURE__*/React.createElement("div", {
-    style: {
-      padding: '0 12px'
-    }
-  }, tab === 'peso' && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement(InserimentoRapido, {
-    data: data,
-    onSalva: updatePeso
-  }), /*#__PURE__*/React.createElement(GraficoPeso, {
-    data: data
-  }), /*#__PURE__*/React.createElement("div", {
-    style: {
-      ...glassCard,
-      padding: '16px',
-      marginBottom: '14px'
+      background: IRON.surface,
+      borderTop: '1px solid ' + IRON.edge,
+      borderBottom: '1px solid ' + IRON.edge,
+      padding: '16px 14px'
     }
   }, /*#__PURE__*/React.createElement("div", {
     style: {
-      fontSize: '11px',
-      color: '#908AA0',
-      textTransform: 'uppercase',
-      letterSpacing: '0.6px',
-      marginBottom: '8px'
+      display: 'flex',
+      gap: '14px',
+      alignItems: 'center'
     }
-  }, "Peso iniziale"), /*#__PURE__*/React.createElement("div", {
+  }, /*#__PURE__*/React.createElement("div", {
     style: {
+      flexShrink: 0,
+      width: '108px'
+    }
+  }, comp ? /*#__PURE__*/React.createElement(Figura, {
+    bf: comp.bf,
+    ffmi: comp.ffmi,
+    altezzaPx: 168
+  }) : /*#__PURE__*/React.createElement("div", {
+    style: {
+      height: '168px',
       display: 'flex',
       alignItems: 'center',
-      gap: '10px'
+      justifyContent: 'center',
+      border: '1px dashed ' + IRON.edge,
+      borderRadius: '3px'
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      ...lblStyle,
+      fontSize: '8px',
+      textAlign: 'center',
+      lineHeight: 1.6
+    }
+  }, "servono", /*#__PURE__*/React.createElement("br", null), "altezza", /*#__PURE__*/React.createElement("br", null), "vita e collo"))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      flex: 1,
+      minWidth: 0
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: lblStyle
+  }, "Peso attuale"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      alignItems: 'baseline',
+      gap: '7px',
+      marginTop: '3px'
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      ...numStyle,
+      fontSize: '36px',
+      fontWeight: '600',
+      letterSpacing: '-0.04em',
+      color: IRON.chalk,
+      lineHeight: 1
+    }
+  }, peso ? peso.toFixed(1).replace('.', ',') : '—'), /*#__PURE__*/React.createElement("span", {
+    style: {
+      ...numStyle,
+      fontSize: '12px',
+      color: IRON.dust
+    }
+  }, "KG")), trend != null && /*#__PURE__*/React.createElement("div", {
+    style: {
+      ...numStyle,
+      fontSize: '11.5px',
+      color: trend < -0.05 ? '#2FA055' : trend > 0.05 ? '#E5A82B' : IRON.dust,
+      marginTop: '4px'
+    }
+  }, trend > 0 ? '+' : '', trend.toFixed(2).replace('.', ','), " kg / settimana"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginTop: '13px',
+      borderTop: '1px solid ' + IRON.edge,
+      paddingTop: '11px'
+    }
+  }, comp ? [['GRASSO', comp.bf.toFixed(1).replace('.', ',') + '%', giudizioBF(comp.bf)], ['FFMI', String(comp.ffmi).replace('.', ','), giudizioFFMI(comp.ffmi)], ['MASSA MAGRA', comp.ffm.toFixed(1).replace('.', ',') + ' kg', null]].map(_ref20 => {
+    let _ref21 = _slicedToArray(_ref20, 3),
+      l = _ref21[0],
+      v = _ref21[1],
+      gj = _ref21[2];
+    return /*#__PURE__*/React.createElement("div", {
+      key: l,
+      style: {
+        display: 'flex',
+        alignItems: 'baseline',
+        gap: '8px',
+        padding: '3px 0'
+      }
+    }, /*#__PURE__*/React.createElement("span", {
+      style: {
+        ...lblStyle,
+        fontSize: '8px',
+        width: '74px',
+        flexShrink: 0
+      }
+    }, l), /*#__PURE__*/React.createElement("span", {
+      style: {
+        ...numStyle,
+        fontSize: '14px',
+        fontWeight: '600',
+        color: gj ? gj.c : IRON.chalk
+      }
+    }, v), gj && /*#__PURE__*/React.createElement("span", {
+      style: {
+        ...lblStyle,
+        fontSize: '7.5px',
+        color: gj.c
+      }
+    }, gj.t));
+  }) : /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: '11px',
+      color: IRON.dust,
+      lineHeight: 1.5
+    }
+  }, "Inserisci altezza, vita e collo per vedere la composizione."))))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: '14px 14px 0'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'baseline',
+      marginBottom: '8px'
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: lblStyle
+  }, "Registra oggi"), /*#__PURE__*/React.createElement("span", {
+    style: {
+      ...numStyle,
+      fontSize: '10px',
+      color: IRON.dust
+    }
+  }, oggiTxt, " \xB7 settimana ", settimanaCorrente())), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      gap: '9px'
     }
   }, /*#__PURE__*/React.createElement("input", {
     type: "number",
     inputMode: "decimal",
     step: "0.1",
-    value: pesoIniziale,
-    onChange: e => updatePesoIniziale(e.target.value),
+    value: nuovo,
+    onChange: e => setNuovo(e.target.value),
+    onKeyDown: e => {
+      if (e.key === 'Enter') registraOggi();
+    },
+    placeholder: giaOggi ? String(giaOggi) : 'kg',
     style: {
       ...inputDark,
-      width: '110px',
-      padding: '10px',
-      fontSize: '20px',
-      fontWeight: '700',
-      color: '#4D82E8',
-      border: '1px solid rgba(60, 111, 223, 0.4)'
+      flex: 1,
+      minHeight: '64px',
+      fontSize: '30px',
+      fontWeight: '600'
     }
-  }), /*#__PURE__*/React.createElement("span", {
+  }), /*#__PURE__*/React.createElement("button", {
+    onClick: registraOggi,
+    disabled: !String(nuovo).trim(),
     style: {
-      fontSize: '14px',
-      color: '#908AA0'
+      width: '112px',
+      minHeight: '64px',
+      borderRadius: '3px',
+      border: 'none',
+      cursor: String(nuovo).trim() ? 'pointer' : 'default',
+      background: String(nuovo).trim() ? IRON.chalk : IRON.surface,
+      color: String(nuovo).trim() ? IRON.bg : IRON.ash,
+      fontFamily: displayFont,
+      fontVariationSettings: "'wdth' 112",
+      fontSize: '13px',
+      fontWeight: '800',
+      letterSpacing: '0.06em',
+      textTransform: 'uppercase'
     }
-  }, "kg"))), [1, 2, 3, 4, 5, 6, 7, 8].map(w => {
-    const wd = data[w] || {
-      lun: '',
-      mer: '',
-      ven: '',
-      dom: '',
-      media: 0,
-      note: ''
-    };
-    const delta = getDelta(w);
-    return /*#__PURE__*/React.createElement("div", {
-      key: w,
-      style: {
-        ...glassCard,
-        padding: '14px',
-        marginBottom: '10px'
-      }
-    }, /*#__PURE__*/React.createElement("div", {
-      style: {
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: '10px'
-      }
-    }, /*#__PURE__*/React.createElement("div", {
-      style: {
-        fontSize: '13px',
-        fontWeight: '700',
-        color: '#4D82E8'
-      }
-    }, "SETTIMANA ", w), wd.media > 0 && /*#__PURE__*/React.createElement("div", {
-      style: {
-        display: 'flex',
-        alignItems: 'center',
-        gap: '8px'
-      }
-    }, delta !== null && /*#__PURE__*/React.createElement("span", {
-      style: {
-        color: getStatusColor(delta),
-        fontWeight: '700',
-        fontSize: '12px'
-      }
-    }, delta > 0 ? '+' : '', delta.toFixed(1)), /*#__PURE__*/React.createElement("span", {
-      style: {
-        fontWeight: '700',
-        color: '#F4F2F8',
-        fontSize: '14px'
-      }
-    }, wd.media.toFixed(1), " kg"))), /*#__PURE__*/React.createElement("div", {
-      style: {
-        display: 'grid',
-        gridTemplateColumns: 'repeat(4, 1fr)',
-        gap: '6px',
-        marginBottom: '8px'
-      }
-    }, ['lun', 'mer', 'ven', 'dom'].map(d => /*#__PURE__*/React.createElement("div", {
-      key: d
-    }, /*#__PURE__*/React.createElement("div", {
-      style: {
-        fontSize: '9px',
-        textTransform: 'uppercase',
-        color: '#908AA0',
-        textAlign: 'center',
-        marginBottom: '3px'
-      }
-    }, d), /*#__PURE__*/React.createElement("input", {
-      type: "number",
-      inputMode: "decimal",
-      step: "0.1",
-      value: wd[d],
-      onChange: e => updatePeso(w, d, e.target.value),
-      placeholder: "\u2014",
-      style: {
-        ...inputDark,
-        width: '100%',
-        padding: '8px 2px',
-        fontSize: '13px',
-        boxSizing: 'border-box',
-        fontWeight: '600'
-      }
-    })))), /*#__PURE__*/React.createElement("input", {
-      type: "text",
-      placeholder: "Note...",
-      value: wd.note,
-      onChange: e => updateNote(w, e.target.value),
-      style: {
-        ...inputDark,
-        width: '100%',
-        padding: '8px',
-        fontSize: '11px',
-        textAlign: 'left',
-        boxSizing: 'border-box'
-      }
-    }));
-  })), tab === 'corpo' && /*#__PURE__*/React.createElement(SezioneCorpo, {
+  }, giaOggi ? 'Correggi' : 'Registra')), giaOggi && /*#__PURE__*/React.createElement("div", {
+    style: {
+      ...numStyle,
+      fontSize: '10px',
+      color: '#2FA055',
+      marginTop: '6px'
+    }
+  }, "oggi: ", giaOggi, " kg gi\xE0 registrato")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: '16px 14px 0'
+    }
+  }, /*#__PURE__*/React.createElement(GraficoPeso, {
     data: data,
-    misure: misure,
-    setMisure: setMisure
-  }), tab === 'misure' && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+    altezza: 150
+  })), /*#__PURE__*/React.createElement("div", {
     style: {
-      fontSize: '11px',
-      color: '#908AA0',
-      marginBottom: '14px',
-      padding: '12px',
-      background: 'rgba(232, 176, 40, 0.1)',
-      borderLeft: '3px solid #E8B43C',
-      borderRadius: '8px'
-    }
-  }, "Misura ogni 4 settimane (fine blocco). Centimetri."), ['INIZIO', 'FINE BL.A (S3)', 'FINE BL.B (S6)', 'FINE BL.C (S8)'].map(b => /*#__PURE__*/React.createElement("div", {
-    key: b,
-    style: {
-      ...glassCard,
-      padding: '14px',
-      marginBottom: '10px'
+      padding: '0 14px'
     }
   }, /*#__PURE__*/React.createElement("div", {
     style: {
-      fontSize: '12px',
-      fontWeight: '700',
-      color: '#4D82E8',
-      marginBottom: '12px'
+      display: 'flex',
+      gap: '5px',
+      marginBottom: '13px'
     }
-  }, b), punti.map(p => {
+  }, [['ora', 'Composizione'], ['misure', 'Misure'], ['storico', 'Storico']].map(_ref22 => {
+    let _ref23 = _slicedToArray(_ref22, 2),
+      id = _ref23[0],
+      l = _ref23[1];
+    return /*#__PURE__*/React.createElement("button", {
+      key: id,
+      onClick: () => setVista(id),
+      style: {
+        flex: 1,
+        minHeight: '44px',
+        borderRadius: '3px',
+        cursor: 'pointer',
+        fontFamily: monoFont,
+        fontSize: '11px',
+        fontWeight: '600',
+        background: vista === id ? IRON.chalk : IRON.surface,
+        color: vista === id ? IRON.bg : IRON.dust,
+        border: '1px solid ' + (vista === id ? IRON.chalk : IRON.edge)
+      }
+    }, l);
+  })), vista === 'ora' && /*#__PURE__*/React.createElement(React.Fragment, null, !comp && /*#__PURE__*/React.createElement("div", {
+    style: {
+      ...glassCard,
+      padding: '14px',
+      marginBottom: '13px'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      ...lblStyle,
+      marginBottom: '9px'
+    }
+  }, "Altezza"), /*#__PURE__*/React.createElement(Fld, {
+    type: "number",
+    value: h,
+    onChange: v => {
+      setH(v);
+      storage.set('altezza', v);
+    },
+    ph: "178"
+  }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: '11px',
+      color: IRON.dust,
+      marginTop: '9px',
+      lineHeight: 1.5
+    }
+  }, "Poi aggiungi ", /*#__PURE__*/React.createElement("b", {
+    style: {
+      color: IRON.chalk
+    }
+  }, "vita ombelicale"), " e ", /*#__PURE__*/React.createElement("b", {
+    style: {
+      color: IRON.chalk
+    }
+  }, "collo"), " nella scheda Misure.")), comp && /*#__PURE__*/React.createElement(React.Fragment, null, (comp.bf < 6 || comp.bf > 40) && /*#__PURE__*/React.createElement(InfoBox, {
+    color: "#D8342C",
+    title: "Valore fuori scala"
+  }, comp.bf, "% \xE8 fuori dall'intervallo attendibile. Ricontrolla vita e collo: a digiuno, metro aderente ma non stretto, vita all'ombelico e collo sotto il pomo d'Adamo."), /*#__PURE__*/React.createElement(InfoBox, {
+    color: giudizioBF(comp.bf).c,
+    title: 'Grasso ' + comp.bf + '% · ' + giudizioBF(comp.bf).t
+  }, giudizioBF(comp.bf).n), /*#__PURE__*/React.createElement(InfoBox, {
+    color: giudizioFFMI(comp.ffmi).c,
+    title: 'FFMI ' + comp.ffmi + ' · ' + giudizioFFMI(comp.ffmi).t
+  }, giudizioFFMI(comp.ffmi).n), /*#__PURE__*/React.createElement("div", {
+    style: {
+      ...glassCard,
+      padding: '13px',
+      marginBottom: '13px'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      ...lblStyle,
+      marginBottom: '8px'
+    }
+  }, "Altezza usata nel calcolo"), /*#__PURE__*/React.createElement(Fld, {
+    type: "number",
+    value: h,
+    onChange: v => {
+      setH(v);
+      storage.set('altezza', v);
+    },
+    ph: "178"
+  }))), /*#__PURE__*/React.createElement(InfoBox, {
+    color: "#8A8A93",
+    title: "Quanto fidarsi"
+  }, "La figura \xE8 uno ", /*#__PURE__*/React.createElement("b", {
+    style: {
+      color: IRON.chalk
+    }
+  }, "schema"), " su due numeri, non un ritratto. La stima del grasso usa la formula Navy (vita, collo, altezza): errore di ", /*#__PURE__*/React.createElement("b", {
+    style: {
+      color: IRON.chalk
+    }
+  }, "\xB13-4 punti"), " sulla DEXA, e con collo e schiena spessi", /*#__PURE__*/React.createElement("b", {
+    style: {
+      color: IRON.chalk
+    }
+  }, " tende a sottostimare"), ". Guarda come si muove nel tempo, non il valore assoluto: stesso metro, stessa ora, a digiuno.")), vista === 'misure' && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      gap: '8px',
+      marginBottom: '13px'
+    }
+  }, /*#__PURE__*/React.createElement(BigBtn, {
+    onClick: nuovaRilevazione,
+    color: "#4D82E8",
+    icon: /*#__PURE__*/React.createElement(Plus, {
+      size: 16
+    })
+  }, "Nuova rilevazione"), blocchiMis.length > 0 && /*#__PURE__*/React.createElement(BigBtn, {
+    onClick: () => setEditMis(!editMis),
+    color: "#8A8A93",
+    ghost: true,
+    icon: /*#__PURE__*/React.createElement(Pencil, {
+      size: 15
+    })
+  }, editMis ? 'Chiudi' : 'Modifica')), blocchiMis.length === 0 && /*#__PURE__*/React.createElement("div", {
+    style: {
+      ...glassCard,
+      padding: '22px 16px',
+      textAlign: 'center'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      ...lblStyle,
+      marginBottom: '7px'
+    }
+  }, "Nessuna rilevazione"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: '11px',
+      color: IRON.dust,
+      lineHeight: 1.5
+    }
+  }, "Servono almeno ", /*#__PURE__*/React.createElement("b", {
+    style: {
+      color: IRON.chalk
+    }
+  }, "vita"), " e ", /*#__PURE__*/React.createElement("b", {
+    style: {
+      color: IRON.chalk
+    }
+  }, "collo"), " per la composizione. Le altre misure servono a leggere i progressi.")), blocchiMis.length > 0 && !editMis && /*#__PURE__*/React.createElement("div", {
+    style: {
+      ...glassCard,
+      padding: '13px',
+      marginBottom: '13px'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      justifyContent: 'space-between',
+      marginBottom: '10px'
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: lblStyle
+  }, "Ultima \xB7 ", blocchiMis[blocchiMis.length - 1]), blocchiMis.length > 1 && /*#__PURE__*/React.createElement("span", {
+    style: {
+      ...lblStyle,
+      fontSize: '8px'
+    }
+  }, "vs ", blocchiMis[0])), PUNTI.map(pnt => {
+    const b = parseFloat(ultimo[pnt]);
+    if (isNaN(b)) return null;
+    const a = parseFloat(primo[pnt]);
+    const d = !isNaN(a) && blocchiMis.length > 1 ? b - a : null;
+    const buono = pnt === 'Vita ombelicale' ? d < 0 : d > 0;
+    return /*#__PURE__*/React.createElement("div", {
+      key: pnt,
+      style: {
+        display: 'flex',
+        alignItems: 'center',
+        padding: '7px 0',
+        borderBottom: '1px solid ' + IRON.edge
+      }
+    }, /*#__PURE__*/React.createElement("span", {
+      style: {
+        flex: 1,
+        fontSize: '12px',
+        color: '#C7C2D0'
+      }
+    }, pnt), /*#__PURE__*/React.createElement("span", {
+      style: {
+        ...numStyle,
+        fontSize: '14px',
+        fontWeight: '600',
+        color: IRON.chalk
+      }
+    }, b.toFixed(1).replace('.', ',')), /*#__PURE__*/React.createElement("span", {
+      style: {
+        ...lblStyle,
+        fontSize: '8px',
+        margin: '0 4px 0 3px'
+      }
+    }, "cm"), d != null && d !== 0 && /*#__PURE__*/React.createElement("span", {
+      style: {
+        ...numStyle,
+        fontSize: '11px',
+        width: '48px',
+        textAlign: 'right',
+        color: buono ? '#2FA055' : '#E5A82B'
+      }
+    }, d > 0 ? '+' : '', d.toFixed(1).replace('.', ',')));
+  })), editMis && blocchiMis.map(b => /*#__PURE__*/React.createElement("div", {
+    key: b,
+    style: {
+      ...glassCard,
+      padding: '13px',
+      marginBottom: '11px'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      ...lblStyle,
+      marginBottom: '10px'
+    }
+  }, b), PUNTI.map(pnt => {
     var _misure$b;
     return /*#__PURE__*/React.createElement("div", {
-      key: p,
+      key: pnt,
       style: {
         display: 'flex',
         alignItems: 'center',
         gap: '10px',
-        marginBottom: '8px'
+        marginBottom: '7px'
       }
-    }, /*#__PURE__*/React.createElement("div", {
+    }, /*#__PURE__*/React.createElement("span", {
       style: {
         flex: 1,
         fontSize: '12px',
-        color: '#e8e8f0'
+        color: '#C7C2D0'
       }
-    }, p), /*#__PURE__*/React.createElement("input", {
+    }, pnt), /*#__PURE__*/React.createElement("div", {
+      style: {
+        width: '92px'
+      }
+    }, /*#__PURE__*/React.createElement(Fld, {
       type: "number",
-      inputMode: "decimal",
-      step: "0.1",
-      value: ((_misure$b = misure[b]) === null || _misure$b === void 0 ? void 0 : _misure$b[p]) || '',
-      onChange: e => updateMisura(b, p, e.target.value),
-      placeholder: "\u2014",
+      value: ((_misure$b = misure[b]) === null || _misure$b === void 0 ? void 0 : _misure$b[pnt]) || '',
+      onChange: v => scriviMisura(b, pnt, v),
+      ph: "\u2014"
+    })), /*#__PURE__*/React.createElement("span", {
       style: {
-        ...inputDark,
-        width: '80px',
-        padding: '8px',
-        fontSize: '12px',
-        fontWeight: '600'
-      }
-    }), /*#__PURE__*/React.createElement("span", {
-      style: {
-        fontSize: '10px',
-        color: '#908AA0'
+        ...lblStyle,
+        fontSize: '8px',
+        width: '16px'
       }
     }, "cm"));
-  })))), tab === 'foto' && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: '11px',
-      color: '#908AA0',
-      marginBottom: '14px',
-      padding: '12px',
-      background: 'rgba(232, 176, 40, 0.1)',
-      borderLeft: '3px solid #E8B43C',
-      borderRadius: '8px',
-      lineHeight: 1.6
-    }
-  }, /*#__PURE__*/React.createElement("strong", {
-    style: {
-      color: '#E8B43C'
-    }
-  }, "Come fare le foto:"), " 3 angoli (frontale/laterale/dorso). Stessa luce, stessa ora, stesso pasto giorno prima."), [{
-    id: 'inizio',
-    label: 'Inizio (S1)'
-  }, {
-    id: 'fineA',
-    label: 'Fine Blocco A (S4)'
-  }, {
-    id: 'fineB',
-    label: 'Fine Blocco B (S7)'
-  }, {
-    id: 'fineC',
-    label: 'Fine Blocco C (S9)'
-  }].map(f => /*#__PURE__*/React.createElement("button", {
-    key: f.id,
-    onClick: () => toggleFoto(f.id),
+  })))), vista === 'storico' && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
     style: {
       ...glassCard,
-      width: '100%',
-      padding: '16px',
-      marginBottom: '10px',
-      background: foto[f.id] ? 'linear-gradient(135deg, rgba(47, 164, 92, 0.25) 0%, rgba(47, 164, 92, 0.1) 100%)' : glassCard.background,
-      border: foto[f.id] ? '1px solid rgba(47, 164, 92, 0.5)' : glassCard.border,
-      color: '#F4F2F8',
-      fontSize: '13px',
-      fontWeight: '600',
-      cursor: 'pointer',
+      padding: '13px',
+      marginBottom: '13px'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      ...lblStyle,
+      marginBottom: '10px'
+    }
+  }, "Medie settimanali"), serie.length === 0 && /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: '11.5px',
+      color: IRON.dust
+    }
+  }, "Nessun dato registrato."), serie.slice().reverse().map((s, i, arr) => {
+    const prec = arr[i + 1];
+    const d = prec ? s.m - prec.m : null;
+    const giorni = GIORNI_SETT.map(g => (data[s.w] || {})[g]).filter(Boolean).length;
+    return /*#__PURE__*/React.createElement("div", {
+      key: s.w,
+      style: {
+        display: 'flex',
+        alignItems: 'center',
+        padding: '8px 0',
+        borderBottom: '1px solid ' + IRON.edge
+      }
+    }, /*#__PURE__*/React.createElement("span", {
+      style: {
+        ...numStyle,
+        fontSize: '10.5px',
+        color: IRON.ash,
+        width: '38px'
+      }
+    }, "S", s.w), /*#__PURE__*/React.createElement("span", {
+      style: {
+        ...numStyle,
+        fontSize: '15px',
+        fontWeight: '600',
+        color: IRON.chalk,
+        flex: 1
+      }
+    }, s.m.toFixed(1).replace('.', ',')), /*#__PURE__*/React.createElement("span", {
+      style: {
+        ...lblStyle,
+        fontSize: '8px',
+        marginRight: '9px'
+      }
+    }, giorni, " pesate"), d != null && /*#__PURE__*/React.createElement("span", {
+      style: {
+        ...numStyle,
+        fontSize: '11.5px',
+        width: '52px',
+        textAlign: 'right',
+        color: d < 0 ? '#2FA055' : d > 0 ? '#E5A82B' : IRON.ash
+      }
+    }, d > 0 ? '+' : '', d.toFixed(1).replace('.', ',')));
+  })), serie.length > 0 && /*#__PURE__*/React.createElement("div", {
+    style: {
+      ...glassCard,
+      padding: '13px'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      ...lblStyle,
+      marginBottom: '10px'
+    }
+  }, "Settimana ", settimanaCorrente(), " \xB7 pesate singole"), GIORNI_SETT.filter(g => g !== 'dom').concat(['dom']).map(g => /*#__PURE__*/React.createElement("div", {
+    key: g,
+    style: {
       display: 'flex',
       alignItems: 'center',
-      gap: '14px'
+      gap: '10px',
+      marginBottom: '6px'
     }
-  }, foto[f.id] ? /*#__PURE__*/React.createElement(Check, {
-    size: 22,
-    color: "#3FB66C"
-  }) : /*#__PURE__*/React.createElement(Camera, {
-    size: 22,
-    color: "#888"
-  }), /*#__PURE__*/React.createElement("span", {
+  }, /*#__PURE__*/React.createElement("span", {
     style: {
-      flex: 1,
-      textAlign: 'left'
+      ...lblStyle,
+      width: '34px',
+      color: g === oggi ? IRON.chalk : IRON.ash
     }
-  }, f.label), foto[f.id] && /*#__PURE__*/React.createElement("span", {
+  }, NOMI_GIORNI[g]), /*#__PURE__*/React.createElement("div", {
     style: {
-      fontSize: '11px',
-      color: '#3FB66C',
-      fontWeight: '700'
+      flex: 1
     }
-  }, "FATTE \u2713"))))));
+  }, /*#__PURE__*/React.createElement(Fld, {
+    type: "number",
+    value: (data[settimanaCorrente()] || {})[g] || '',
+    onChange: v => scriviPeso(settimanaCorrente(), g, v),
+    ph: "\u2014"
+  }))))))));
 }
 
 // ============= DASHBOARD =============
 
-function DashboardScreen(_ref20) {
-  let goBack = _ref20.goBack;
+function DashboardScreen(_ref24) {
+  let goBack = _ref24.goBack;
   const schede = tutteLeSchede();
-  const _useState43 = useState(() => Math.max(0, schede.findIndex(s => s.id === schedaAttivaId()))),
-    _useState44 = _slicedToArray(_useState43, 2),
-    progIdx = _useState44[0],
-    setProgIdx = _useState44[1];
+  const _useState45 = useState(() => Math.max(0, schede.findIndex(s => s.id === schedaAttivaId()))),
+    _useState46 = _slicedToArray(_useState45, 2),
+    progIdx = _useState46[0],
+    setProgIdx = _useState46[1];
   const prog = schede[progIdx] || schede[0];
   const CFG = prog.config;
   // i multiarticolari del programma, trovati dinamicamente
@@ -4813,18 +5045,18 @@ function DashboardScreen(_ref20) {
     day: d.id,
     idx: x.i
   }))).slice(0, 8);
-  const _useState45 = useState({}),
-    _useState46 = _slicedToArray(_useState45, 2),
-    workouts = _useState46[0],
-    setWorkouts = _useState46[1];
   const _useState47 = useState({}),
     _useState48 = _slicedToArray(_useState47, 2),
-    pesoData = _useState48[0],
-    setPesoData = _useState48[1];
-  const _useState49 = useState(92),
+    workouts = _useState48[0],
+    setWorkouts = _useState48[1];
+  const _useState49 = useState({}),
     _useState50 = _slicedToArray(_useState49, 2),
-    pesoIniziale = _useState50[0],
-    setPesoIniziale = _useState50[1];
+    pesoData = _useState50[0],
+    setPesoData = _useState50[1];
+  const _useState51 = useState(92),
+    _useState52 = _slicedToArray(_useState51, 2),
+    pesoIniziale = _useState52[0],
+    setPesoIniziale = _useState52[1];
   useEffect(() => {
     setWorkouts(storage.get(CFG.storageKey) || {});
     setPesoData(storage.get('peso') || {});
@@ -4843,10 +5075,10 @@ function DashboardScreen(_ref20) {
     });
     return result;
   };
-  const ultimaSett = Object.entries(pesoData).filter(_ref21 => {
-    let _ref22 = _slicedToArray(_ref21, 2),
-      _ = _ref22[0],
-      v = _ref22[1];
+  const ultimaSett = Object.entries(pesoData).filter(_ref25 => {
+    let _ref26 = _slicedToArray(_ref25, 2),
+      _ = _ref26[0],
+      v = _ref26[1];
     return v.media > 0;
   }).sort((a, b) => parseInt(a[0]) - parseInt(b[0])).slice(-1)[0];
   const pesoAttuale = ultimaSett ? ultimaSett[1].media : pesoIniziale;
@@ -5193,12 +5425,12 @@ function DashboardScreen(_ref20) {
 
 // ============= RECOVERY =============
 
-function RecoveryScreen(_ref23) {
-  let goBack = _ref23.goBack;
-  const _useState51 = useState({}),
-    _useState52 = _slicedToArray(_useState51, 2),
-    data = _useState52[0],
-    setData = _useState52[1];
+function RecoveryScreen(_ref27) {
+  let goBack = _ref27.goBack;
+  const _useState53 = useState({}),
+    _useState54 = _slicedToArray(_useState53, 2),
+    data = _useState54[0],
+    setData = _useState54[1];
   useEffect(() => {
     setData(storage.get('recovery') || {});
   }, []);
@@ -5347,8 +5579,8 @@ function RecoveryScreen(_ref23) {
 
 // ============= GUIDE =============
 
-function GuideScreen(_ref24) {
-  let goBack = _ref24.goBack;
+function GuideScreen(_ref28) {
+  let goBack = _ref28.goBack;
   const techniques = [{
     badge: 'C',
     name: 'Compound principale',
@@ -5634,12 +5866,12 @@ function GuideScreen(_ref24) {
 
 // ============= SETTINGS =============
 
-function SettingsScreen(_ref25) {
-  let goBack = _ref25.goBack;
-  const _useState53 = useState(null),
-    _useState54 = _slicedToArray(_useState53, 2),
-    msg = _useState54[0],
-    setMsg = _useState54[1];
+function SettingsScreen(_ref29) {
+  let goBack = _ref29.goBack;
+  const _useState55 = useState(null),
+    _useState56 = _slicedToArray(_useState55, 2),
+    msg = _useState56[0],
+    setMsg = _useState56[1];
   const fileInputRef = useRef(null);
   const exportData = () => {
     const data = storage.exportAll();
@@ -17651,10 +17883,10 @@ const validateV8w = obj => {
 // "Gonfia" una scheda leggera .v8w in un config completo per WorkoutScreen.
 const rehydrateSchedule = v8w => {
   const localDb = {};
-  if (v8w.newExercises) Object.entries(v8w.newExercises).forEach(_ref26 => {
-    let _ref27 = _slicedToArray(_ref26, 2),
-      id = _ref27[0],
-      def = _ref27[1];
+  if (v8w.newExercises) Object.entries(v8w.newExercises).forEach(_ref30 => {
+    let _ref31 = _slicedToArray(_ref30, 2),
+      id = _ref31[0],
+      def = _ref31[1];
     localDb[id] = {
       id,
       ...def
@@ -17708,10 +17940,10 @@ const rehydrateSchedule = v8w => {
     rotation: !!v8w.rotation
   };
 };
-function InfoBox(_ref28) {
-  let color = _ref28.color,
-    title = _ref28.title,
-    children = _ref28.children;
+function InfoBox(_ref32) {
+  let color = _ref32.color,
+    title = _ref32.title,
+    children = _ref32.children;
   return /*#__PURE__*/React.createElement("div", {
     style: {
       background: `${color}14`,
@@ -17735,12 +17967,12 @@ function InfoBox(_ref28) {
     }
   }, children));
 }
-function SummerScreen(_ref29) {
-  let goBack = _ref29.goBack;
-  const _useState55 = useState('info'),
-    _useState56 = _slicedToArray(_useState55, 2),
-    mode = _useState56[0],
-    setMode = _useState56[1]; // 'info' | 'train'
+function SummerScreen(_ref33) {
+  let goBack = _ref33.goBack;
+  const _useState57 = useState('info'),
+    _useState58 = _slicedToArray(_useState57, 2),
+    mode = _useState58[0],
+    setMode = _useState58[1]; // 'info' | 'train'
 
   if (mode === 'train') {
     return /*#__PURE__*/React.createElement(WorkoutScreen, {
@@ -18069,12 +18301,12 @@ const SUPP_STACK = [{
   e: 'Micronutrienti',
   t: '#908AA0'
 }];
-function NutritionScreen(_ref30) {
-  let goBack = _ref30.goBack;
-  const _useState57 = useState('dieta'),
-    _useState58 = _slicedToArray(_useState57, 2),
-    tab = _useState58[0],
-    setTab = _useState58[1];
+function NutritionScreen(_ref34) {
+  let goBack = _ref34.goBack;
+  const _useState59 = useState('dieta'),
+    _useState60 = _slicedToArray(_useState59, 2),
+    tab = _useState60[0],
+    setTab = _useState60[1];
   const tabs = [{
     id: 'dieta',
     label: 'Dieta'
@@ -18126,11 +18358,11 @@ function NutritionScreen(_ref30) {
       gap: '6px',
       marginBottom: '12px'
     }
-  }, [['KCAL', '~2.000', '#E0524A'], ['PROT', '200g', '#3FB66C'], ['CHO', '170g', '#E8B43C'], ['GRASSI', '55g', '#4D82E8']].map(_ref31 => {
-    let _ref32 = _slicedToArray(_ref31, 3),
-      l = _ref32[0],
-      v = _ref32[1],
-      c = _ref32[2];
+  }, [['KCAL', '~2.000', '#E0524A'], ['PROT', '200g', '#3FB66C'], ['CHO', '170g', '#E8B43C'], ['GRASSI', '55g', '#4D82E8']].map(_ref35 => {
+    let _ref36 = _slicedToArray(_ref35, 3),
+      l = _ref36[0],
+      v = _ref36[1],
+      c = _ref36[2];
     return /*#__PURE__*/React.createElement("div", {
       key: l,
       style: {
@@ -18354,11 +18586,11 @@ function NutritionScreen(_ref30) {
       gap: '6px',
       marginBottom: '12px'
     }
-  }, [['KCAL', '~2.800', '#E0524A'], ['PROT', '200g', '#3FB66C'], ['CHO', '460-550', '#E8B43C'], ['GRASSI', '30-40', '#4D82E8']].map(_ref33 => {
-    let _ref34 = _slicedToArray(_ref33, 3),
-      l = _ref34[0],
-      v = _ref34[1],
-      c = _ref34[2];
+  }, [['KCAL', '~2.800', '#E0524A'], ['PROT', '200g', '#3FB66C'], ['CHO', '460-550', '#E8B43C'], ['GRASSI', '30-40', '#4D82E8']].map(_ref37 => {
+    let _ref38 = _slicedToArray(_ref37, 3),
+      l = _ref38[0],
+      v = _ref38[1],
+      c = _ref38[2];
     return /*#__PURE__*/React.createElement("div", {
       key: l,
       style: {
@@ -18499,12 +18731,12 @@ const XIcon = p => /*#__PURE__*/React.createElement(Icon, _extends({
 }, p));
 
 // ============= ESTATE V2 · 4 GIORNI =============
-function Summer2Screen(_ref35) {
-  let goBack = _ref35.goBack;
-  const _useState59 = useState('info'),
-    _useState60 = _slicedToArray(_useState59, 2),
-    mode = _useState60[0],
-    setMode = _useState60[1];
+function Summer2Screen(_ref39) {
+  let goBack = _ref39.goBack;
+  const _useState61 = useState('info'),
+    _useState62 = _slicedToArray(_useState61, 2),
+    mode = _useState62[0],
+    setMode = _useState62[1];
   if (mode === 'train') return /*#__PURE__*/React.createElement(WorkoutScreen, {
     goBack: () => setMode('info'),
     config: SUMMER2_CONFIG
@@ -18551,11 +18783,11 @@ function Summer2Screen(_ref35) {
       gap: '4px',
       marginBottom: '14px'
     }
-  }, cols.map(_ref36 => {
-    let _ref37 = _slicedToArray(_ref36, 3),
-      d = _ref37[0],
-      n = _ref37[1],
-      c = _ref37[2];
+  }, cols.map(_ref40 => {
+    let _ref41 = _slicedToArray(_ref40, 3),
+      d = _ref41[0],
+      n = _ref41[1],
+      c = _ref41[2];
     return /*#__PURE__*/React.createElement("div", {
       key: d,
       style: {
@@ -18624,28 +18856,28 @@ function Summer2Screen(_ref35) {
 }
 
 // ============= LIBRERIA SCHEDE (import .v8w) =============
-function LibraryScreenLegacy(_ref38) {
-  let goBack = _ref38.goBack;
-  const _useState61 = useState(() => storage.get('custom_schedules') || []),
-    _useState62 = _slicedToArray(_useState61, 2),
-    schedules = _useState62[0],
-    setSchedules = _useState62[1];
-  const _useState63 = useState(null),
+function LibraryScreenLegacy(_ref42) {
+  let goBack = _ref42.goBack;
+  const _useState63 = useState(() => storage.get('custom_schedules') || []),
     _useState64 = _slicedToArray(_useState63, 2),
-    selected = _useState64[0],
-    setSelected = _useState64[1];
-  const _useState65 = useState(false),
+    schedules = _useState64[0],
+    setSchedules = _useState64[1];
+  const _useState65 = useState(null),
     _useState66 = _slicedToArray(_useState65, 2),
-    panel = _useState66[0],
-    setPanel = _useState66[1];
-  const _useState67 = useState(''),
+    selected = _useState66[0],
+    setSelected = _useState66[1];
+  const _useState67 = useState(false),
     _useState68 = _slicedToArray(_useState67, 2),
-    paste = _useState68[0],
-    setPaste = _useState68[1];
-  const _useState69 = useState(null),
+    panel = _useState68[0],
+    setPanel = _useState68[1];
+  const _useState69 = useState(''),
     _useState70 = _slicedToArray(_useState69, 2),
-    msg = _useState70[0],
-    setMsg = _useState70[1];
+    paste = _useState70[0],
+    setPaste = _useState70[1];
+  const _useState71 = useState(null),
+    _useState72 = _slicedToArray(_useState71, 2),
+    msg = _useState72[0],
+    setMsg = _useState72[1];
   const fileRef = useRef(null);
   const persist = list => {
     setSchedules(list);
@@ -19689,17 +19921,17 @@ const copyText = t => {
 // ============================================================
 // V10 · COMPONENTI UI CONDIVISI
 // ============================================================
-function Fld(_ref39) {
-  let label = _ref39.label,
-    value = _ref39.value,
-    onChange = _ref39.onChange,
-    _ref39$type = _ref39.type,
-    type = _ref39$type === void 0 ? 'text' : _ref39$type,
-    ph = _ref39.ph,
-    _ref39$align = _ref39.align,
-    align = _ref39$align === void 0 ? 'center' : _ref39$align,
-    _ref39$flex = _ref39.flex,
-    flex = _ref39$flex === void 0 ? 1 : _ref39$flex;
+function Fld(_ref43) {
+  let label = _ref43.label,
+    value = _ref43.value,
+    onChange = _ref43.onChange,
+    _ref43$type = _ref43.type,
+    type = _ref43$type === void 0 ? 'text' : _ref43$type,
+    ph = _ref43.ph,
+    _ref43$align = _ref43.align,
+    align = _ref43$align === void 0 ? 'center' : _ref43$align,
+    _ref43$flex = _ref43.flex,
+    flex = _ref43$flex === void 0 ? 1 : _ref43$flex;
   return /*#__PURE__*/React.createElement("div", {
     style: {
       flex: flex,
@@ -19730,8 +19962,8 @@ function Fld(_ref39) {
     }
   }));
 }
-function BtnRow(_ref40) {
-  let children = _ref40.children;
+function BtnRow(_ref44) {
+  let children = _ref44.children;
   return /*#__PURE__*/React.createElement("div", {
     style: {
       display: 'flex',
@@ -19740,12 +19972,12 @@ function BtnRow(_ref40) {
     }
   }, children);
 }
-function MiniBtn(_ref41) {
-  let onClick = _ref41.onClick,
-    _ref41$color = _ref41.color,
-    color = _ref41$color === void 0 ? '#908AA0' : _ref41$color,
-    children = _ref41.children,
-    title = _ref41.title;
+function MiniBtn(_ref45) {
+  let onClick = _ref45.onClick,
+    _ref45$color = _ref45.color,
+    color = _ref45$color === void 0 ? '#908AA0' : _ref45$color,
+    children = _ref45.children,
+    title = _ref45.title;
   return /*#__PURE__*/React.createElement("button", {
     onClick: onClick,
     title: title,
@@ -19764,14 +19996,14 @@ function MiniBtn(_ref41) {
     }
   }, children);
 }
-function BigBtn(_ref42) {
-  let onClick = _ref42.onClick,
-    _ref42$color = _ref42.color,
-    color = _ref42$color === void 0 ? '#A855F7' : _ref42$color,
-    icon = _ref42.icon,
-    children = _ref42.children,
-    disabled = _ref42.disabled,
-    ghost = _ref42.ghost;
+function BigBtn(_ref46) {
+  let onClick = _ref46.onClick,
+    _ref46$color = _ref46.color,
+    color = _ref46$color === void 0 ? '#A855F7' : _ref46$color,
+    icon = _ref46.icon,
+    children = _ref46.children,
+    disabled = _ref46.disabled,
+    ghost = _ref46.ghost;
   return /*#__PURE__*/React.createElement("button", {
     onClick: onClick,
     disabled: disabled,
@@ -19792,11 +20024,11 @@ function BigBtn(_ref42) {
     }
   }, icon, children);
 }
-function Modal(_ref43) {
-  let title = _ref43.title,
-    subtitle = _ref43.subtitle,
-    onClose = _ref43.onClose,
-    children = _ref43.children;
+function Modal(_ref47) {
+  let title = _ref47.title,
+    subtitle = _ref47.subtitle,
+    onClose = _ref47.onClose,
+    children = _ref47.children;
   useAndroidBack(onClose, true);
   return /*#__PURE__*/React.createElement("div", {
     style: {
@@ -19865,11 +20097,11 @@ function Modal(_ref43) {
 }
 
 // Barra macro con confronto sul target
-function MacroBar(_ref44) {
-  let label = _ref44.label,
-    value = _ref44.value,
-    target = _ref44.target,
-    color = _ref44.color;
+function MacroBar(_ref48) {
+  let label = _ref48.label,
+    value = _ref48.value,
+    target = _ref48.target,
+    color = _ref48.color;
   const t = parseFloat(target) || 0;
   const pct = t > 0 ? Math.min(100, value / t * 100) : 0;
   const delta = t > 0 ? value - t : null;
@@ -19930,17 +20162,17 @@ function MacroBar(_ref44) {
 // ============================================================
 // V10 · SELETTORE ESERCIZI (dal database interno)
 // ============================================================
-function ExercisePicker(_ref45) {
-  let onPick = _ref45.onPick,
-    onClose = _ref45.onClose;
-  const _useState71 = useState(''),
-    _useState72 = _slicedToArray(_useState71, 2),
-    q = _useState72[0],
-    setQ = _useState72[1];
-  const _useState73 = useState(null),
+function ExercisePicker(_ref49) {
+  let onPick = _ref49.onPick,
+    onClose = _ref49.onClose;
+  const _useState73 = useState(''),
     _useState74 = _slicedToArray(_useState73, 2),
-    tag = _useState74[0],
-    setTag = _useState74[1];
+    q = _useState74[0],
+    setQ = _useState74[1];
+  const _useState75 = useState(null),
+    _useState76 = _slicedToArray(_useState75, 2),
+    tag = _useState76[0],
+    setTag = _useState76[1];
   const all = Object.values(EXERCISE_DB).filter(e => !BUILTIN_TWIN[e.id]);
   const tags = [];
   all.forEach(e => (e.tags || []).forEach(t => {
@@ -20101,17 +20333,17 @@ function ExercisePicker(_ref45) {
 // ============================================================
 // V10 · SELETTORE ALIMENTI
 // ============================================================
-function FoodPicker(_ref46) {
-  let onPick = _ref46.onPick,
-    onClose = _ref46.onClose;
-  const _useState75 = useState(''),
-    _useState76 = _slicedToArray(_useState75, 2),
-    q = _useState76[0],
-    setQ = _useState76[1];
-  const _useState77 = useState(null),
+function FoodPicker(_ref50) {
+  let onPick = _ref50.onPick,
+    onClose = _ref50.onClose;
+  const _useState77 = useState(''),
     _useState78 = _slicedToArray(_useState77, 2),
-    cat = _useState78[0],
-    setCat = _useState78[1];
+    q = _useState78[0],
+    setQ = _useState78[1];
+  const _useState79 = useState(null),
+    _useState80 = _slicedToArray(_useState79, 2),
+    cat = _useState80[0],
+    setCat = _useState80[1];
   const ql = q.trim().toLowerCase();
   const list = FOOD_DB.filter(f => (!ql || f.n.toLowerCase().indexOf(ql) >= 0) && (!cat || f.cat === cat));
   const addCustom = () => onPick({
@@ -20404,26 +20636,26 @@ const DAY_COLORS = ['#4D82E8', '#3b82f6', '#8b5cf6', '#A855F7', '#f59e0b', '#14b
 // ============================================================
 // V10 · EDITOR SCHEDA ALLENAMENTO
 // ============================================================
-function ScheduleEditorScreen(_ref47) {
-  let initial = _ref47.initial,
-    onSave = _ref47.onSave,
-    goBack = _ref47.goBack;
-  const _useState79 = useState(() => toEditableSched(initial)),
-    _useState80 = _slicedToArray(_useState79, 2),
-    ed = _useState80[0],
-    setEd = _useState80[1];
-  const _useState81 = useState(0),
+function ScheduleEditorScreen(_ref51) {
+  let initial = _ref51.initial,
+    onSave = _ref51.onSave,
+    goBack = _ref51.goBack;
+  const _useState81 = useState(() => toEditableSched(initial)),
     _useState82 = _slicedToArray(_useState81, 2),
-    open = _useState82[0],
-    setOpen = _useState82[1];
-  const _useState83 = useState(null),
+    ed = _useState82[0],
+    setEd = _useState82[1];
+  const _useState83 = useState(0),
     _useState84 = _slicedToArray(_useState83, 2),
-    picker = _useState84[0],
-    setPicker = _useState84[1]; // indice giorno
+    open = _useState84[0],
+    setOpen = _useState84[1];
   const _useState85 = useState(null),
     _useState86 = _slicedToArray(_useState85, 2),
-    msg = _useState86[0],
-    setMsg = _useState86[1];
+    picker = _useState86[0],
+    setPicker = _useState86[1]; // indice giorno
+  const _useState87 = useState(null),
+    _useState88 = _slicedToArray(_useState87, 2),
+    msg = _useState88[0],
+    setMsg = _useState88[1];
   useAndroidBack(goBack, true);
   const setField = (k, v) => setEd(p => ({
     ...p,
@@ -20882,36 +21114,36 @@ function ScheduleEditorScreen(_ref47) {
 // ============================================================
 // V10 · LIBRERIA SCHEDE ALLENAMENTO
 // ============================================================
-function LibraryScreen(_ref48) {
-  let goBack = _ref48.goBack;
-  const _useState87 = useState(() => storage.get('custom_schedules') || []),
-    _useState88 = _slicedToArray(_useState87, 2),
-    schedules = _useState88[0],
-    setSchedules = _useState88[1];
-  const _useState89 = useState('list'),
+function LibraryScreen(_ref52) {
+  let goBack = _ref52.goBack;
+  const _useState89 = useState(() => storage.get('custom_schedules') || []),
     _useState90 = _slicedToArray(_useState89, 2),
-    view = _useState90[0],
-    setView = _useState90[1];
-  const _useState91 = useState(null),
+    schedules = _useState90[0],
+    setSchedules = _useState90[1];
+  const _useState91 = useState('list'),
     _useState92 = _slicedToArray(_useState91, 2),
-    current = _useState92[0],
-    setCurrent = _useState92[1];
-  const _useState93 = useState(false),
+    view = _useState92[0],
+    setView = _useState92[1];
+  const _useState93 = useState(null),
     _useState94 = _slicedToArray(_useState93, 2),
-    panel = _useState94[0],
-    setPanel = _useState94[1];
-  const _useState95 = useState(''),
+    current = _useState94[0],
+    setCurrent = _useState94[1];
+  const _useState95 = useState(false),
     _useState96 = _slicedToArray(_useState95, 2),
-    paste = _useState96[0],
-    setPaste = _useState96[1];
-  const _useState97 = useState(null),
+    panel = _useState96[0],
+    setPanel = _useState96[1];
+  const _useState97 = useState(''),
     _useState98 = _slicedToArray(_useState97, 2),
-    msg = _useState98[0],
-    setMsg = _useState98[1];
-  const _useState99 = useState(schedaAttivaId),
+    paste = _useState98[0],
+    setPaste = _useState98[1];
+  const _useState99 = useState(null),
     _useState100 = _slicedToArray(_useState99, 2),
-    attiva = _useState100[0],
-    setAttiva = _useState100[1];
+    msg = _useState100[0],
+    setMsg = _useState100[1];
+  const _useState101 = useState(schedaAttivaId),
+    _useState102 = _slicedToArray(_useState101, 2),
+    attiva = _useState102[0],
+    setAttiva = _useState102[1];
   const fileRef = useRef(null);
   const persist = list => {
     setSchedules(list);
@@ -21536,26 +21768,26 @@ const validateV8d = o => {
 // ============================================================
 // V10 · EDITOR DIETA
 // ============================================================
-function DietEditorScreen(_ref49) {
-  let initial = _ref49.initial,
-    onSave = _ref49.onSave,
-    goBack = _ref49.goBack;
-  const _useState101 = useState(() => JSON.parse(JSON.stringify(initial))),
-    _useState102 = _slicedToArray(_useState101, 2),
-    d = _useState102[0],
-    setD = _useState102[1];
-  const _useState103 = useState(null),
+function DietEditorScreen(_ref53) {
+  let initial = _ref53.initial,
+    onSave = _ref53.onSave,
+    goBack = _ref53.goBack;
+  const _useState103 = useState(() => JSON.parse(JSON.stringify(initial))),
     _useState104 = _slicedToArray(_useState103, 2),
-    picker = _useState104[0],
-    setPicker = _useState104[1]; // indice pasto
-  const _useState105 = useState(0),
+    d = _useState104[0],
+    setD = _useState104[1];
+  const _useState105 = useState(null),
     _useState106 = _slicedToArray(_useState105, 2),
-    openMeal = _useState106[0],
-    setOpenMeal = _useState106[1];
-  const _useState107 = useState(null),
+    picker = _useState106[0],
+    setPicker = _useState106[1]; // indice pasto
+  const _useState107 = useState(0),
     _useState108 = _slicedToArray(_useState107, 2),
-    msg = _useState108[0],
-    setMsg = _useState108[1];
+    openMeal = _useState108[0],
+    setOpenMeal = _useState108[1];
+  const _useState109 = useState(null),
+    _useState110 = _slicedToArray(_useState109, 2),
+    msg = _useState110[0],
+    setMsg = _useState110[1];
   useAndroidBack(goBack, true);
   const setField = (k, v) => setD(p => ({
     ...p,
@@ -22089,40 +22321,40 @@ function DietEditorScreen(_ref49) {
 // ============================================================
 // V10 · LIBRERIA DIETE + LISTA DELLA SPESA
 // ============================================================
-function DietScreen(_ref50) {
-  let goBack = _ref50.goBack;
-  const _useState109 = useState(() => storage.get('custom_diets') || []),
-    _useState110 = _slicedToArray(_useState109, 2),
-    diets = _useState110[0],
-    setDiets = _useState110[1];
-  const _useState111 = useState('list'),
+function DietScreen(_ref54) {
+  let goBack = _ref54.goBack;
+  const _useState111 = useState(() => storage.get('custom_diets') || []),
     _useState112 = _slicedToArray(_useState111, 2),
-    view = _useState112[0],
-    setView = _useState112[1];
-  const _useState113 = useState(null),
+    diets = _useState112[0],
+    setDiets = _useState112[1];
+  const _useState113 = useState('list'),
     _useState114 = _slicedToArray(_useState113, 2),
-    current = _useState114[0],
-    setCurrent = _useState114[1];
+    view = _useState114[0],
+    setView = _useState114[1];
   const _useState115 = useState(null),
     _useState116 = _slicedToArray(_useState115, 2),
-    shop = _useState116[0],
-    setShop = _useState116[1];
-  const _useState117 = useState(7),
+    current = _useState116[0],
+    setCurrent = _useState116[1];
+  const _useState117 = useState(null),
     _useState118 = _slicedToArray(_useState117, 2),
-    days = _useState118[0],
-    setDays = _useState118[1];
-  const _useState119 = useState(false),
+    shop = _useState118[0],
+    setShop = _useState118[1];
+  const _useState119 = useState(7),
     _useState120 = _slicedToArray(_useState119, 2),
-    panel = _useState120[0],
-    setPanel = _useState120[1];
-  const _useState121 = useState(''),
+    days = _useState120[0],
+    setDays = _useState120[1];
+  const _useState121 = useState(false),
     _useState122 = _slicedToArray(_useState121, 2),
-    paste = _useState122[0],
-    setPaste = _useState122[1];
-  const _useState123 = useState(null),
+    panel = _useState122[0],
+    setPanel = _useState122[1];
+  const _useState123 = useState(''),
     _useState124 = _slicedToArray(_useState123, 2),
-    msg = _useState124[0],
-    setMsg = _useState124[1];
+    paste = _useState124[0],
+    setPaste = _useState124[1];
+  const _useState125 = useState(null),
+    _useState126 = _slicedToArray(_useState125, 2),
+    msg = _useState126[0],
+    setMsg = _useState126[1];
   const fileRef = useRef(null);
   const persist = list => {
     setDiets(list);
@@ -22208,19 +22440,19 @@ function DietScreen(_ref50) {
       agg[key].g += (parseFloat(it.g) || 0) * n;
     }));
     const byCat = {};
-    Object.entries(agg).forEach(_ref51 => {
-      let _ref52 = _slicedToArray(_ref51, 2),
-        k = _ref52[0],
-        v = _ref52[1];
+    Object.entries(agg).forEach(_ref55 => {
+      let _ref56 = _slicedToArray(_ref55, 2),
+        k = _ref56[0],
+        v = _ref56[1];
       (byCat[v.cat] = byCat[v.cat] || []).push([k, v.g]);
     });
     let out = 'LISTA SPESA — ' + d.name + ' × ' + n + ' giorni\n';
     Object.keys(byCat).sort().forEach(cat => {
       out += '\n' + cat.toUpperCase() + '\n';
-      byCat[cat].sort((a, b) => b[1] - a[1]).forEach(_ref53 => {
-        let _ref54 = _slicedToArray(_ref53, 2),
-          k = _ref54[0],
-          g = _ref54[1];
+      byCat[cat].sort((a, b) => b[1] - a[1]).forEach(_ref57 => {
+        let _ref58 = _slicedToArray(_ref57, 2),
+          k = _ref58[0],
+          g = _ref58[1];
         out += '  • ' + k + ' — ' + (g >= 1000 ? Math.round(g / 100) / 10 + ' kg' : Math.round(g) + ' g') + '\n';
       });
     });
@@ -22614,15 +22846,15 @@ function DietScreen(_ref50) {
 // ============================================================
 const EQUIP_LIST = ['Manubri', 'Bilanciere', 'Cavi', 'Macchina', 'Corpo libero', 'Bilanciere EZ', 'Elastici', 'Varie'];
 const TAG_LIST = ['PETTO', 'DORSO', 'D.ANT', 'D.MED', 'D.POST', 'BI', 'TRI', 'AVB', 'QUAD', 'HAM', 'GLUTE', 'POLP', 'CORE'];
-function Thumb(_ref55) {
-  let id = _ref55.id,
-    _ref55$size = _ref55.size,
-    size = _ref55$size === void 0 ? 58 : _ref55$size;
+function Thumb(_ref59) {
+  let id = _ref59.id,
+    _ref59$size = _ref59.size,
+    size = _ref59$size === void 0 ? 58 : _ref59$size;
   const urls = EXERCISE_IMAGES[id] || [];
-  const _useState125 = useState(0),
-    _useState126 = _slicedToArray(_useState125, 2),
-    i = _useState126[0],
-    setI = _useState126[1];
+  const _useState127 = useState(0),
+    _useState128 = _slicedToArray(_useState127, 2),
+    i = _useState128[0],
+    setI = _useState128[1];
   useEffect(() => {
     setI(0);
   }, [id]);
@@ -22641,9 +22873,9 @@ function Thumb(_ref55) {
     }
   });
 }
-function ExDetailModal(_ref56) {
-  let ex = _ref56.ex,
-    onClose = _ref56.onClose;
+function ExDetailModal(_ref60) {
+  let ex = _ref60.ex,
+    onClose = _ref60.onClose;
   const imgs = EXERCISE_IMAGES[ex.id] || [];
   return /*#__PURE__*/React.createElement(Modal, {
     title: ex.name,
@@ -22735,10 +22967,10 @@ function ExDetailModal(_ref56) {
       justifyContent: 'space-around',
       textAlign: 'center'
     }
-  }, [['SERIE', ex.sets], ['REP', ex.reps], ['RIR', ex.rir], ['REC.', ex.rest]].map(_ref57 => {
-    let _ref58 = _slicedToArray(_ref57, 2),
-      l = _ref58[0],
-      v = _ref58[1];
+  }, [['SERIE', ex.sets], ['REP', ex.reps], ['RIR', ex.rir], ['REC.', ex.rest]].map(_ref61 => {
+    let _ref62 = _slicedToArray(_ref61, 2),
+      l = _ref62[0],
+      v = _ref62[1];
     return /*#__PURE__*/React.createElement("div", {
       key: l
     }, /*#__PURE__*/React.createElement("div", {
@@ -22845,28 +23077,28 @@ function ExDetailModal(_ref56) {
     }
   }, "Nome originale: ", ex.nameEn));
 }
-function ExerciseDBScreen(_ref59) {
-  let goBack = _ref59.goBack;
-  const _useState127 = useState(''),
-    _useState128 = _slicedToArray(_useState127, 2),
-    q = _useState128[0],
-    setQ = _useState128[1];
-  const _useState129 = useState(null),
+function ExerciseDBScreen(_ref63) {
+  let goBack = _ref63.goBack;
+  const _useState129 = useState(''),
     _useState130 = _slicedToArray(_useState129, 2),
-    tag = _useState130[0],
-    setTag = _useState130[1];
+    q = _useState130[0],
+    setQ = _useState130[1];
   const _useState131 = useState(null),
     _useState132 = _slicedToArray(_useState131, 2),
-    eq = _useState132[0],
-    setEq = _useState132[1];
+    tag = _useState132[0],
+    setTag = _useState132[1];
   const _useState133 = useState(null),
     _useState134 = _slicedToArray(_useState133, 2),
-    sel = _useState134[0],
-    setSel = _useState134[1];
-  const _useState135 = useState(30),
+    eq = _useState134[0],
+    setEq = _useState134[1];
+  const _useState135 = useState(null),
     _useState136 = _slicedToArray(_useState135, 2),
-    limit = _useState136[0],
-    setLimit = _useState136[1];
+    sel = _useState136[0],
+    setSel = _useState136[1];
+  const _useState137 = useState(30),
+    _useState138 = _slicedToArray(_useState137, 2),
+    limit = _useState138[0],
+    setLimit = _useState138[1];
   const all = Object.values(EXERCISE_DB).filter(e => !BUILTIN_TWIN[e.id]);
   const ql = q.trim().toLowerCase();
   const list = all.filter(e => (!ql || (e.name || '').toLowerCase().indexOf(ql) >= 0 || (e.nameEn || '').toLowerCase().indexOf(ql) >= 0) && (!tag || (e.tags || []).indexOf(tag) >= 0) && (!eq || e.equip === eq));
@@ -23107,10 +23339,10 @@ function computeVolume(config, weekLog) {
     const dayLog = weekLog[day.id];
     if (!dayLog || !dayLog.esercizi) return;
     const list = config.exercises[day.id] || [];
-    Object.entries(dayLog.esercizi).forEach(_ref60 => {
-      let _ref61 = _slicedToArray(_ref60, 2),
-        idx = _ref61[0],
-        rec = _ref61[1];
+    Object.entries(dayLog.esercizi).forEach(_ref64 => {
+      let _ref65 = _slicedToArray(_ref64, 2),
+        idx = _ref65[0],
+        rec = _ref65[1];
       const ex = list[parseInt(idx, 10)];
       if (!ex) return;
       const done = (rec.sets_done || []).filter(Boolean).length;
@@ -23123,8 +23355,8 @@ function computeVolume(config, weekLog) {
   });
   return out;
 }
-function VolumeScreen(_ref62) {
-  let goBack = _ref62.goBack;
+function VolumeScreen(_ref66) {
+  let goBack = _ref66.goBack;
   const programs = [{
     id: 'main',
     label: 'V8.3.4',
@@ -23146,17 +23378,17 @@ function VolumeScreen(_ref62) {
       config: cfg
     } : null;
   }).filter(Boolean));
-  const _useState137 = useState(0),
-    _useState138 = _slicedToArray(_useState137, 2),
-    progIdx = _useState138[0],
-    setProgIdx = _useState138[1];
+  const _useState139 = useState(0),
+    _useState140 = _slicedToArray(_useState139, 2),
+    progIdx = _useState140[0],
+    setProgIdx = _useState140[1];
   const prog = programs[progIdx] || programs[0];
   const log = storage.get(prog.config.storageKey) || {};
   const weeksWithData = (prog.config.weeks || []).filter(w => log[w]);
-  const _useState139 = useState(weeksWithData.length ? weeksWithData[weeksWithData.length - 1] : (prog.config.weeks || [1])[0]),
-    _useState140 = _slicedToArray(_useState139, 2),
-    week = _useState140[0],
-    setWeek = _useState140[1];
+  const _useState141 = useState(weeksWithData.length ? weeksWithData[weeksWithData.length - 1] : (prog.config.weeks || [1])[0]),
+    _useState142 = _slicedToArray(_useState141, 2),
+    week = _useState142[0],
+    setWeek = _useState142[1];
   useEffect(() => {
     const l = storage.get(prog.config.storageKey) || {};
     const ws = (prog.config.weeks || []).filter(w => l[w]);
@@ -23368,18 +23600,18 @@ function VolumeScreen(_ref62) {
 // ============================================================
 const KCAL_PER_KG = 7700; // ~7700 kcal per kg di massa persa/guadagnata
 
-function TdeeScreen(_ref63) {
-  let goBack = _ref63.goBack;
+function TdeeScreen(_ref67) {
+  let goBack = _ref67.goBack;
   const pesoLog = storage.get('peso') || {};
   const diets = storage.get('custom_diets') || [];
-  const _useState141 = useState(() => storage.get('tdee_giorni') || {}),
-    _useState142 = _slicedToArray(_useState141, 2),
-    assign = _useState142[0],
-    setAssign = _useState142[1];
-  const _useState143 = useState(() => storage.get('tdee_manuale') || ''),
+  const _useState143 = useState(() => storage.get('tdee_giorni') || {}),
     _useState144 = _slicedToArray(_useState143, 2),
-    manual = _useState144[0],
-    setManual = _useState144[1];
+    assign = _useState144[0],
+    setAssign = _useState144[1];
+  const _useState145 = useState(() => storage.get('tdee_manuale') || ''),
+    _useState146 = _slicedToArray(_useState145, 2),
+    manual = _useState146[0],
+    setManual = _useState146[1];
   const setDays = (id, n) => {
     const next = {
       ...assign,
@@ -23578,10 +23810,10 @@ function TdeeScreen(_ref63) {
       padding: '13px',
       marginBottom: '12px'
     }
-  }, [['Intake medio', Math.round(intakeMedio) + ' kcal/g'], ['Finestra analizzata', settimane + ' settimane (S' + primo.w + '→S' + ultimo.w + ')'], ['Variazione peso', (deltaKg > 0 ? '+' : '') + deltaKg.toFixed(2) + ' kg'], ['Ritmo settimanale', (kgSett > 0 ? '+' : '') + kgSett.toFixed(2) + ' kg/sett (' + (pctSett > 0 ? '+' : '') + pctSett.toFixed(2) + '%)'], ['Scarto calorico', (scartoGiorno > 0 ? '+' : '') + Math.round(scartoGiorno) + ' kcal/g']].map(_ref64 => {
-    let _ref65 = _slicedToArray(_ref64, 2),
-      k = _ref65[0],
-      v = _ref65[1];
+  }, [['Intake medio', Math.round(intakeMedio) + ' kcal/g'], ['Finestra analizzata', settimane + ' settimane (S' + primo.w + '→S' + ultimo.w + ')'], ['Variazione peso', (deltaKg > 0 ? '+' : '') + deltaKg.toFixed(2) + ' kg'], ['Ritmo settimanale', (kgSett > 0 ? '+' : '') + kgSett.toFixed(2) + ' kg/sett (' + (pctSett > 0 ? '+' : '') + pctSett.toFixed(2) + '%)'], ['Scarto calorico', (scartoGiorno > 0 ? '+' : '') + Math.round(scartoGiorno) + ' kcal/g']].map(_ref68 => {
+    let _ref69 = _slicedToArray(_ref68, 2),
+      k = _ref69[0],
+      v = _ref69[1];
     return /*#__PURE__*/React.createElement("div", {
       key: k,
       style: {
@@ -23633,16 +23865,16 @@ function TdeeScreen(_ref63) {
 // V11.2 · SOSTITUZIONE ESERCIZIO AL VOLO
 // ============================================================
 const SWAP_EQUIP = ['Manubri', 'Bilanciere', 'Bilanciere EZ', 'Cavi', 'Corpo libero'];
-function SwapModal(_ref66) {
-  let exercise = _ref66.exercise,
-    onPick = _ref66.onPick,
-    onClose = _ref66.onClose,
-    onReset = _ref66.onReset,
-    hasSwap = _ref66.hasSwap;
-  const _useState145 = useState(null),
-    _useState146 = _slicedToArray(_useState145, 2),
-    eq = _useState146[0],
-    setEq = _useState146[1];
+function SwapModal(_ref70) {
+  let exercise = _ref70.exercise,
+    onPick = _ref70.onPick,
+    onClose = _ref70.onClose,
+    onReset = _ref70.onReset,
+    hasSwap = _ref70.hasSwap;
+  const _useState147 = useState(null),
+    _useState148 = _slicedToArray(_useState147, 2),
+    eq = _useState148[0],
+    setEq = _useState148[1];
   const primary = (exercise.tags || [])[0];
   // gli esercizi dei programmi non hanno il campo attrezzo: lo prendo dal gemello del pacchetto
   const twinId = BUILTIN_TWIN[exercise.id];
@@ -23859,10 +24091,10 @@ const askConfirm = (titolo, dettaglio, onOk) => {
   });else if (window.confirm(titolo)) onOk();
 };
 function ConfirmHost() {
-  const _useState147 = useState(null),
-    _useState148 = _slicedToArray(_useState147, 2),
-    req = _useState148[0],
-    setReq = _useState148[1];
+  const _useState149 = useState(null),
+    _useState150 = _slicedToArray(_useState149, 2),
+    req = _useState150[0],
+    setReq = _useState150[1];
   useEffect(() => {
     _confirmSetter = setReq;
     return () => {
@@ -23953,10 +24185,10 @@ const notifyStorageError = () => {
   if (_storageErrSetter) _storageErrSetter(Date.now());
 };
 function StorageBanner() {
-  const _useState149 = useState(0),
-    _useState150 = _slicedToArray(_useState149, 2),
-    err = _useState150[0],
-    setErr = _useState150[1];
+  const _useState151 = useState(0),
+    _useState152 = _slicedToArray(_useState151, 2),
+    err = _useState152[0],
+    setErr = _useState152[1];
   useEffect(() => {
     _storageErrSetter = setErr;
     return () => {
@@ -24051,10 +24283,10 @@ function statsBlocco(config, log) {
       if (!dl || !dl.esercizi) return;
       let serieGiorno = 0;
       const list = config.exercises[day.id] || [];
-      Object.entries(dl.esercizi).forEach(_ref67 => {
-        let _ref68 = _slicedToArray(_ref67, 2),
-          idx = _ref68[0],
-          rec = _ref68[1];
+      Object.entries(dl.esercizi).forEach(_ref71 => {
+        let _ref72 = _slicedToArray(_ref71, 2),
+          idx = _ref72[0],
+          rec = _ref72[1];
         const ex = list[parseInt(idx, 10)];
         const fatte = (rec.sets_done || []).filter(Boolean).length;
         if (!fatte) return;
@@ -24106,24 +24338,24 @@ const PROGRAMMI = () => [{
     return null;
   }
 }).filter(Boolean));
-function StoricoScreen(_ref69) {
-  let goBack = _ref69.goBack;
-  const _useState151 = useState(() => storage.get('archivio') || []),
-    _useState152 = _slicedToArray(_useState151, 2),
-    archivio = _useState152[0],
-    setArchivio = _useState152[1];
-  const _useState153 = useState(0),
+function StoricoScreen(_ref73) {
+  let goBack = _ref73.goBack;
+  const _useState153 = useState(() => storage.get('archivio') || []),
     _useState154 = _slicedToArray(_useState153, 2),
-    progIdx = _useState154[0],
-    setProgIdx = _useState154[1];
-  const _useState155 = useState([]),
+    archivio = _useState154[0],
+    setArchivio = _useState154[1];
+  const _useState155 = useState(0),
     _useState156 = _slicedToArray(_useState155, 2),
-    cmp = _useState156[0],
-    setCmp = _useState156[1];
-  const _useState157 = useState(null),
+    progIdx = _useState156[0],
+    setProgIdx = _useState156[1];
+  const _useState157 = useState([]),
     _useState158 = _slicedToArray(_useState157, 2),
-    msg = _useState158[0],
-    setMsg = _useState158[1];
+    cmp = _useState158[0],
+    setCmp = _useState158[1];
+  const _useState159 = useState(null),
+    _useState160 = _slicedToArray(_useState159, 2),
+    msg = _useState160[0],
+    setMsg = _useState160[1];
   const programs = PROGRAMMI();
   const prog = programs[progIdx] || programs[0];
   const logCorrente = storage.get(prog.config.storageKey) || {};
@@ -24234,10 +24466,10 @@ function StoricoScreen(_ref69) {
       textAlign: 'center',
       marginBottom: '12px'
     }
-  }, [['SESSIONI', statsCorrente.sessioni], ['SERIE', Math.round(statsCorrente.serie)], ['TONNELLAGGIO', (statsCorrente.tonnellaggio / 1000).toFixed(1) + ' t']].map(_ref70 => {
-    let _ref71 = _slicedToArray(_ref70, 2),
-      l = _ref71[0],
-      v = _ref71[1];
+  }, [['SESSIONI', statsCorrente.sessioni], ['SERIE', Math.round(statsCorrente.serie)], ['TONNELLAGGIO', (statsCorrente.tonnellaggio / 1000).toFixed(1) + ' t']].map(_ref74 => {
+    let _ref75 = _slicedToArray(_ref74, 2),
+      l = _ref75[0],
+      v = _ref75[1];
     return /*#__PURE__*/React.createElement("div", {
       key: l
     }, /*#__PURE__*/React.createElement("div", {
@@ -24310,12 +24542,12 @@ function StoricoScreen(_ref69) {
       flex: 1,
       textAlign: 'right'
     }
-  }, a2.programma, " \xB7 ", fmtData(a2.dal))), [['Sessioni', a1.sessioni, a2.sessioni, ''], ['Serie totali', Math.round(a1.serie), Math.round(a2.serie), ''], ['Tonnellaggio', (a1.tonnellaggio / 1000).toFixed(1), (a2.tonnellaggio / 1000).toFixed(1), ' t']].map(_ref72 => {
-    let _ref73 = _slicedToArray(_ref72, 4),
-      k = _ref73[0],
-      v1 = _ref73[1],
-      v2 = _ref73[2],
-      u = _ref73[3];
+  }, a2.programma, " \xB7 ", fmtData(a2.dal))), [['Sessioni', a1.sessioni, a2.sessioni, ''], ['Serie totali', Math.round(a1.serie), Math.round(a2.serie), ''], ['Tonnellaggio', (a1.tonnellaggio / 1000).toFixed(1), (a2.tonnellaggio / 1000).toFixed(1), ' t']].map(_ref76 => {
+    let _ref77 = _slicedToArray(_ref76, 4),
+      k = _ref77[0],
+      v1 = _ref77[1],
+      v2 = _ref77[2],
+      u = _ref77[3];
     const d = v2 - v1;
     const col = d > 0 ? '#3FB66C' : d < 0 ? '#E0524A' : '#908AA0';
     return /*#__PURE__*/React.createElement("div", {
@@ -24483,10 +24715,10 @@ function StoricoScreen(_ref69) {
         gap: '14px',
         marginTop: '8px'
       }
-    }, [['sessioni', a.sessioni], ['serie', Math.round(a.serie)], ['tonn.', (a.tonnellaggio / 1000).toFixed(1) + ' t']].map(_ref74 => {
-      let _ref75 = _slicedToArray(_ref74, 2),
-        l = _ref75[0],
-        v = _ref75[1];
+    }, [['sessioni', a.sessioni], ['serie', Math.round(a.serie)], ['tonn.', (a.tonnellaggio / 1000).toFixed(1) + ' t']].map(_ref78 => {
+      let _ref79 = _slicedToArray(_ref78, 2),
+        l = _ref79[0],
+        v = _ref79[1];
       return /*#__PURE__*/React.createElement("div", {
         key: l
       }, /*#__PURE__*/React.createElement("span", {
@@ -24579,9 +24811,9 @@ function scomponi(totale, cfg) {
 }
 
 // Il manicotto: la firma visiva del registro.
-function Sleeve(_ref76) {
-  let peso = _ref76.peso,
-    compatta = _ref76.compatta;
+function Sleeve(_ref80) {
+  let peso = _ref80.peso,
+    compatta = _ref80.compatta;
   const r = scomponi(parseFloat(peso) || 0);
   const H = compatta ? 0.52 : 1;
   if (r.err) {
@@ -24714,12 +24946,12 @@ function ultimaVolta(log, week, dayId, exIdx) {
   }
   return null;
 }
-function UltimaVolta(_ref77) {
-  let log = _ref77.log,
-    week = _ref77.week,
-    dayId = _ref77.dayId,
-    exIdx = _ref77.exIdx,
-    kgAttuale = _ref77.kgAttuale;
+function UltimaVolta(_ref81) {
+  let log = _ref81.log,
+    week = _ref81.week,
+    dayId = _ref81.dayId,
+    exIdx = _ref81.exIdx,
+    kgAttuale = _ref81.kgAttuale;
   const p = ultimaVolta(log, week, dayId, exIdx);
   if (!p) return null;
   const kg = parseFloat(kgAttuale) || 0;
@@ -24790,12 +25022,12 @@ function UltimaVolta(_ref77) {
 // ============================================================
 // REGISTRO · IMPOSTAZIONI BILANCIERE E DISCHI
 // ============================================================
-function BilanciereScreen(_ref78) {
-  let goBack = _ref78.goBack;
-  const _useState159 = useState(plateCfg),
-    _useState160 = _slicedToArray(_useState159, 2),
-    cfg = _useState160[0],
-    setCfg = _useState160[1];
+function BilanciereScreen(_ref82) {
+  let goBack = _ref82.goBack;
+  const _useState161 = useState(plateCfg),
+    _useState162 = _slicedToArray(_useState161, 2),
+    cfg = _useState162[0],
+    setCfg = _useState162[1];
   const salva = next => {
     setCfg(next);
     storage.set('bilanciere', next);
@@ -24941,8 +25173,8 @@ const usaBilanciere = ex => {
 // ============================================================
 // REGISTRO · LA SEDUTA DI OGGI
 // ============================================================
-function TodayCard(_ref79) {
-  let navigate = _ref79.navigate;
+function TodayCard(_ref83) {
+  let navigate = _ref83.navigate;
   const att = schedaAttiva();
   const CFG = att.config;
   const log = storage.get(CFG.storageKey) || {};
@@ -24996,10 +25228,10 @@ function TodayCard(_ref79) {
       overflow: 'hidden',
       marginTop: '15px'
     }
-  }, [[String(nEs).padStart(2, '0'), 'ESERCIZI'], [String(nSerie), 'SERIE'], [giorno.dur || '—', 'DURATA']].map((_ref80, i) => {
-    let _ref81 = _slicedToArray(_ref80, 2),
-      v = _ref81[0],
-      l = _ref81[1];
+  }, [[String(nEs).padStart(2, '0'), 'ESERCIZI'], [String(nSerie), 'SERIE'], [giorno.dur || '—', 'DURATA']].map((_ref84, i) => {
+    let _ref85 = _slicedToArray(_ref84, 2),
+      v = _ref85[0],
+      l = _ref85[1];
     return /*#__PURE__*/React.createElement("div", {
       key: l,
       style: {
@@ -25090,14 +25322,14 @@ function PesoSpark() {
 // Una tacca per esercizio: piena se finito, a metà se iniziato.
 // ============================================================
 let _barraGiu = false; // vero quando la barra della seduta occupa il fondo schermo
-function ProgressoSeduta(_ref82) {
-  let esercizi = _ref82.esercizi,
-    blocchi = _ref82.blocchi,
-    data = _ref82.data,
-    week = _ref82.week,
-    dayId = _ref82.dayId,
-    cur = _ref82.cur,
-    vai = _ref82.vai;
+function ProgressoSeduta(_ref86) {
+  let esercizi = _ref86.esercizi,
+    blocchi = _ref86.blocchi,
+    data = _ref86.data,
+    week = _ref86.week,
+    dayId = _ref86.dayId,
+    cur = _ref86.cur,
+    vai = _ref86.vai;
   const log = (data[week] || {})[dayId] || {};
   const gruppi = blocchi || esercizi.map((_, i) => [i]);
   const stato = gruppi.map(g => {
@@ -25158,17 +25390,17 @@ function ProgressoSeduta(_ref82) {
 // L'azione più frequente (spuntare la serie) sta nella zona del
 // pollice e non si sposta mai. Durante il recupero diventa timer.
 // ============================================================
-function BarraSeduta(_ref83) {
-  let esercizi = _ref83.esercizi,
-    idx = _ref83.idx,
-    vai = _ref83.vai,
-    exData = _ref83.exData,
-    logic = _ref83.logic,
-    onSpunta = _ref83.onSpunta,
-    completa = _ref83.completa,
-    completato = _ref83.completato,
-    nomeProssimo = _ref83.nomeProssimo,
-    superset = _ref83.superset;
+function BarraSeduta(_ref87) {
+  let esercizi = _ref87.esercizi,
+    idx = _ref87.idx,
+    vai = _ref87.vai,
+    exData = _ref87.exData,
+    logic = _ref87.logic,
+    onSpunta = _ref87.onSpunta,
+    completa = _ref87.completa,
+    completato = _ref87.completato,
+    nomeProssimo = _ref87.nomeProssimo,
+    superset = _ref87.superset;
   const _useTimer4 = useTimer(),
     active = _useTimer4.active,
     remaining = _useTimer4.remaining,
@@ -25434,15 +25666,15 @@ const recuperoSerie = (tec, i, standard) => {
 };
 
 // Intestazione della tecnica sopra la tabella delle serie
-function IntestazioneTecnica(_ref84) {
-  let tec = _ref84.tec;
+function IntestazioneTecnica(_ref88) {
+  let tec = _ref88.tec;
   const t = TECNICHE[tec];
-  const _ref85 = useContext(TechModalContext) || {},
-    showTech = _ref85.showTech;
-  const _useState161 = useState(false),
-    _useState162 = _slicedToArray(_useState161, 2),
-    aperto = _useState162[0],
-    setAperto = _useState162[1];
+  const _ref89 = useContext(TechModalContext) || {},
+    showTech = _ref89.showTech;
+  const _useState163 = useState(false),
+    _useState164 = _slicedToArray(_useState163, 2),
+    aperto = _useState164[0],
+    setAperto = _useState164[1];
   if (!t) return null;
   return /*#__PURE__*/React.createElement("div", {
     style: {
@@ -25512,10 +25744,10 @@ function IntestazioneTecnica(_ref84) {
 }
 
 // Fascia del superset: mostra la coppia e come alternarla
-function FasciaSuperset(_ref86) {
-  let lettera = _ref86.lettera,
-    esercizi = _ref86.esercizi,
-    correnteIdx = _ref86.correnteIdx;
+function FasciaSuperset(_ref90) {
+  let lettera = _ref90.lettera,
+    esercizi = _ref90.esercizi,
+    correnteIdx = _ref90.correnteIdx;
   if (!esercizi || esercizi.length < 2) return null;
   return /*#__PURE__*/React.createElement("div", {
     style: {
@@ -25580,6 +25812,7 @@ function FasciaSuperset(_ref86) {
 // Un campo solo: scrive nel giorno di oggi della settimana corrente.
 // ============================================================
 const GIORNI_SETT = ['dom', 'lun', 'mar', 'mer', 'gio', 'ven', 'sab'];
+const PUNTI = ['Vita ombelicale', 'Collo', 'Petto', 'Braccio (flesso)', 'Coscia (max)', 'Polpaccio', 'Avambraccio'];
 const NOMI_GIORNI = {
   lun: 'LUN',
   mar: 'MAR',
@@ -25609,13 +25842,13 @@ const mediaSett = r => {
   const v = GIORNI_SETT.map(g => parseFloat((r || {})[g])).filter(x => !isNaN(x) && x > 0);
   return v.length ? v.reduce((a, b) => a + b, 0) / v.length : 0;
 };
-function InserimentoRapido(_ref87) {
-  let data = _ref87.data,
-    onSalva = _ref87.onSalva;
-  const _useState163 = useState(''),
-    _useState164 = _slicedToArray(_useState163, 2),
-    v = _useState164[0],
-    setV = _useState164[1];
+function InserimentoRapido(_ref91) {
+  let data = _ref91.data,
+    onSalva = _ref91.onSalva;
+  const _useState165 = useState(''),
+    _useState166 = _slicedToArray(_useState165, 2),
+    v = _useState166[0],
+    setV = _useState166[1];
   const oggi = GIORNI_SETT[new Date().getDay()];
   const sett = settimanaCorrente();
   const gia = (data[sett] || {})[oggi] || '';
@@ -25702,10 +25935,10 @@ function InserimentoRapido(_ref87) {
 // ============================================================
 // PESO · GRAFICO DELL'ANDAMENTO
 // ============================================================
-function GraficoPeso(_ref88) {
-  let data = _ref88.data,
-    _ref88$altezza = _ref88.altezza,
-    altezza = _ref88$altezza === void 0 ? 130 : _ref88$altezza;
+function GraficoPeso(_ref92) {
+  let data = _ref92.data,
+    _ref92$altezza = _ref92.altezza,
+    altezza = _ref92$altezza === void 0 ? 130 : _ref92$altezza;
   const serie = Object.keys(data).map(Number).sort((a, b) => a - b).map(w => ({
     w,
     m: mediaSett(data[w])
@@ -25812,11 +26045,11 @@ function GraficoPeso(_ref88) {
 // Grasso: formula Navy (vita, collo, altezza). Errore dichiarato ±3-4%.
 // Massa magra: FFMI normalizzato.
 // ============================================================
-function stimaComposizione(_ref89) {
-  let peso = _ref89.peso,
-    vita = _ref89.vita,
-    collo = _ref89.collo,
-    altezza = _ref89.altezza;
+function stimaComposizione(_ref93) {
+  let peso = _ref93.peso,
+    vita = _ref93.vita,
+    collo = _ref93.collo,
+    altezza = _ref93.altezza;
   const p = parseFloat(peso),
     v = parseFloat(vita),
     c = parseFloat(collo),
@@ -25836,11 +26069,11 @@ function stimaComposizione(_ref89) {
 }
 
 // Figura schematica: le spalle e gli arti crescono col FFMI, la vita col grasso.
-function Figura(_ref90) {
-  let bf = _ref90.bf,
-    ffmi = _ref90.ffmi,
-    _ref90$altezzaPx = _ref90.altezzaPx,
-    altezzaPx = _ref90$altezzaPx === void 0 ? 210 : _ref90$altezzaPx;
+function Figura(_ref94) {
+  let bf = _ref94.bf,
+    ffmi = _ref94.ffmi,
+    _ref94$altezzaPx = _ref94.altezzaPx,
+    altezzaPx = _ref94$altezzaPx === void 0 ? 210 : _ref94$altezzaPx;
   const m = Math.max(0, Math.min(1, (ffmi - 17) / 8)); // 17 → 25
   const g = Math.max(0, Math.min(1, (bf - 8) / 20)); // 8% → 28%
   const spalle = 30 + m * 15;
@@ -25962,208 +26195,6 @@ function giudizioFFMI(ffmi) {
     c: '#E5A82B',
     n: 'Sopra 25 la letteratura sui natural è scarsa. Più probabile un errore di misura sulla vita o sul collo.'
   };
-}
-
-// ============================================================
-// CORPO · figura, stime e giudizi
-// ============================================================
-function SezioneCorpo(_ref91) {
-  let data = _ref91.data,
-    misure = _ref91.misure,
-    setMisure = _ref91.setMisure;
-  const _useState165 = useState(() => storage.get('altezza') || ''),
-    _useState166 = _slicedToArray(_useState165, 2),
-    h = _useState166[0],
-    setH = _useState166[1];
-  const salvaH = v => {
-    setH(v);
-    storage.set('altezza', v);
-  };
-  const blocchi = Object.keys(misure || {});
-  const ultimo = blocchi.length ? misure[blocchi[blocchi.length - 1]] : {};
-  const primo = blocchi.length ? misure[blocchi[0]] : {};
-  const serie = Object.keys(data).map(Number).sort((a, b) => a - b).map(w => mediaSett(data[w])).filter(x => x > 0);
-  const peso = serie.length ? serie[serie.length - 1] : null;
-  const comp = stimaComposizione({
-    peso,
-    vita: ultimo['Vita ombelicale'],
-    collo: ultimo['Collo'],
-    altezza: h
-  });
-  return /*#__PURE__*/React.createElement(React.Fragment, null, !comp && /*#__PURE__*/React.createElement("div", {
-    style: {
-      ...glassCard,
-      padding: '14px',
-      marginBottom: '14px',
-      borderLeft: '3px solid #E5A82B'
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      ...lblStyle,
-      color: '#E5A82B',
-      marginBottom: '8px'
-    }
-  }, "Servono tre dati"), /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: '11.5px',
-      color: '#C7C2D0',
-      lineHeight: 1.55,
-      marginBottom: '11px'
-    }
-  }, "Per stimare grasso e massa magra servono ", /*#__PURE__*/React.createElement("b", {
-    style: {
-      color: IRON.chalk
-    }
-  }, "altezza"), ", ", /*#__PURE__*/React.createElement("b", {
-    style: {
-      color: IRON.chalk
-    }
-  }, "vita ombelicale"), " e ", /*#__PURE__*/React.createElement("b", {
-    style: {
-      color: IRON.chalk
-    }
-  }, "collo"), ". Vita e collo si inseriscono nella scheda Misure, il peso nella scheda Peso."), /*#__PURE__*/React.createElement(Fld, {
-    label: "Altezza in cm",
-    type: "number",
-    value: h,
-    onChange: salvaH,
-    ph: "178"
-  })), comp && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
-    style: {
-      ...glassCard,
-      padding: '16px 14px',
-      marginBottom: '14px'
-    }
-  }, /*#__PURE__*/React.createElement(Figura, {
-    bf: comp.bf,
-    ffmi: comp.ffmi
-  }), /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: 'flex',
-      gap: '8px',
-      marginTop: '12px'
-    }
-  }, [['GRASSO', comp.bf + '%', giudizioBF(comp.bf)], ['FFMI', comp.ffmi, giudizioFFMI(comp.ffmi)], ['MASSA MAGRA', comp.ffm + ' kg', null]].map(_ref92 => {
-    let _ref93 = _slicedToArray(_ref92, 3),
-      l = _ref93[0],
-      v = _ref93[1],
-      gj = _ref93[2];
-    return /*#__PURE__*/React.createElement("div", {
-      key: l,
-      style: {
-        flex: 1,
-        textAlign: 'center',
-        border: '1px solid ' + IRON.edge,
-        borderRadius: '3px',
-        padding: '9px 3px'
-      }
-    }, /*#__PURE__*/React.createElement("div", {
-      style: {
-        ...numStyle,
-        fontSize: '17px',
-        fontWeight: '600',
-        color: gj ? gj.c : IRON.chalk
-      }
-    }, v), /*#__PURE__*/React.createElement("div", {
-      style: {
-        ...lblStyle,
-        fontSize: '8px'
-      }
-    }, l), gj && /*#__PURE__*/React.createElement("div", {
-      style: {
-        ...lblStyle,
-        fontSize: '7.5px',
-        color: gj.c,
-        marginTop: '2px'
-      }
-    }, gj.t));
-  }))), (comp.bf < 6 || comp.bf > 40) && /*#__PURE__*/React.createElement(InfoBox, {
-    color: "#D8342C",
-    title: "Valore fuori scala"
-  }, comp.bf, "% \xE8 al di fuori dell'intervallo in cui la formula \xE8 attendibile. Ricontrolla la misura della vita e del collo: vanno prese a digiuno, con il metro aderente ma non stretto, la vita all'ombelico e il collo sotto il pomo d'Adamo."), /*#__PURE__*/React.createElement(InfoBox, {
-    color: giudizioBF(comp.bf).c,
-    title: 'Grasso stimato ' + comp.bf + '% · ' + giudizioBF(comp.bf).t
-  }, giudizioBF(comp.bf).n), /*#__PURE__*/React.createElement(InfoBox, {
-    color: giudizioFFMI(comp.ffmi).c,
-    title: 'FFMI ' + comp.ffmi + ' · ' + giudizioFFMI(comp.ffmi).t
-  }, giudizioFFMI(comp.ffmi).n), blocchi.length > 1 && /*#__PURE__*/React.createElement("div", {
-    style: {
-      ...glassCard,
-      padding: '14px',
-      marginBottom: '14px'
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      ...lblStyle,
-      marginBottom: '10px'
-    }
-  }, "Variazione misure \xB7 ", blocchi[0], " \u2192 ", blocchi[blocchi.length - 1]), ['Petto', 'Braccio (flesso)', 'Coscia (max)', 'Vita ombelicale'].map(k => {
-    const a = parseFloat(primo[k]),
-      b = parseFloat(ultimo[k]);
-    if (isNaN(a) || isNaN(b)) return null;
-    const d = b - a;
-    const buono = k === 'Vita ombelicale' ? d < 0 : d > 0;
-    return /*#__PURE__*/React.createElement("div", {
-      key: k,
-      style: {
-        display: 'flex',
-        alignItems: 'center',
-        padding: '5px 0',
-        borderBottom: '1px solid ' + IRON.edge
-      }
-    }, /*#__PURE__*/React.createElement("span", {
-      style: {
-        flex: 1,
-        fontSize: '12px',
-        color: '#C7C2D0'
-      }
-    }, k), /*#__PURE__*/React.createElement("span", {
-      style: {
-        ...numStyle,
-        fontSize: '12px',
-        color: IRON.dust
-      }
-    }, a.toFixed(1), " \u2192 ", b.toFixed(1)), /*#__PURE__*/React.createElement("span", {
-      style: {
-        ...numStyle,
-        fontSize: '11.5px',
-        width: '52px',
-        textAlign: 'right',
-        color: d === 0 ? IRON.ash : buono ? '#2FA055' : '#E5A82B'
-      }
-    }, d > 0 ? '+' : '', d.toFixed(1)));
-  })), /*#__PURE__*/React.createElement("div", {
-    style: {
-      ...glassCard,
-      padding: '13px',
-      marginBottom: '14px'
-    }
-  }, /*#__PURE__*/React.createElement(Fld, {
-    label: "Altezza in cm",
-    type: "number",
-    value: h,
-    onChange: salvaH,
-    ph: "178"
-  }))), /*#__PURE__*/React.createElement(InfoBox, {
-    color: "#8A8A93",
-    title: "Quanto fidarsi"
-  }, "La figura \xE8 uno ", /*#__PURE__*/React.createElement("b", {
-    style: {
-      color: IRON.chalk
-    }
-  }, "schema"), " costruito su due numeri, non un ritratto. La stima del grasso usa la formula Navy (vita, collo, altezza): comoda perch\xE9 serve solo un metro, ma con un errore di ", /*#__PURE__*/React.createElement("b", {
-    style: {
-      color: IRON.chalk
-    }
-  }, "\xB13-4 punti percentuali"), " rispetto alla DEXA. In chi ha collo e schiena spessi ", /*#__PURE__*/React.createElement("b", {
-    style: {
-      color: IRON.chalk
-    }
-  }, "tende a sottostimare"), ", perch\xE9 il collo largo entra nella formula come se fosse magrezza. Il valore assoluto conta poco: quello che conta \xE8 come si muove ", /*#__PURE__*/React.createElement("b", {
-    style: {
-      color: IRON.chalk
-    }
-  }, "a parit\xE0 di metodo, metro e momento della giornata"), "."));
 }
 
 // ============= MAIN =============
