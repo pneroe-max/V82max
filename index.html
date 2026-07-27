@@ -2047,6 +2047,8 @@ document.addEventListener('visibilitychange', () => {
 // ============= TEMA v5 "VETRO & VIOLA" =============
 // Card-vetro semitrasparenti (img2) che lasciano filtrare le sfere viola;
 // accento UI viola elettrico (img1). Colori-disco solo per i giorni.
+const APP_VERSION = 'v15.2';
+const APP_BUILD = '2026-07-27';
 const displayFont = "'Archivo', -apple-system, system-ui, sans-serif";
 const monoFont = "'IBM Plex Mono', ui-monospace, 'SF Mono', monospace";
 // cifra: sempre monospaziata e incolonnata
@@ -3186,7 +3188,7 @@ function HomeScreen(_ref12) {
       letterSpacing: '0.04em',
       fontWeight: '500'
     }
-  }, "V8 Tracker v12.0 \xABRegistro\xBB \xB7 Protocollo V8.3.4 \xB7 92 kg", /*#__PURE__*/React.createElement("br", null), "Dati salvati sul dispositivo")));
+  }, "V8 Tracker ", APP_VERSION, " \xB7 Protocollo V8.3.4 \xB7 92 kg", /*#__PURE__*/React.createElement("br", null), "Dati salvati sul dispositivo")));
 }
 
 // ============= EXERCISE DETAIL =============
@@ -5994,12 +5996,75 @@ function SettingsScreen(_ref29) {
     size: 16
   }), " Esporta backup JSON"), /*#__PURE__*/React.createElement("div", {
     style: {
-      fontSize: '10.5px',
-      color: '#5A5468',
-      textAlign: 'center',
-      marginBottom: '10px'
+      border: '1px solid ' + IRON.edge,
+      borderRadius: '3px',
+      padding: '12px',
+      marginBottom: '12px'
     }
-  }, "Dati salvati: ", storageUsage().kb, " KB su ", storageUsage().voci, " voci"), /*#__PURE__*/React.createElement("div", {
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'baseline',
+      marginBottom: '9px'
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: lblStyle
+  }, "Versione installata"), /*#__PURE__*/React.createElement("span", {
+    style: {
+      ...numStyle,
+      fontSize: '14px',
+      fontWeight: '600',
+      color: IRON.chalk
+    }
+  }, APP_VERSION)), /*#__PURE__*/React.createElement("div", {
+    style: {
+      ...numStyle,
+      fontSize: '10px',
+      color: IRON.dust,
+      marginBottom: '11px'
+    }
+  }, "build ", APP_BUILD, " \xB7 dati ", storageUsage().kb, " KB su ", storageUsage().voci, " voci"), /*#__PURE__*/React.createElement("button", {
+    onClick: async () => {
+      try {
+        if ('caches' in window) {
+          const k = await caches.keys();
+          await Promise.all(k.map(x => caches.delete(x)));
+        }
+        if (navigator.serviceWorker) {
+          const rs = await navigator.serviceWorker.getRegistrations();
+          await Promise.all(rs.map(r => r.unregister()));
+        }
+      } catch (e) {}
+      location.reload(true);
+    },
+    style: {
+      width: '100%',
+      minHeight: '48px',
+      background: IRON.chalk,
+      color: IRON.bg,
+      border: 'none',
+      borderRadius: '3px',
+      fontFamily: displayFont,
+      fontVariationSettings: "'wdth' 112",
+      fontSize: '12.5px',
+      fontWeight: '800',
+      letterSpacing: '0.06em',
+      textTransform: 'uppercase',
+      cursor: 'pointer'
+    }
+  }, "Forza aggiornamento"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: '10.5px',
+      color: IRON.dust,
+      marginTop: '8px',
+      lineHeight: 1.5
+    }
+  }, "Svuota la cache e ricarica. I tuoi dati ", /*#__PURE__*/React.createElement("b", {
+    style: {
+      color: IRON.chalk
+    }
+  }, "non"), " vengono toccati: stanno in una memoria separata.")), /*#__PURE__*/React.createElement("div", {
     style: {
       display: 'flex',
       gap: '7px',
@@ -6130,7 +6195,7 @@ function SettingsScreen(_ref29) {
     style: {
       color: '#F4F2F8'
     }
-  }, "V8 Tracker v12.0 \xABRegistro\xBB \xABVetro & Viola\xBB \xB7 Protocollo V8.3.4"), /*#__PURE__*/React.createElement("br", null), "Programma: V8 Block Cutting \xB7 8 Settimane \xB7 92kg (progressione a singola variabile)", /*#__PURE__*/React.createElement("br", null), "Storage: localStorage del browser", /*#__PURE__*/React.createElement("br", null), "Funziona offline dopo la prima apertura", /*#__PURE__*/React.createElement("br", null), "Immagini esercizi: Wikimedia Commons (con fallback SVG)"))));
+  }, "V8 Tracker ", APP_VERSION, " \xB7 Protocollo V8.3.4"), /*#__PURE__*/React.createElement("br", null), "Programma: V8 Block Cutting \xB7 8 Settimane \xB7 92kg (progressione a singola variabile)", /*#__PURE__*/React.createElement("br", null), "Storage: localStorage del browser", /*#__PURE__*/React.createElement("br", null), "Funziona offline dopo la prima apertura", /*#__PURE__*/React.createElement("br", null), "Immagini esercizi: Wikimedia Commons (con fallback SVG)"))));
 }
 
 // ============= ESTATE / VIAGGIO =============
