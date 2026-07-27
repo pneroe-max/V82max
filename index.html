@@ -3801,6 +3801,22 @@ function WorkoutScreen(_ref18) {
       _orig: ex.name
     } : ex;
   });
+  // Raggruppa gli esercizi in "blocchi": un superset occupa una pagina sola.
+  const blocchi = (() => {
+    const out = [],
+      visti = {};
+    (exercises || []).forEach((e, i) => {
+      if (e && e.sup) {
+        if (visti[e.sup] != null) {
+          out[visti[e.sup]].push(i);
+          return;
+        }
+        visti[e.sup] = out.length;
+        out.push([i]);
+      } else out.push([i]);
+    });
+    return out;
+  })();
   const block = getBlock(selectedWeek);
   const completed = isCompleted(selectedWeek, selectedDay);
   const isRotA = selectedWeek % 2 === 1;
@@ -3829,7 +3845,7 @@ function WorkoutScreen(_ref18) {
       const dy = e.changedTouches[0].clientY - touch.current.y;
       touch.current = null;
       if (Math.abs(dx) < 65 || Math.abs(dy) > Math.abs(dx)) return;
-      if (dx < 0 && curEx < exercises.length - 1) setCurEx(curEx + 1);
+      if (dx < 0 && curEx < blocchi.length - 1) setCurEx(curEx + 1);
       if (dx > 0 && curEx > 0) setCurEx(curEx - 1);
     }
   }, /*#__PURE__*/React.createElement(Header, {
@@ -3842,6 +3858,7 @@ function WorkoutScreen(_ref18) {
     }
   }, /*#__PURE__*/React.createElement(ProgressoSeduta, {
     esercizi: exercises,
+    blocchi: blocchi,
     data: data,
     week: selectedWeek,
     dayId: selectedDay,
@@ -3858,9 +3875,10 @@ function WorkoutScreen(_ref18) {
       color: isRotA ? '#E8B43C' : '#26c6da',
       textAlign: 'center'
     }
-  }, "Settimana ", selectedWeek, " \u2192 Rotazione ", /*#__PURE__*/React.createElement("strong", null, isRotA ? 'A (sett 1-3-5-7)' : 'B (sett 2-4-6-8)')), exercises.slice(curEx, curEx + 1).map(ex => {
+  }, "Settimana ", selectedWeek, " \u2192 Rotazione ", /*#__PURE__*/React.createElement("strong", null, isRotA ? 'A (sett 1-3-5-7)' : 'B (sett 2-4-6-8)')), (blocchi[curEx] || []).map((idx, posBlocco) => {
     var _data$selectedWeek;
-    const idx = curEx;
+    const ex = exercises[idx];
+    const inSuperset = (blocchi[curEx] || []).length > 1;
     const exData = ((_data$selectedWeek = data[selectedWeek]) === null || _data$selectedWeek === void 0 || (_data$selectedWeek = _data$selectedWeek[selectedDay]) === null || _data$selectedWeek === void 0 || (_data$selectedWeek = _data$selectedWeek.esercizi) === null || _data$selectedWeek === void 0 ? void 0 : _data$selectedWeek[idx]) || {
       kg: '',
       reps: ['', '', '', ''],
@@ -4337,17 +4355,28 @@ function WorkoutScreen(_ref18) {
       kgAttuale: exData.kg
     }));
   }))), /*#__PURE__*/React.createElement(BarraSeduta, {
-    esercizi: exercises,
+    esercizi: blocchi,
     idx: curEx,
     vai: setCurEx,
-    exData: ((_data$selectedWeek2 = data[selectedWeek]) === null || _data$selectedWeek2 === void 0 || (_data$selectedWeek2 = _data$selectedWeek2[selectedDay]) === null || _data$selectedWeek2 === void 0 || (_data$selectedWeek2 = _data$selectedWeek2.esercizi) === null || _data$selectedWeek2 === void 0 ? void 0 : _data$selectedWeek2[curEx]) || {},
-    logic: applyLogic(exercises[curEx] || {}, selectedWeek),
+    nomeProssimo: (exercises[(blocchi[curEx + 1] || [])[0]] || {}).name,
+    superset: (blocchi[curEx] || []).length > 1,
+    exData: ((_data$selectedWeek2 = data[selectedWeek]) === null || _data$selectedWeek2 === void 0 || (_data$selectedWeek2 = _data$selectedWeek2[selectedDay]) === null || _data$selectedWeek2 === void 0 || (_data$selectedWeek2 = _data$selectedWeek2.esercizi) === null || _data$selectedWeek2 === void 0 ? void 0 : _data$selectedWeek2[(blocchi[curEx] || [0])[0]]) || {},
+    logic: applyLogic(exercises[(blocchi[curEx] || [0])[0]] || {}, selectedWeek),
     onSpunta: (setIdx, reps) => {
-      if (reps) updateExercise(selectedWeek, selectedDay, curEx, 'reps', reps, setIdx);
-      updateExercise(selectedWeek, selectedDay, curEx, 'sets_done', true, setIdx);
-      const exx = exercises[curEx] || {};
-      const lg = applyLogic(exx, selectedWeek);
-      startTimer(recuperoSerie(exx.tec, setIdx, parseRestSeconds(lg.rest)), exx.name + ' · ' + rigaSerie(exx.tec, setIdx, lg.sets));
+      const gruppo = blocchi[curEx] || [];
+      gruppo.forEach(i => {
+        var _data$selectedWeek3;
+        const e = exercises[i] || {};
+        const lg = applyLogic(e, selectedWeek);
+        const rec = ((_data$selectedWeek3 = data[selectedWeek]) === null || _data$selectedWeek3 === void 0 || (_data$selectedWeek3 = _data$selectedWeek3[selectedDay]) === null || _data$selectedWeek3 === void 0 || (_data$selectedWeek3 = _data$selectedWeek3.esercizi) === null || _data$selectedWeek3 === void 0 ? void 0 : _data$selectedWeek3[i]) || {};
+        if (!(rec.reps || [])[setIdx]) {
+          updateExercise(selectedWeek, selectedDay, i, 'reps', String(parseRepRange(lg.reps).max), setIdx);
+        }
+        updateExercise(selectedWeek, selectedDay, i, 'sets_done', true, setIdx);
+      });
+      const primo = exercises[gruppo[0]] || {};
+      const lg = applyLogic(primo, selectedWeek);
+      startTimer(recuperoSerie(primo.tec, setIdx, parseRestSeconds(lg.rest)), (gruppo.length > 1 ? 'Superset ' + primo.sup : primo.name) + ' · ' + rigaSerie(primo.tec, setIdx, lg.sets));
       try {
         if (navigator.vibrate) navigator.vibrate(40);
       } catch (e) {}
@@ -4390,17 +4419,11 @@ function PesoScreen(_ref19) {
   const updatePeso = (week, day, value) => {
     const newData = JSON.parse(JSON.stringify(data));
     if (!newData[week]) newData[week] = {
-      lun: '',
-      mer: '',
-      ven: '',
-      dom: '',
       media: 0,
       note: ''
     };
     newData[week][day] = value;
-    const days = ['lun', 'mer', 'ven', 'dom'];
-    const valori = days.map(d => parseFloat(newData[week][d])).filter(v => !isNaN(v) && v > 0);
-    newData[week].media = valori.length > 0 ? valori.reduce((a, b) => a + b, 0) / valori.length : 0;
+    newData[week].media = mediaSett(newData[week]);
     setData(newData);
     storage.set('peso', newData);
   };
@@ -4454,7 +4477,7 @@ function PesoScreen(_ref19) {
     if (delta > 0.3) return '#E0524A';
     return '#908AA0';
   };
-  const punti = ['Vita ombelicale', 'Petto', 'Coscia (max)', 'Polpaccio', 'Braccio (flesso)', 'Avambraccio'];
+  const punti = ['Vita ombelicale', 'Collo', 'Petto', 'Coscia (max)', 'Polpaccio', 'Braccio (flesso)', 'Avambraccio'];
   return /*#__PURE__*/React.createElement("div", {
     style: {
       minHeight: '100vh',
@@ -4473,7 +4496,10 @@ function PesoScreen(_ref19) {
     }
   }, [{
     id: 'peso',
-    label: 'Peso 4×/sett'
+    label: 'Peso'
+  }, {
+    id: 'corpo',
+    label: 'Corpo'
   }, {
     id: 'misure',
     label: 'Misure'
@@ -4498,7 +4524,12 @@ function PesoScreen(_ref19) {
     style: {
       padding: '0 12px'
     }
-  }, tab === 'peso' && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+  }, tab === 'peso' && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement(InserimentoRapido, {
+    data: data,
+    onSalva: updatePeso
+  }), /*#__PURE__*/React.createElement(GraficoPeso, {
+    data: data
+  }), /*#__PURE__*/React.createElement("div", {
     style: {
       ...glassCard,
       padding: '16px',
@@ -4632,7 +4663,11 @@ function PesoScreen(_ref19) {
         boxSizing: 'border-box'
       }
     }));
-  })), tab === 'misure' && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+  })), tab === 'corpo' && /*#__PURE__*/React.createElement(SezioneCorpo, {
+    data: data,
+    misure: misure,
+    setMisure: setMisure
+  }), tab === 'misure' && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: '11px',
       color: '#908AA0',
@@ -25057,17 +25092,23 @@ function PesoSpark() {
 let _barraGiu = false; // vero quando la barra della seduta occupa il fondo schermo
 function ProgressoSeduta(_ref82) {
   let esercizi = _ref82.esercizi,
+    blocchi = _ref82.blocchi,
     data = _ref82.data,
     week = _ref82.week,
     dayId = _ref82.dayId,
     cur = _ref82.cur,
     vai = _ref82.vai;
   const log = (data[week] || {})[dayId] || {};
-  const stato = esercizi.map((ex, i) => {
-    const rec = (log.esercizi || {})[i] || {};
-    const fatte = (rec.sets_done || []).filter(Boolean).length;
-    const tot = ex.sets || 4;
-    return fatte === 0 ? 0 : fatte >= tot ? 2 : 1;
+  const gruppi = blocchi || esercizi.map((_, i) => [i]);
+  const stato = gruppi.map(g => {
+    // un blocco è finito quando lo sono tutti gli esercizi che contiene
+    const st = g.map(i => {
+      const rec = (log.esercizi || {})[i] || {};
+      const fatte = (rec.sets_done || []).filter(Boolean).length;
+      const tot = (esercizi[i] || {}).sets || 4;
+      return fatte === 0 ? 0 : fatte >= tot ? 2 : 1;
+    });
+    return Math.min.apply(null, st);
   });
   const finiti = stato.filter(s => s === 2).length;
   return /*#__PURE__*/React.createElement("div", {
@@ -25079,10 +25120,10 @@ function ProgressoSeduta(_ref82) {
       display: 'flex',
       gap: '4px'
     }
-  }, esercizi.map((ex, i) => /*#__PURE__*/React.createElement("button", {
+  }, gruppi.map((g, i) => /*#__PURE__*/React.createElement("button", {
     key: i,
     onClick: () => vai(i),
-    "aria-label": 'Esercizio ' + (i + 1),
+    "aria-label": 'Blocco ' + (i + 1),
     style: {
       flex: 1,
       minHeight: '30px',
@@ -25096,7 +25137,7 @@ function ProgressoSeduta(_ref82) {
       fontWeight: '600',
       color: i === cur ? IRON.bg : stato[i] ? '#DFF3E6' : IRON.ash
     }
-  }, String(i + 1).padStart(2, '0')))), /*#__PURE__*/React.createElement("div", {
+  }, g.length > 1 ? 'SS' : String(i + 1).padStart(2, '0')))), /*#__PURE__*/React.createElement("div", {
     style: {
       display: 'flex',
       justifyContent: 'space-between',
@@ -25104,10 +25145,10 @@ function ProgressoSeduta(_ref82) {
     }
   }, /*#__PURE__*/React.createElement("span", {
     style: lblStyle
-  }, "Esercizio ", cur + 1, " di ", esercizi.length), /*#__PURE__*/React.createElement("span", {
+  }, "Blocco ", cur + 1, " di ", gruppi.length), /*#__PURE__*/React.createElement("span", {
     style: {
       ...lblStyle,
-      color: finiti === esercizi.length ? '#2FA055' : IRON.ash
+      color: finiti === gruppi.length ? '#2FA055' : IRON.ash
     }
   }, finiti, " completati")));
 }
@@ -25125,7 +25166,9 @@ function BarraSeduta(_ref83) {
     logic = _ref83.logic,
     onSpunta = _ref83.onSpunta,
     completa = _ref83.completa,
-    completato = _ref83.completato;
+    completato = _ref83.completato,
+    nomeProssimo = _ref83.nomeProssimo,
+    superset = _ref83.superset;
   const _useTimer4 = useTimer(),
     active = _useTimer4.active,
     remaining = _useTimer4.remaining,
@@ -25184,13 +25227,13 @@ function BarraSeduta(_ref83) {
         letterSpacing: '0.06em',
         textTransform: 'uppercase'
       }
-    }, "Serie ", nextSet + 1, " fatta"), /*#__PURE__*/React.createElement("span", {
+    }, superset ? 'Giro ' + (nextSet + 1) + ' fatto' : 'Serie ' + (nextSet + 1) + ' fatta'), /*#__PURE__*/React.createElement("span", {
       style: {
         ...lblStyle,
         color: 'rgba(12,12,14,0.6)',
         fontSize: '8.5px'
       }
-    }, fatte, " di ", tot, " \xB7 avvia recupero ", logic.rest));
+    }, superset ? 'segna A e B insieme · ' : '', fatte, " di ", tot, " \xB7 recupero ", logic.rest));
   } else if (!ultimoEsercizio) {
     centro = /*#__PURE__*/React.createElement("button", {
       onClick: () => vai(idx + 1),
@@ -25214,7 +25257,7 @@ function BarraSeduta(_ref83) {
         color: 'rgba(8,33,15,0.65)',
         fontSize: '8.5px'
       }
-    }, (esercizi[idx + 1] || {}).name));
+    }, nomeProssimo));
   } else {
     centro = /*#__PURE__*/React.createElement("button", {
       onClick: completa,
@@ -25532,13 +25575,604 @@ function FasciaSuperset(_ref86) {
   }, "poi recuperi"), ". Ripeti per il numero di serie previsto."));
 }
 
+// ============================================================
+// PESO · INSERIMENTO RAPIDO
+// Un campo solo: scrive nel giorno di oggi della settimana corrente.
+// ============================================================
+const GIORNI_SETT = ['dom', 'lun', 'mar', 'mer', 'gio', 'ven', 'sab'];
+const NOMI_GIORNI = {
+  lun: 'LUN',
+  mar: 'MAR',
+  mer: 'MER',
+  gio: 'GIO',
+  ven: 'VEN',
+  sab: 'SAB',
+  dom: 'DOM'
+};
+
+// La settimana corrente segue la scheda attiva: prima non ancora completata.
+function settimanaCorrente() {
+  try {
+    const att = schedaAttiva();
+    const cfg = att.config;
+    const log = storage.get(cfg.storageKey) || {};
+    for (const w of cfg.weeks) {
+      const fatti = cfg.days.filter(d => log[w] && log[w][d.id] && log[w][d.id].completato).length;
+      if (fatti < cfg.days.length) return w;
+    }
+    return cfg.weeks[cfg.weeks.length - 1];
+  } catch (e) {
+    return 1;
+  }
+}
+const mediaSett = r => {
+  const v = GIORNI_SETT.map(g => parseFloat((r || {})[g])).filter(x => !isNaN(x) && x > 0);
+  return v.length ? v.reduce((a, b) => a + b, 0) / v.length : 0;
+};
+function InserimentoRapido(_ref87) {
+  let data = _ref87.data,
+    onSalva = _ref87.onSalva;
+  const _useState163 = useState(''),
+    _useState164 = _slicedToArray(_useState163, 2),
+    v = _useState164[0],
+    setV = _useState164[1];
+  const oggi = GIORNI_SETT[new Date().getDay()];
+  const sett = settimanaCorrente();
+  const gia = (data[sett] || {})[oggi] || '';
+  const d = new Date();
+  const dataLeggibile = String(d.getDate()).padStart(2, '0') + '/' + String(d.getMonth() + 1).padStart(2, '0');
+  const salva = () => {
+    const n = parseFloat(String(v).replace(',', '.'));
+    if (isNaN(n) || n <= 0) return;
+    onSalva(sett, oggi, String(Math.round(n * 10) / 10));
+    setV('');
+  };
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      ...glassCard,
+      padding: '14px',
+      marginBottom: '14px',
+      borderLeft: '3px solid #2FA055'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'baseline',
+      marginBottom: '10px'
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: lblStyle
+  }, "Peso di oggi"), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontFamily: monoFont,
+      fontSize: '10px',
+      color: IRON.dust
+    }
+  }, NOMI_GIORNI[oggi], " ", dataLeggibile, " \xB7 settimana ", sett)), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      gap: '9px'
+    }
+  }, /*#__PURE__*/React.createElement("input", {
+    type: "number",
+    inputMode: "decimal",
+    step: "0.1",
+    value: v,
+    onChange: e => setV(e.target.value),
+    onKeyDown: e => {
+      if (e.key === 'Enter') salva();
+    },
+    placeholder: gia ? String(gia) : '—',
+    style: {
+      ...inputDark,
+      flex: 1,
+      minHeight: '62px',
+      fontSize: '28px',
+      fontWeight: '600'
+    }
+  }), /*#__PURE__*/React.createElement("button", {
+    onClick: salva,
+    disabled: !String(v).trim(),
+    style: {
+      width: '104px',
+      minHeight: '62px',
+      borderRadius: '3px',
+      border: 'none',
+      cursor: String(v).trim() ? 'pointer' : 'default',
+      background: String(v).trim() ? IRON.chalk : IRON.surface,
+      color: String(v).trim() ? IRON.bg : IRON.ash,
+      fontFamily: displayFont,
+      fontVariationSettings: "'wdth' 112",
+      fontSize: '13px',
+      fontWeight: '800',
+      letterSpacing: '0.06em',
+      textTransform: 'uppercase'
+    }
+  }, gia ? 'Correggi' : 'Registra')), gia && /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontFamily: monoFont,
+      fontSize: '10px',
+      color: '#2FA055',
+      marginTop: '7px'
+    }
+  }, "oggi hai gi\xE0 registrato ", gia, " kg"));
+}
+
+// ============================================================
+// PESO · GRAFICO DELL'ANDAMENTO
+// ============================================================
+function GraficoPeso(_ref88) {
+  let data = _ref88.data,
+    _ref88$altezza = _ref88.altezza,
+    altezza = _ref88$altezza === void 0 ? 130 : _ref88$altezza;
+  const serie = Object.keys(data).map(Number).sort((a, b) => a - b).map(w => ({
+    w,
+    m: mediaSett(data[w])
+  })).filter(x => x.m > 0);
+  if (serie.length < 2) {
+    return /*#__PURE__*/React.createElement("div", {
+      style: {
+        ...glassCard,
+        padding: '20px',
+        textAlign: 'center',
+        ...lblStyle,
+        marginBottom: '14px'
+      }
+    }, "Servono almeno due settimane per il grafico");
+  }
+  const vals = serie.map(x => x.m);
+  const mn = Math.min(...vals),
+    mx = Math.max(...vals);
+  const span = mx - mn || 1;
+  const W = 100,
+    H = 100;
+  const pt = (x, i) => [i / (serie.length - 1) * W, H - (x - mn) / span * H];
+  const punti = serie.map((s, i) => pt(s.m, i));
+  const d = punti.map((p, i) => (i ? 'L' : 'M') + p[0].toFixed(1) + ' ' + p[1].toFixed(1)).join(' ');
+  const area = d + ` L${W} ${H} L0 ${H} Z`;
+  const delta = vals[vals.length - 1] - vals[0];
+  const perSett = serie.length > 1 ? delta / (serie[serie.length - 1].w - serie[0].w || 1) : 0;
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      ...glassCard,
+      padding: '14px',
+      marginBottom: '14px'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'baseline',
+      marginBottom: '10px'
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: lblStyle
+  }, "Andamento \xB7 ", serie.length, " settimane"), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontFamily: monoFont,
+      fontSize: '11px',
+      color: delta < 0 ? '#2FA055' : delta > 0 ? '#E5A82B' : IRON.dust
+    }
+  }, delta > 0 ? '+' : '', delta.toFixed(1), " kg \xB7 ", perSett > 0 ? '+' : '', perSett.toFixed(2), "/sett")), /*#__PURE__*/React.createElement("svg", {
+    viewBox: `0 0 ${W} ${H}`,
+    preserveAspectRatio: "none",
+    style: {
+      width: '100%',
+      height: altezza + 'px',
+      display: 'block',
+      overflow: 'visible'
+    }
+  }, /*#__PURE__*/React.createElement("path", {
+    d: area,
+    fill: "rgba(47,160,85,0.10)"
+  }), /*#__PURE__*/React.createElement("path", {
+    d: d,
+    fill: "none",
+    stroke: "#2FA055",
+    strokeWidth: "1.6",
+    vectorEffect: "non-scaling-stroke",
+    strokeLinejoin: "round"
+  }), punti.map((p, i) => /*#__PURE__*/React.createElement("circle", {
+    key: i,
+    cx: p[0],
+    cy: p[1],
+    r: "1.6",
+    fill: i === punti.length - 1 ? IRON.chalk : '#2FA055',
+    vectorEffect: "non-scaling-stroke"
+  }))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      justifyContent: 'space-between',
+      marginTop: '7px'
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontFamily: monoFont,
+      fontSize: '9.5px',
+      color: IRON.ash
+    }
+  }, "S", serie[0].w, " \xB7 ", vals[0].toFixed(1)), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontFamily: monoFont,
+      fontSize: '9.5px',
+      color: IRON.ash
+    }
+  }, "min ", mn.toFixed(1), " \xB7 max ", mx.toFixed(1)), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontFamily: monoFont,
+      fontSize: '9.5px',
+      color: IRON.chalk
+    }
+  }, "S", serie[serie.length - 1].w, " \xB7 ", vals[vals.length - 1].toFixed(1))));
+}
+
+// ============================================================
+// COMPOSIZIONE · STIME E FIGURA
+// Grasso: formula Navy (vita, collo, altezza). Errore dichiarato ±3-4%.
+// Massa magra: FFMI normalizzato.
+// ============================================================
+function stimaComposizione(_ref89) {
+  let peso = _ref89.peso,
+    vita = _ref89.vita,
+    collo = _ref89.collo,
+    altezza = _ref89.altezza;
+  const p = parseFloat(peso),
+    v = parseFloat(vita),
+    c = parseFloat(collo),
+    h = parseFloat(altezza);
+  if (!p || !v || !c || !h || v <= c) return null;
+  // Navy, versione metrica per uomini
+  const bf = 495 / (1.0324 - 0.19077 * Math.log10(v - c) + 0.15456 * Math.log10(h)) - 450;
+  if (!isFinite(bf) || bf <= 0 || bf > 60) return null;
+  const hm = h / 100;
+  const ffm = p * (1 - bf / 100);
+  const ffmi = ffm / (hm * hm) + 6.1 * (1.8 - hm); // normalizzato all'altezza
+  return {
+    bf: Math.round(bf * 10) / 10,
+    ffm: Math.round(ffm * 10) / 10,
+    ffmi: Math.round(ffmi * 10) / 10
+  };
+}
+
+// Figura schematica: le spalle e gli arti crescono col FFMI, la vita col grasso.
+function Figura(_ref90) {
+  let bf = _ref90.bf,
+    ffmi = _ref90.ffmi,
+    _ref90$altezzaPx = _ref90.altezzaPx,
+    altezzaPx = _ref90$altezzaPx === void 0 ? 210 : _ref90$altezzaPx;
+  const m = Math.max(0, Math.min(1, (ffmi - 17) / 8)); // 17 → 25
+  const g = Math.max(0, Math.min(1, (bf - 8) / 20)); // 8% → 28%
+  const spalle = 30 + m * 15;
+  const vita = 15 + g * 15 + m * 3;
+  const braccio = 4.5 + m * 3.2 + g * 0.8;
+  const coscia = 8 + m * 4 + g * 2.2;
+  const petto = 24 + m * 9 + g * 3;
+  const cx = 60;
+  const col = '#8A8A93',
+    hi = IRON.chalk;
+  return /*#__PURE__*/React.createElement("svg", {
+    viewBox: "0 0 120 200",
+    style: {
+      height: altezzaPx + 'px',
+      display: 'block',
+      margin: '0 auto'
+    }
+  }, /*#__PURE__*/React.createElement("g", {
+    fill: "none",
+    stroke: hi,
+    strokeWidth: "1.6",
+    strokeLinejoin: "round",
+    strokeLinecap: "round"
+  }, /*#__PURE__*/React.createElement("circle", {
+    cx: cx,
+    cy: "20",
+    r: "10"
+  }), /*#__PURE__*/React.createElement("path", {
+    d: `M${cx - 4} 30 L${cx + 4} 30`
+  }), /*#__PURE__*/React.createElement("path", {
+    d: `M${cx - spalle / 2} 40
+                  C${cx - petto / 2} 52 ${cx - petto / 2} 62 ${cx - vita / 2} 82
+                  L${cx - vita / 2 - 1} 100
+                  L${cx + vita / 2 + 1} 100
+                  L${cx + vita / 2} 82
+                  C${cx + petto / 2} 62 ${cx + petto / 2} 52 ${cx + spalle / 2} 40 Z`,
+    fill: hi,
+    fillOpacity: "0.07"
+  }), /*#__PURE__*/React.createElement("path", {
+    d: `M${cx - spalle / 2} 42 C${cx - spalle / 2 - braccio} 60 ${cx - spalle / 2 - braccio * 0.7} 76 ${cx - spalle / 2 - 2} 96`,
+    strokeWidth: braccio * 0.9,
+    stroke: hi,
+    strokeOpacity: "0.5"
+  }), /*#__PURE__*/React.createElement("path", {
+    d: `M${cx + spalle / 2} 42 C${cx + spalle / 2 + braccio} 60 ${cx + spalle / 2 + braccio * 0.7} 76 ${cx + spalle / 2 + 2} 96`,
+    strokeWidth: braccio * 0.9,
+    stroke: hi,
+    strokeOpacity: "0.5"
+  }), /*#__PURE__*/React.createElement("path", {
+    d: `M${cx - vita / 2} 100 L${cx - vita / 2 - 1} 150 L${cx - vita / 2 - 2} 186`,
+    strokeWidth: coscia * 0.75,
+    stroke: hi,
+    strokeOpacity: "0.5"
+  }), /*#__PURE__*/React.createElement("path", {
+    d: `M${cx + vita / 2} 100 L${cx + vita / 2 + 1} 150 L${cx + vita / 2 + 2} 186`,
+    strokeWidth: coscia * 0.75,
+    stroke: hi,
+    strokeOpacity: "0.5"
+  })), /*#__PURE__*/React.createElement("line", {
+    x1: "8",
+    y1: "192",
+    x2: "112",
+    y2: "192",
+    stroke: col,
+    strokeWidth: "0.6",
+    strokeOpacity: "0.4"
+  }));
+}
+function giudizioBF(bf) {
+  if (bf < 10) return {
+    t: 'molto asciutto',
+    c: '#22D3EE',
+    n: 'Sotto il 10% mantenere è difficile e la performance cala. Fascia da gara, non da blocco lungo.'
+  };
+  if (bf < 14) return {
+    t: 'asciutto',
+    c: '#2FA055',
+    n: 'Fascia ideale per far partire una fase di crescita: la ripartizione dei nutrienti è favorevole.'
+  };
+  if (bf < 18) return {
+    t: 'nella norma',
+    c: '#2FA055',
+    n: 'Zona sana e sostenibile. Sia crescita che definizione funzionano da qui.'
+  };
+  if (bf < 23) return {
+    t: 'sopra la media',
+    c: '#E5A82B',
+    n: "Conviene smagrire prima di un surplus: sopra il 15-16% il grasso guadagnato durante la crescita aumenta."
+  };
+  return {
+    t: 'alto',
+    c: '#D8342C',
+    n: 'Priorità al deficit calorico. Da qui la ricomposizione funziona meglio che in un soggetto magro.'
+  };
+}
+function giudizioFFMI(ffmi) {
+  if (ffmi < 18) return {
+    t: 'principiante',
+    c: '#8A8A93',
+    n: 'Margine di crescita ampio: qui i guadagni arrivano in fretta.'
+  };
+  if (ffmi < 20) return {
+    t: 'intermedio',
+    c: '#4D82E8',
+    n: 'Buona base costruita. Da qui il ritmo rallenta e la programmazione conta di più.'
+  };
+  if (ffmi < 22) return {
+    t: 'avanzato',
+    c: '#2FA055',
+    n: 'Sopra la media di chi si allena. I guadagni si misurano in mesi, non settimane.'
+  };
+  if (ffmi < 25) return {
+    t: 'molto avanzato',
+    c: '#A855F7',
+    n: 'Vicino al limite naturale stimato (~25). Ogni chilo di magra costa un blocco intero.'
+  };
+  return {
+    t: 'oltre il limite stimato',
+    c: '#E5A82B',
+    n: 'Sopra 25 la letteratura sui natural è scarsa. Più probabile un errore di misura sulla vita o sul collo.'
+  };
+}
+
+// ============================================================
+// CORPO · figura, stime e giudizi
+// ============================================================
+function SezioneCorpo(_ref91) {
+  let data = _ref91.data,
+    misure = _ref91.misure,
+    setMisure = _ref91.setMisure;
+  const _useState165 = useState(() => storage.get('altezza') || ''),
+    _useState166 = _slicedToArray(_useState165, 2),
+    h = _useState166[0],
+    setH = _useState166[1];
+  const salvaH = v => {
+    setH(v);
+    storage.set('altezza', v);
+  };
+  const blocchi = Object.keys(misure || {});
+  const ultimo = blocchi.length ? misure[blocchi[blocchi.length - 1]] : {};
+  const primo = blocchi.length ? misure[blocchi[0]] : {};
+  const serie = Object.keys(data).map(Number).sort((a, b) => a - b).map(w => mediaSett(data[w])).filter(x => x > 0);
+  const peso = serie.length ? serie[serie.length - 1] : null;
+  const comp = stimaComposizione({
+    peso,
+    vita: ultimo['Vita ombelicale'],
+    collo: ultimo['Collo'],
+    altezza: h
+  });
+  return /*#__PURE__*/React.createElement(React.Fragment, null, !comp && /*#__PURE__*/React.createElement("div", {
+    style: {
+      ...glassCard,
+      padding: '14px',
+      marginBottom: '14px',
+      borderLeft: '3px solid #E5A82B'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      ...lblStyle,
+      color: '#E5A82B',
+      marginBottom: '8px'
+    }
+  }, "Servono tre dati"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: '11.5px',
+      color: '#C7C2D0',
+      lineHeight: 1.55,
+      marginBottom: '11px'
+    }
+  }, "Per stimare grasso e massa magra servono ", /*#__PURE__*/React.createElement("b", {
+    style: {
+      color: IRON.chalk
+    }
+  }, "altezza"), ", ", /*#__PURE__*/React.createElement("b", {
+    style: {
+      color: IRON.chalk
+    }
+  }, "vita ombelicale"), " e ", /*#__PURE__*/React.createElement("b", {
+    style: {
+      color: IRON.chalk
+    }
+  }, "collo"), ". Vita e collo si inseriscono nella scheda Misure, il peso nella scheda Peso."), /*#__PURE__*/React.createElement(Fld, {
+    label: "Altezza in cm",
+    type: "number",
+    value: h,
+    onChange: salvaH,
+    ph: "178"
+  })), comp && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+    style: {
+      ...glassCard,
+      padding: '16px 14px',
+      marginBottom: '14px'
+    }
+  }, /*#__PURE__*/React.createElement(Figura, {
+    bf: comp.bf,
+    ffmi: comp.ffmi
+  }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      gap: '8px',
+      marginTop: '12px'
+    }
+  }, [['GRASSO', comp.bf + '%', giudizioBF(comp.bf)], ['FFMI', comp.ffmi, giudizioFFMI(comp.ffmi)], ['MASSA MAGRA', comp.ffm + ' kg', null]].map(_ref92 => {
+    let _ref93 = _slicedToArray(_ref92, 3),
+      l = _ref93[0],
+      v = _ref93[1],
+      gj = _ref93[2];
+    return /*#__PURE__*/React.createElement("div", {
+      key: l,
+      style: {
+        flex: 1,
+        textAlign: 'center',
+        border: '1px solid ' + IRON.edge,
+        borderRadius: '3px',
+        padding: '9px 3px'
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        ...numStyle,
+        fontSize: '17px',
+        fontWeight: '600',
+        color: gj ? gj.c : IRON.chalk
+      }
+    }, v), /*#__PURE__*/React.createElement("div", {
+      style: {
+        ...lblStyle,
+        fontSize: '8px'
+      }
+    }, l), gj && /*#__PURE__*/React.createElement("div", {
+      style: {
+        ...lblStyle,
+        fontSize: '7.5px',
+        color: gj.c,
+        marginTop: '2px'
+      }
+    }, gj.t));
+  }))), (comp.bf < 6 || comp.bf > 40) && /*#__PURE__*/React.createElement(InfoBox, {
+    color: "#D8342C",
+    title: "Valore fuori scala"
+  }, comp.bf, "% \xE8 al di fuori dell'intervallo in cui la formula \xE8 attendibile. Ricontrolla la misura della vita e del collo: vanno prese a digiuno, con il metro aderente ma non stretto, la vita all'ombelico e il collo sotto il pomo d'Adamo."), /*#__PURE__*/React.createElement(InfoBox, {
+    color: giudizioBF(comp.bf).c,
+    title: 'Grasso stimato ' + comp.bf + '% · ' + giudizioBF(comp.bf).t
+  }, giudizioBF(comp.bf).n), /*#__PURE__*/React.createElement(InfoBox, {
+    color: giudizioFFMI(comp.ffmi).c,
+    title: 'FFMI ' + comp.ffmi + ' · ' + giudizioFFMI(comp.ffmi).t
+  }, giudizioFFMI(comp.ffmi).n), blocchi.length > 1 && /*#__PURE__*/React.createElement("div", {
+    style: {
+      ...glassCard,
+      padding: '14px',
+      marginBottom: '14px'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      ...lblStyle,
+      marginBottom: '10px'
+    }
+  }, "Variazione misure \xB7 ", blocchi[0], " \u2192 ", blocchi[blocchi.length - 1]), ['Petto', 'Braccio (flesso)', 'Coscia (max)', 'Vita ombelicale'].map(k => {
+    const a = parseFloat(primo[k]),
+      b = parseFloat(ultimo[k]);
+    if (isNaN(a) || isNaN(b)) return null;
+    const d = b - a;
+    const buono = k === 'Vita ombelicale' ? d < 0 : d > 0;
+    return /*#__PURE__*/React.createElement("div", {
+      key: k,
+      style: {
+        display: 'flex',
+        alignItems: 'center',
+        padding: '5px 0',
+        borderBottom: '1px solid ' + IRON.edge
+      }
+    }, /*#__PURE__*/React.createElement("span", {
+      style: {
+        flex: 1,
+        fontSize: '12px',
+        color: '#C7C2D0'
+      }
+    }, k), /*#__PURE__*/React.createElement("span", {
+      style: {
+        ...numStyle,
+        fontSize: '12px',
+        color: IRON.dust
+      }
+    }, a.toFixed(1), " \u2192 ", b.toFixed(1)), /*#__PURE__*/React.createElement("span", {
+      style: {
+        ...numStyle,
+        fontSize: '11.5px',
+        width: '52px',
+        textAlign: 'right',
+        color: d === 0 ? IRON.ash : buono ? '#2FA055' : '#E5A82B'
+      }
+    }, d > 0 ? '+' : '', d.toFixed(1)));
+  })), /*#__PURE__*/React.createElement("div", {
+    style: {
+      ...glassCard,
+      padding: '13px',
+      marginBottom: '14px'
+    }
+  }, /*#__PURE__*/React.createElement(Fld, {
+    label: "Altezza in cm",
+    type: "number",
+    value: h,
+    onChange: salvaH,
+    ph: "178"
+  }))), /*#__PURE__*/React.createElement(InfoBox, {
+    color: "#8A8A93",
+    title: "Quanto fidarsi"
+  }, "La figura \xE8 uno ", /*#__PURE__*/React.createElement("b", {
+    style: {
+      color: IRON.chalk
+    }
+  }, "schema"), " costruito su due numeri, non un ritratto. La stima del grasso usa la formula Navy (vita, collo, altezza): comoda perch\xE9 serve solo un metro, ma con un errore di ", /*#__PURE__*/React.createElement("b", {
+    style: {
+      color: IRON.chalk
+    }
+  }, "\xB13-4 punti percentuali"), " rispetto alla DEXA. In chi ha collo e schiena spessi ", /*#__PURE__*/React.createElement("b", {
+    style: {
+      color: IRON.chalk
+    }
+  }, "tende a sottostimare"), ", perch\xE9 il collo largo entra nella formula come se fosse magrezza. Il valore assoluto conta poco: quello che conta \xE8 come si muove ", /*#__PURE__*/React.createElement("b", {
+    style: {
+      color: IRON.chalk
+    }
+  }, "a parit\xE0 di metodo, metro e momento della giornata"), "."));
+}
+
 // ============= MAIN =============
 
 function App() {
-  const _useState163 = useState('home'),
-    _useState164 = _slicedToArray(_useState163, 2),
-    screen = _useState164[0],
-    setScreen = _useState164[1];
+  const _useState167 = useState('home'),
+    _useState168 = _slicedToArray(_useState167, 2),
+    screen = _useState168[0],
+    setScreen = _useState168[1];
   const goHome = useCallback(() => setScreen('home'), []);
   // Quando siamo fuori da home, intercetta il tasto indietro per tornare alla home
   useAndroidBack(goHome, screen !== 'home');
