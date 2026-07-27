@@ -3054,7 +3054,7 @@ function HomeScreen(_ref12) {
     }
   }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
     style: lblStyle
-  }, "V8.3.4 \xB7 blocco ", stats.sett, " di 8"), /*#__PURE__*/React.createElement("div", {
+  }, schedaAttiva().label, " \xB7 settimana ", stats.sett, " di ", (schedaAttiva().config.weeks || []).length), /*#__PURE__*/React.createElement("div", {
     style: {
       display: 'flex',
       alignItems: 'baseline',
@@ -4167,7 +4167,16 @@ function WorkoutScreen(_ref18) {
     }, /*#__PURE__*/React.createElement(Sleeve, {
       peso: exData.kg,
       compatta: true
-    })), /*#__PURE__*/React.createElement("table", {
+    })), ex.sup && /*#__PURE__*/React.createElement(FasciaSuperset, {
+      lettera: ex.sup,
+      correnteIdx: idx,
+      esercizi: exercises.map((e, i) => ({
+        ...e,
+        idx: i
+      })).filter(e => e.sup === ex.sup)
+    }), ex.tec && /*#__PURE__*/React.createElement(IntestazioneTecnica, {
+      tec: ex.tec
+    }), /*#__PURE__*/React.createElement("table", {
       style: {
         width: '100%',
         borderCollapse: 'collapse',
@@ -4176,11 +4185,11 @@ function WorkoutScreen(_ref18) {
     }, /*#__PURE__*/React.createElement("thead", null, /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("th", {
       style: {
         ...lblStyle,
-        width: '46px',
+        width: ex.tec ? '76px' : '46px',
         textAlign: 'left',
         padding: '0 0 7px'
       }
-    }, "Set"), /*#__PURE__*/React.createElement("th", {
+    }, ex.tec ? 'Fase' : 'Set'), /*#__PURE__*/React.createElement("th", {
       style: {
         ...lblStyle,
         textAlign: 'center',
@@ -4228,10 +4237,11 @@ function WorkoutScreen(_ref18) {
           display: 'flex',
           alignItems: 'center',
           fontFamily: monoFont,
-          fontSize: '13px',
-          color: IRON.ash
+          fontSize: ex.tec ? '10px' : '13px',
+          color: ex.tec && TECNICHE[ex.tec] ? TECNICHE[ex.tec].colore : IRON.ash,
+          letterSpacing: ex.tec ? '0.06em' : '0'
         }
-      }, String(setIdx + 1).padStart(2, '0'))), /*#__PURE__*/React.createElement("td", {
+      }, rigaSerie(ex.tec, setIdx, logic.sets))), /*#__PURE__*/React.createElement("td", {
         style: {
           borderTop: '1px solid ' + IRON.edge,
           padding: 0
@@ -4293,7 +4303,7 @@ function WorkoutScreen(_ref18) {
           }
           updateExercise(selectedWeek, selectedDay, idx, 'sets_done', willBeDone, setIdx);
           if (willBeDone) {
-            startTimer(parseRestSeconds(logic.rest), `${ex.name} S${setIdx + 1}`);
+            startTimer(recuperoSerie(ex.tec, setIdx, parseRestSeconds(logic.rest)), `${ex.name} · ${rigaSerie(ex.tec, setIdx, logic.sets)}`);
             try {
               if (navigator.vibrate) navigator.vibrate(40);
             } catch (e) {}
@@ -4335,7 +4345,9 @@ function WorkoutScreen(_ref18) {
     onSpunta: (setIdx, reps) => {
       if (reps) updateExercise(selectedWeek, selectedDay, curEx, 'reps', reps, setIdx);
       updateExercise(selectedWeek, selectedDay, curEx, 'sets_done', true, setIdx);
-      startTimer(parseRestSeconds(applyLogic(exercises[curEx] || {}, selectedWeek).rest), (exercises[curEx] || {}).name + ' S' + (setIdx + 1));
+      const exx = exercises[curEx] || {};
+      const lg = applyLogic(exx, selectedWeek);
+      startTimer(recuperoSerie(exx.tec, setIdx, parseRestSeconds(lg.rest)), exx.name + ' · ' + rigaSerie(exx.tec, setIdx, lg.sets));
       try {
         if (navigator.vibrate) navigator.vibrate(40);
       } catch (e) {}
@@ -4749,26 +4761,43 @@ function PesoScreen(_ref19) {
 
 function DashboardScreen(_ref20) {
   let goBack = _ref20.goBack;
-  const _useState43 = useState({}),
+  const schede = tutteLeSchede();
+  const _useState43 = useState(() => Math.max(0, schede.findIndex(s => s.id === schedaAttivaId()))),
     _useState44 = _slicedToArray(_useState43, 2),
-    workouts = _useState44[0],
-    setWorkouts = _useState44[1];
+    progIdx = _useState44[0],
+    setProgIdx = _useState44[1];
+  const prog = schede[progIdx] || schede[0];
+  const CFG = prog.config;
+  // i multiarticolari del programma, trovati dinamicamente
+  const COMPOUNDS = (CFG.days || []).flatMap(d => (CFG.exercises[d.id] || []).map((ex, i) => ({
+    ex,
+    i,
+    d
+  })).filter(x => x.ex.isCompound).map(x => ({
+    name: x.ex.name,
+    day: d.id,
+    idx: x.i
+  }))).slice(0, 8);
   const _useState45 = useState({}),
     _useState46 = _slicedToArray(_useState45, 2),
-    pesoData = _useState46[0],
-    setPesoData = _useState46[1];
-  const _useState47 = useState(92),
+    workouts = _useState46[0],
+    setWorkouts = _useState46[1];
+  const _useState47 = useState({}),
     _useState48 = _slicedToArray(_useState47, 2),
-    pesoIniziale = _useState48[0],
-    setPesoIniziale = _useState48[1];
+    pesoData = _useState48[0],
+    setPesoData = _useState48[1];
+  const _useState49 = useState(92),
+    _useState50 = _slicedToArray(_useState49, 2),
+    pesoIniziale = _useState50[0],
+    setPesoIniziale = _useState50[1];
   useEffect(() => {
-    setWorkouts(storage.get('workouts') || {});
+    setWorkouts(storage.get(CFG.storageKey) || {});
     setPesoData(storage.get('peso') || {});
     setPesoIniziale(storage.get('pesoIniziale') || 92);
-  }, []);
+  }, [progIdx]);
   const get1RM = compound => {
     const result = {};
-    [1, 4, 7, 8].forEach(week => {
+    (CFG.weeks || [1, 4, 7, 8]).forEach(week => {
       var _workouts$week, _ex$reps;
       const ex = (_workouts$week = workouts[week]) === null || _workouts$week === void 0 || (_workouts$week = _workouts$week[compound.day]) === null || _workouts$week === void 0 || (_workouts$week = _workouts$week.esercizi) === null || _workouts$week === void 0 ? void 0 : _workouts$week[compound.idx];
       if (ex && ex.kg && (_ex$reps = ex.reps) !== null && _ex$reps !== void 0 && _ex$reps[0]) {
@@ -4802,6 +4831,37 @@ function DashboardScreen(_ref20) {
     subtitle: "Progressi del ciclo",
     onBack: goBack
   }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: '0 12px 12px'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      gap: '5px',
+      overflowX: 'auto'
+    }
+  }, schede.map((p, i) => /*#__PURE__*/React.createElement("button", {
+    key: p.id,
+    onClick: () => setProgIdx(i),
+    style: {
+      flexShrink: 0,
+      padding: '8px 13px',
+      borderRadius: '3px',
+      fontFamily: monoFont,
+      fontSize: '11px',
+      fontWeight: '600',
+      cursor: 'pointer',
+      background: i === progIdx ? IRON.chalk : IRON.surface,
+      color: i === progIdx ? IRON.bg : IRON.dust,
+      border: '1px solid ' + (i === progIdx ? IRON.chalk : IRON.edge)
+    }
+  }, p.label))), COMPOUNDS.length === 0 && /*#__PURE__*/React.createElement("div", {
+    style: {
+      ...lblStyle,
+      marginTop: '9px',
+      color: '#E5A82B'
+    }
+  }, "Nessun multiarticolare rilevato in questa scheda")), /*#__PURE__*/React.createElement("div", {
     style: {
       padding: '0 12px'
     }
@@ -5100,10 +5160,10 @@ function DashboardScreen(_ref20) {
 
 function RecoveryScreen(_ref23) {
   let goBack = _ref23.goBack;
-  const _useState49 = useState({}),
-    _useState50 = _slicedToArray(_useState49, 2),
-    data = _useState50[0],
-    setData = _useState50[1];
+  const _useState51 = useState({}),
+    _useState52 = _slicedToArray(_useState51, 2),
+    data = _useState52[0],
+    setData = _useState52[1];
   useEffect(() => {
     setData(storage.get('recovery') || {});
   }, []);
@@ -5541,10 +5601,10 @@ function GuideScreen(_ref24) {
 
 function SettingsScreen(_ref25) {
   let goBack = _ref25.goBack;
-  const _useState51 = useState(null),
-    _useState52 = _slicedToArray(_useState51, 2),
-    msg = _useState52[0],
-    setMsg = _useState52[1];
+  const _useState53 = useState(null),
+    _useState54 = _slicedToArray(_useState53, 2),
+    msg = _useState54[0],
+    setMsg = _useState54[1];
   const fileInputRef = useRef(null);
   const exportData = () => {
     const data = storage.exportAll();
@@ -17535,7 +17595,7 @@ const resolveV8wExercise = (item, localDb) => {
     const out = {
       ...base
     };
-    ['sets', 'reps', 'rir', 'rest'].forEach(k => {
+    ['sets', 'reps', 'rir', 'rest', 'tec', 'sup'].forEach(k => {
       if (item[k] != null) out[k] = item[k];
     });
     return out;
@@ -17642,10 +17702,10 @@ function InfoBox(_ref28) {
 }
 function SummerScreen(_ref29) {
   let goBack = _ref29.goBack;
-  const _useState53 = useState('info'),
-    _useState54 = _slicedToArray(_useState53, 2),
-    mode = _useState54[0],
-    setMode = _useState54[1]; // 'info' | 'train'
+  const _useState55 = useState('info'),
+    _useState56 = _slicedToArray(_useState55, 2),
+    mode = _useState56[0],
+    setMode = _useState56[1]; // 'info' | 'train'
 
   if (mode === 'train') {
     return /*#__PURE__*/React.createElement(WorkoutScreen, {
@@ -17976,10 +18036,10 @@ const SUPP_STACK = [{
 }];
 function NutritionScreen(_ref30) {
   let goBack = _ref30.goBack;
-  const _useState55 = useState('dieta'),
-    _useState56 = _slicedToArray(_useState55, 2),
-    tab = _useState56[0],
-    setTab = _useState56[1];
+  const _useState57 = useState('dieta'),
+    _useState58 = _slicedToArray(_useState57, 2),
+    tab = _useState58[0],
+    setTab = _useState58[1];
   const tabs = [{
     id: 'dieta',
     label: 'Dieta'
@@ -18406,10 +18466,10 @@ const XIcon = p => /*#__PURE__*/React.createElement(Icon, _extends({
 // ============= ESTATE V2 · 4 GIORNI =============
 function Summer2Screen(_ref35) {
   let goBack = _ref35.goBack;
-  const _useState57 = useState('info'),
-    _useState58 = _slicedToArray(_useState57, 2),
-    mode = _useState58[0],
-    setMode = _useState58[1];
+  const _useState59 = useState('info'),
+    _useState60 = _slicedToArray(_useState59, 2),
+    mode = _useState60[0],
+    setMode = _useState60[1];
   if (mode === 'train') return /*#__PURE__*/React.createElement(WorkoutScreen, {
     goBack: () => setMode('info'),
     config: SUMMER2_CONFIG
@@ -18531,26 +18591,26 @@ function Summer2Screen(_ref35) {
 // ============= LIBRERIA SCHEDE (import .v8w) =============
 function LibraryScreenLegacy(_ref38) {
   let goBack = _ref38.goBack;
-  const _useState59 = useState(() => storage.get('custom_schedules') || []),
-    _useState60 = _slicedToArray(_useState59, 2),
-    schedules = _useState60[0],
-    setSchedules = _useState60[1];
-  const _useState61 = useState(null),
+  const _useState61 = useState(() => storage.get('custom_schedules') || []),
     _useState62 = _slicedToArray(_useState61, 2),
-    selected = _useState62[0],
-    setSelected = _useState62[1];
-  const _useState63 = useState(false),
+    schedules = _useState62[0],
+    setSchedules = _useState62[1];
+  const _useState63 = useState(null),
     _useState64 = _slicedToArray(_useState63, 2),
-    panel = _useState64[0],
-    setPanel = _useState64[1];
-  const _useState65 = useState(''),
+    selected = _useState64[0],
+    setSelected = _useState64[1];
+  const _useState65 = useState(false),
     _useState66 = _slicedToArray(_useState65, 2),
-    paste = _useState66[0],
-    setPaste = _useState66[1];
-  const _useState67 = useState(null),
+    panel = _useState66[0],
+    setPanel = _useState66[1];
+  const _useState67 = useState(''),
     _useState68 = _slicedToArray(_useState67, 2),
-    msg = _useState68[0],
-    setMsg = _useState68[1];
+    paste = _useState68[0],
+    setPaste = _useState68[1];
+  const _useState69 = useState(null),
+    _useState70 = _slicedToArray(_useState69, 2),
+    msg = _useState70[0],
+    setMsg = _useState70[1];
   const fileRef = useRef(null);
   const persist = list => {
     setSchedules(list);
@@ -18804,13 +18864,26 @@ function LibraryScreenLegacy(_ref38) {
       }
     }, /*#__PURE__*/React.createElement("div", {
       style: {
+        display: 'flex',
+        alignItems: 'baseline',
+        gap: '7px'
+      }
+    }, /*#__PURE__*/React.createElement("span", {
+      style: {
         fontFamily: displayFont,
         fontSize: '14px',
         fontWeight: '700',
         color: '#F4F2F8',
-        lineHeight: 1.2
+        lineHeight: 1.2,
+        flex: 1
       }
-    }, s.name || 'Scheda'), /*#__PURE__*/React.createElement("div", {
+    }, s.name || 'Scheda'), attiva === s.id && /*#__PURE__*/React.createElement("span", {
+      style: {
+        ...lblStyle,
+        color: '#2FA055',
+        fontSize: '8.5px'
+      }
+    }, "attiva")), /*#__PURE__*/React.createElement("div", {
       style: {
         fontSize: '10px',
         color: '#908AA0',
@@ -19825,14 +19898,14 @@ function MacroBar(_ref44) {
 function ExercisePicker(_ref45) {
   let onPick = _ref45.onPick,
     onClose = _ref45.onClose;
-  const _useState69 = useState(''),
-    _useState70 = _slicedToArray(_useState69, 2),
-    q = _useState70[0],
-    setQ = _useState70[1];
-  const _useState71 = useState(null),
+  const _useState71 = useState(''),
     _useState72 = _slicedToArray(_useState71, 2),
-    tag = _useState72[0],
-    setTag = _useState72[1];
+    q = _useState72[0],
+    setQ = _useState72[1];
+  const _useState73 = useState(null),
+    _useState74 = _slicedToArray(_useState73, 2),
+    tag = _useState74[0],
+    setTag = _useState74[1];
   const all = Object.values(EXERCISE_DB).filter(e => !BUILTIN_TWIN[e.id]);
   const tags = [];
   all.forEach(e => (e.tags || []).forEach(t => {
@@ -19996,14 +20069,14 @@ function ExercisePicker(_ref45) {
 function FoodPicker(_ref46) {
   let onPick = _ref46.onPick,
     onClose = _ref46.onClose;
-  const _useState73 = useState(''),
-    _useState74 = _slicedToArray(_useState73, 2),
-    q = _useState74[0],
-    setQ = _useState74[1];
-  const _useState75 = useState(null),
+  const _useState75 = useState(''),
     _useState76 = _slicedToArray(_useState75, 2),
-    cat = _useState76[0],
-    setCat = _useState76[1];
+    q = _useState76[0],
+    setQ = _useState76[1];
+  const _useState77 = useState(null),
+    _useState78 = _slicedToArray(_useState77, 2),
+    cat = _useState78[0],
+    setCat = _useState78[1];
   const ql = q.trim().toLowerCase();
   const list = FOOD_DB.filter(f => (!ql || f.n.toLowerCase().indexOf(ql) >= 0) && (!cat || f.cat === cat));
   const addCustom = () => onPick({
@@ -20300,22 +20373,22 @@ function ScheduleEditorScreen(_ref47) {
   let initial = _ref47.initial,
     onSave = _ref47.onSave,
     goBack = _ref47.goBack;
-  const _useState77 = useState(() => toEditableSched(initial)),
-    _useState78 = _slicedToArray(_useState77, 2),
-    ed = _useState78[0],
-    setEd = _useState78[1];
-  const _useState79 = useState(0),
+  const _useState79 = useState(() => toEditableSched(initial)),
     _useState80 = _slicedToArray(_useState79, 2),
-    open = _useState80[0],
-    setOpen = _useState80[1];
-  const _useState81 = useState(null),
+    ed = _useState80[0],
+    setEd = _useState80[1];
+  const _useState81 = useState(0),
     _useState82 = _slicedToArray(_useState81, 2),
-    picker = _useState82[0],
-    setPicker = _useState82[1]; // indice giorno
+    open = _useState82[0],
+    setOpen = _useState82[1];
   const _useState83 = useState(null),
     _useState84 = _slicedToArray(_useState83, 2),
-    msg = _useState84[0],
-    setMsg = _useState84[1];
+    picker = _useState84[0],
+    setPicker = _useState84[1]; // indice giorno
+  const _useState85 = useState(null),
+    _useState86 = _slicedToArray(_useState85, 2),
+    msg = _useState86[0],
+    setMsg = _useState86[1];
   useAndroidBack(goBack, true);
   const setField = (k, v) => setEd(p => ({
     ...p,
@@ -20776,30 +20849,34 @@ function ScheduleEditorScreen(_ref47) {
 // ============================================================
 function LibraryScreen(_ref48) {
   let goBack = _ref48.goBack;
-  const _useState85 = useState(() => storage.get('custom_schedules') || []),
-    _useState86 = _slicedToArray(_useState85, 2),
-    schedules = _useState86[0],
-    setSchedules = _useState86[1];
-  const _useState87 = useState('list'),
+  const _useState87 = useState(() => storage.get('custom_schedules') || []),
     _useState88 = _slicedToArray(_useState87, 2),
-    view = _useState88[0],
-    setView = _useState88[1];
-  const _useState89 = useState(null),
+    schedules = _useState88[0],
+    setSchedules = _useState88[1];
+  const _useState89 = useState('list'),
     _useState90 = _slicedToArray(_useState89, 2),
-    current = _useState90[0],
-    setCurrent = _useState90[1];
-  const _useState91 = useState(false),
+    view = _useState90[0],
+    setView = _useState90[1];
+  const _useState91 = useState(null),
     _useState92 = _slicedToArray(_useState91, 2),
-    panel = _useState92[0],
-    setPanel = _useState92[1];
-  const _useState93 = useState(''),
+    current = _useState92[0],
+    setCurrent = _useState92[1];
+  const _useState93 = useState(false),
     _useState94 = _slicedToArray(_useState93, 2),
-    paste = _useState94[0],
-    setPaste = _useState94[1];
-  const _useState95 = useState(null),
+    panel = _useState94[0],
+    setPanel = _useState94[1];
+  const _useState95 = useState(''),
     _useState96 = _slicedToArray(_useState95, 2),
-    msg = _useState96[0],
-    setMsg = _useState96[1];
+    paste = _useState96[0],
+    setPaste = _useState96[1];
+  const _useState97 = useState(null),
+    _useState98 = _slicedToArray(_useState97, 2),
+    msg = _useState98[0],
+    setMsg = _useState98[1];
+  const _useState99 = useState(schedaAttivaId),
+    _useState100 = _slicedToArray(_useState99, 2),
+    attiva = _useState100[0],
+    setAttiva = _useState100[1];
   const fileRef = useRef(null);
   const persist = list => {
     setSchedules(list);
@@ -20885,10 +20962,12 @@ function LibraryScreen(_ref48) {
   const remove = id => persist(schedules.filter(s => s.id !== id));
   if (view === 'train' && current) {
     let cfg = null;
-    try {
-      cfg = rehydrateSchedule(current);
-    } catch (e) {
-      cfg = null;
+    if (current.__builtin) cfg = current.__builtin;else {
+      try {
+        cfg = rehydrateSchedule(current);
+      } catch (e) {
+        cfg = null;
+      }
     }
     if (cfg) return /*#__PURE__*/React.createElement(WorkoutScreen, {
       goBack: () => {
@@ -21018,18 +21097,111 @@ function LibraryScreen(_ref48) {
     }
   }, msg.text), /*#__PURE__*/React.createElement("div", {
     style: {
-      ...glassCard,
-      padding: '13px',
-      marginBottom: '14px'
+      marginBottom: '16px'
     }
   }, /*#__PURE__*/React.createElement("div", {
     style: {
-      fontSize: '11px',
-      fontWeight: '700',
-      color: '#908AA0',
-      letterSpacing: '0.4px',
-      textTransform: 'uppercase',
-      marginBottom: '9px'
+      ...lblStyle,
+      padding: '0 2px 8px'
+    }
+  }, "Schede integrate"), SCHEDE_INTEGRATE().map(p => {
+    const att = attiva === p.id;
+    return /*#__PURE__*/React.createElement("div", {
+      key: p.id,
+      style: {
+        ...glassCard,
+        padding: '13px',
+        marginBottom: '9px',
+        borderLeft: '3px solid ' + (att ? '#2FA055' : IRON.edge)
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        display: 'flex',
+        alignItems: 'baseline',
+        gap: '8px'
+      }
+    }, /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontFamily: displayFont,
+        fontSize: '14px',
+        fontWeight: '700',
+        color: IRON.chalk,
+        flex: 1
+      }
+    }, p.label), att && /*#__PURE__*/React.createElement("span", {
+      style: {
+        ...lblStyle,
+        color: '#2FA055',
+        fontSize: '8.5px'
+      }
+    }, "attiva")), /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontFamily: monoFont,
+        fontSize: '10px',
+        color: IRON.dust,
+        marginTop: '3px'
+      }
+    }, p.sub), /*#__PURE__*/React.createElement("div", {
+      style: {
+        display: 'flex',
+        gap: '6px',
+        marginTop: '11px'
+      }
+    }, /*#__PURE__*/React.createElement("button", {
+      onClick: () => {
+        setCurrent({
+          __builtin: p.config,
+          name: p.label
+        });
+        setView('train');
+      },
+      style: {
+        flex: 2,
+        minHeight: '44px',
+        background: IRON.chalk,
+        color: IRON.bg,
+        border: 'none',
+        borderRadius: '3px',
+        fontFamily: displayFont,
+        fontSize: '12.5px',
+        fontWeight: '800',
+        letterSpacing: '0.05em',
+        textTransform: 'uppercase',
+        cursor: 'pointer'
+      }
+    }, "Allenati"), /*#__PURE__*/React.createElement("button", {
+      onClick: () => {
+        storage.set('scheda_attiva', p.id);
+        setAttiva(p.id);
+      },
+      disabled: att,
+      style: {
+        flex: 1,
+        minHeight: '44px',
+        background: att ? 'transparent' : IRON.surface,
+        color: att ? IRON.ash : '#2FA055',
+        border: '1px solid ' + (att ? IRON.edge : '#2FA05555'),
+        borderRadius: '3px',
+        fontFamily: monoFont,
+        fontSize: '11px',
+        fontWeight: '600',
+        cursor: att ? 'default' : 'pointer'
+      }
+    }, att ? '—' : 'attiva'), /*#__PURE__*/React.createElement(MiniBtn, {
+      onClick: () => dupBuiltin(p.config, p.label, p.sub),
+      color: "#E8B43C",
+      title: "Duplica"
+    }, /*#__PURE__*/React.createElement(CopyIcon, {
+      size: 14,
+      color: "#E8B43C"
+    }))));
+  })), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'none'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: '11px'
     }
   }, "Parti da una scheda integrata"), /*#__PURE__*/React.createElement("div", {
     style: {
@@ -21133,13 +21305,26 @@ function LibraryScreen(_ref48) {
       }
     }, /*#__PURE__*/React.createElement("div", {
       style: {
+        display: 'flex',
+        alignItems: 'baseline',
+        gap: '7px'
+      }
+    }, /*#__PURE__*/React.createElement("span", {
+      style: {
         fontFamily: displayFont,
         fontSize: '14px',
         fontWeight: '700',
         color: '#F4F2F8',
-        lineHeight: 1.2
+        lineHeight: 1.2,
+        flex: 1
       }
-    }, s.name || 'Scheda'), /*#__PURE__*/React.createElement("div", {
+    }, s.name || 'Scheda'), attiva === s.id && /*#__PURE__*/React.createElement("span", {
+      style: {
+        ...lblStyle,
+        color: '#2FA055',
+        fontSize: '8.5px'
+      }
+    }, "attiva")), /*#__PURE__*/React.createElement("div", {
       style: {
         fontSize: '10px',
         color: '#908AA0',
@@ -21158,22 +21343,37 @@ function LibraryScreen(_ref48) {
       },
       style: {
         flex: 2,
-        padding: '11px',
-        background: 'linear-gradient(135deg, ' + col + ' 0%, ' + col + 'cc 100%)',
-        color: 'white',
+        minHeight: '44px',
+        background: IRON.chalk,
+        color: IRON.bg,
         border: 'none',
-        borderRadius: '11px',
+        borderRadius: '3px',
+        fontFamily: displayFont,
         fontSize: '12.5px',
-        fontWeight: '700',
-        cursor: 'pointer',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: '7px'
+        fontWeight: '800',
+        letterSpacing: '0.05em',
+        textTransform: 'uppercase',
+        cursor: 'pointer'
       }
-    }, /*#__PURE__*/React.createElement(Dumbbell, {
-      size: 15
-    }), " Allenati"), /*#__PURE__*/React.createElement(MiniBtn, {
+    }, "Allenati"), /*#__PURE__*/React.createElement("button", {
+      onClick: () => {
+        storage.set('scheda_attiva', s.id);
+        setAttiva(s.id);
+      },
+      disabled: attiva === s.id,
+      style: {
+        flex: 1,
+        minHeight: '44px',
+        background: attiva === s.id ? 'transparent' : IRON.surface,
+        color: attiva === s.id ? IRON.ash : '#2FA055',
+        border: '1px solid ' + (attiva === s.id ? IRON.edge : '#2FA05555'),
+        borderRadius: '3px',
+        fontFamily: monoFont,
+        fontSize: '11px',
+        fontWeight: '600',
+        cursor: attiva === s.id ? 'default' : 'pointer'
+      }
+    }, attiva === s.id ? '—' : 'attiva'), /*#__PURE__*/React.createElement(MiniBtn, {
       onClick: () => {
         setCurrent(s);
         setView('edit');
@@ -21305,22 +21505,22 @@ function DietEditorScreen(_ref49) {
   let initial = _ref49.initial,
     onSave = _ref49.onSave,
     goBack = _ref49.goBack;
-  const _useState97 = useState(() => JSON.parse(JSON.stringify(initial))),
-    _useState98 = _slicedToArray(_useState97, 2),
-    d = _useState98[0],
-    setD = _useState98[1];
-  const _useState99 = useState(null),
-    _useState100 = _slicedToArray(_useState99, 2),
-    picker = _useState100[0],
-    setPicker = _useState100[1]; // indice pasto
-  const _useState101 = useState(0),
+  const _useState101 = useState(() => JSON.parse(JSON.stringify(initial))),
     _useState102 = _slicedToArray(_useState101, 2),
-    openMeal = _useState102[0],
-    setOpenMeal = _useState102[1];
+    d = _useState102[0],
+    setD = _useState102[1];
   const _useState103 = useState(null),
     _useState104 = _slicedToArray(_useState103, 2),
-    msg = _useState104[0],
-    setMsg = _useState104[1];
+    picker = _useState104[0],
+    setPicker = _useState104[1]; // indice pasto
+  const _useState105 = useState(0),
+    _useState106 = _slicedToArray(_useState105, 2),
+    openMeal = _useState106[0],
+    setOpenMeal = _useState106[1];
+  const _useState107 = useState(null),
+    _useState108 = _slicedToArray(_useState107, 2),
+    msg = _useState108[0],
+    setMsg = _useState108[1];
   useAndroidBack(goBack, true);
   const setField = (k, v) => setD(p => ({
     ...p,
@@ -21856,38 +22056,38 @@ function DietEditorScreen(_ref49) {
 // ============================================================
 function DietScreen(_ref50) {
   let goBack = _ref50.goBack;
-  const _useState105 = useState(() => storage.get('custom_diets') || []),
-    _useState106 = _slicedToArray(_useState105, 2),
-    diets = _useState106[0],
-    setDiets = _useState106[1];
-  const _useState107 = useState('list'),
-    _useState108 = _slicedToArray(_useState107, 2),
-    view = _useState108[0],
-    setView = _useState108[1];
-  const _useState109 = useState(null),
+  const _useState109 = useState(() => storage.get('custom_diets') || []),
     _useState110 = _slicedToArray(_useState109, 2),
-    current = _useState110[0],
-    setCurrent = _useState110[1];
-  const _useState111 = useState(null),
+    diets = _useState110[0],
+    setDiets = _useState110[1];
+  const _useState111 = useState('list'),
     _useState112 = _slicedToArray(_useState111, 2),
-    shop = _useState112[0],
-    setShop = _useState112[1];
-  const _useState113 = useState(7),
+    view = _useState112[0],
+    setView = _useState112[1];
+  const _useState113 = useState(null),
     _useState114 = _slicedToArray(_useState113, 2),
-    days = _useState114[0],
-    setDays = _useState114[1];
-  const _useState115 = useState(false),
+    current = _useState114[0],
+    setCurrent = _useState114[1];
+  const _useState115 = useState(null),
     _useState116 = _slicedToArray(_useState115, 2),
-    panel = _useState116[0],
-    setPanel = _useState116[1];
-  const _useState117 = useState(''),
+    shop = _useState116[0],
+    setShop = _useState116[1];
+  const _useState117 = useState(7),
     _useState118 = _slicedToArray(_useState117, 2),
-    paste = _useState118[0],
-    setPaste = _useState118[1];
-  const _useState119 = useState(null),
+    days = _useState118[0],
+    setDays = _useState118[1];
+  const _useState119 = useState(false),
     _useState120 = _slicedToArray(_useState119, 2),
-    msg = _useState120[0],
-    setMsg = _useState120[1];
+    panel = _useState120[0],
+    setPanel = _useState120[1];
+  const _useState121 = useState(''),
+    _useState122 = _slicedToArray(_useState121, 2),
+    paste = _useState122[0],
+    setPaste = _useState122[1];
+  const _useState123 = useState(null),
+    _useState124 = _slicedToArray(_useState123, 2),
+    msg = _useState124[0],
+    setMsg = _useState124[1];
   const fileRef = useRef(null);
   const persist = list => {
     setDiets(list);
@@ -22384,10 +22584,10 @@ function Thumb(_ref55) {
     _ref55$size = _ref55.size,
     size = _ref55$size === void 0 ? 58 : _ref55$size;
   const urls = EXERCISE_IMAGES[id] || [];
-  const _useState121 = useState(0),
-    _useState122 = _slicedToArray(_useState121, 2),
-    i = _useState122[0],
-    setI = _useState122[1];
+  const _useState125 = useState(0),
+    _useState126 = _slicedToArray(_useState125, 2),
+    i = _useState126[0],
+    setI = _useState126[1];
   useEffect(() => {
     setI(0);
   }, [id]);
@@ -22612,26 +22812,26 @@ function ExDetailModal(_ref56) {
 }
 function ExerciseDBScreen(_ref59) {
   let goBack = _ref59.goBack;
-  const _useState123 = useState(''),
-    _useState124 = _slicedToArray(_useState123, 2),
-    q = _useState124[0],
-    setQ = _useState124[1];
-  const _useState125 = useState(null),
-    _useState126 = _slicedToArray(_useState125, 2),
-    tag = _useState126[0],
-    setTag = _useState126[1];
-  const _useState127 = useState(null),
+  const _useState127 = useState(''),
     _useState128 = _slicedToArray(_useState127, 2),
-    eq = _useState128[0],
-    setEq = _useState128[1];
+    q = _useState128[0],
+    setQ = _useState128[1];
   const _useState129 = useState(null),
     _useState130 = _slicedToArray(_useState129, 2),
-    sel = _useState130[0],
-    setSel = _useState130[1];
-  const _useState131 = useState(30),
+    tag = _useState130[0],
+    setTag = _useState130[1];
+  const _useState131 = useState(null),
     _useState132 = _slicedToArray(_useState131, 2),
-    limit = _useState132[0],
-    setLimit = _useState132[1];
+    eq = _useState132[0],
+    setEq = _useState132[1];
+  const _useState133 = useState(null),
+    _useState134 = _slicedToArray(_useState133, 2),
+    sel = _useState134[0],
+    setSel = _useState134[1];
+  const _useState135 = useState(30),
+    _useState136 = _slicedToArray(_useState135, 2),
+    limit = _useState136[0],
+    setLimit = _useState136[1];
   const all = Object.values(EXERCISE_DB).filter(e => !BUILTIN_TWIN[e.id]);
   const ql = q.trim().toLowerCase();
   const list = all.filter(e => (!ql || (e.name || '').toLowerCase().indexOf(ql) >= 0 || (e.nameEn || '').toLowerCase().indexOf(ql) >= 0) && (!tag || (e.tags || []).indexOf(tag) >= 0) && (!eq || e.equip === eq));
@@ -22911,17 +23111,17 @@ function VolumeScreen(_ref62) {
       config: cfg
     } : null;
   }).filter(Boolean));
-  const _useState133 = useState(0),
-    _useState134 = _slicedToArray(_useState133, 2),
-    progIdx = _useState134[0],
-    setProgIdx = _useState134[1];
+  const _useState137 = useState(0),
+    _useState138 = _slicedToArray(_useState137, 2),
+    progIdx = _useState138[0],
+    setProgIdx = _useState138[1];
   const prog = programs[progIdx] || programs[0];
   const log = storage.get(prog.config.storageKey) || {};
   const weeksWithData = (prog.config.weeks || []).filter(w => log[w]);
-  const _useState135 = useState(weeksWithData.length ? weeksWithData[weeksWithData.length - 1] : (prog.config.weeks || [1])[0]),
-    _useState136 = _slicedToArray(_useState135, 2),
-    week = _useState136[0],
-    setWeek = _useState136[1];
+  const _useState139 = useState(weeksWithData.length ? weeksWithData[weeksWithData.length - 1] : (prog.config.weeks || [1])[0]),
+    _useState140 = _slicedToArray(_useState139, 2),
+    week = _useState140[0],
+    setWeek = _useState140[1];
   useEffect(() => {
     const l = storage.get(prog.config.storageKey) || {};
     const ws = (prog.config.weeks || []).filter(w => l[w]);
@@ -23137,14 +23337,14 @@ function TdeeScreen(_ref63) {
   let goBack = _ref63.goBack;
   const pesoLog = storage.get('peso') || {};
   const diets = storage.get('custom_diets') || [];
-  const _useState137 = useState(() => storage.get('tdee_giorni') || {}),
-    _useState138 = _slicedToArray(_useState137, 2),
-    assign = _useState138[0],
-    setAssign = _useState138[1];
-  const _useState139 = useState(() => storage.get('tdee_manuale') || ''),
-    _useState140 = _slicedToArray(_useState139, 2),
-    manual = _useState140[0],
-    setManual = _useState140[1];
+  const _useState141 = useState(() => storage.get('tdee_giorni') || {}),
+    _useState142 = _slicedToArray(_useState141, 2),
+    assign = _useState142[0],
+    setAssign = _useState142[1];
+  const _useState143 = useState(() => storage.get('tdee_manuale') || ''),
+    _useState144 = _slicedToArray(_useState143, 2),
+    manual = _useState144[0],
+    setManual = _useState144[1];
   const setDays = (id, n) => {
     const next = {
       ...assign,
@@ -23404,10 +23604,10 @@ function SwapModal(_ref66) {
     onClose = _ref66.onClose,
     onReset = _ref66.onReset,
     hasSwap = _ref66.hasSwap;
-  const _useState141 = useState(null),
-    _useState142 = _slicedToArray(_useState141, 2),
-    eq = _useState142[0],
-    setEq = _useState142[1];
+  const _useState145 = useState(null),
+    _useState146 = _slicedToArray(_useState145, 2),
+    eq = _useState146[0],
+    setEq = _useState146[1];
   const primary = (exercise.tags || [])[0];
   // gli esercizi dei programmi non hanno il campo attrezzo: lo prendo dal gemello del pacchetto
   const twinId = BUILTIN_TWIN[exercise.id];
@@ -23624,10 +23824,10 @@ const askConfirm = (titolo, dettaglio, onOk) => {
   });else if (window.confirm(titolo)) onOk();
 };
 function ConfirmHost() {
-  const _useState143 = useState(null),
-    _useState144 = _slicedToArray(_useState143, 2),
-    req = _useState144[0],
-    setReq = _useState144[1];
+  const _useState147 = useState(null),
+    _useState148 = _slicedToArray(_useState147, 2),
+    req = _useState148[0],
+    setReq = _useState148[1];
   useEffect(() => {
     _confirmSetter = setReq;
     return () => {
@@ -23718,10 +23918,10 @@ const notifyStorageError = () => {
   if (_storageErrSetter) _storageErrSetter(Date.now());
 };
 function StorageBanner() {
-  const _useState145 = useState(0),
-    _useState146 = _slicedToArray(_useState145, 2),
-    err = _useState146[0],
-    setErr = _useState146[1];
+  const _useState149 = useState(0),
+    _useState150 = _slicedToArray(_useState149, 2),
+    err = _useState150[0],
+    setErr = _useState150[1];
   useEffect(() => {
     _storageErrSetter = setErr;
     return () => {
@@ -23873,22 +24073,22 @@ const PROGRAMMI = () => [{
 }).filter(Boolean));
 function StoricoScreen(_ref69) {
   let goBack = _ref69.goBack;
-  const _useState147 = useState(() => storage.get('archivio') || []),
-    _useState148 = _slicedToArray(_useState147, 2),
-    archivio = _useState148[0],
-    setArchivio = _useState148[1];
-  const _useState149 = useState(0),
-    _useState150 = _slicedToArray(_useState149, 2),
-    progIdx = _useState150[0],
-    setProgIdx = _useState150[1];
-  const _useState151 = useState([]),
+  const _useState151 = useState(() => storage.get('archivio') || []),
     _useState152 = _slicedToArray(_useState151, 2),
-    cmp = _useState152[0],
-    setCmp = _useState152[1];
-  const _useState153 = useState(null),
+    archivio = _useState152[0],
+    setArchivio = _useState152[1];
+  const _useState153 = useState(0),
     _useState154 = _slicedToArray(_useState153, 2),
-    msg = _useState154[0],
-    setMsg = _useState154[1];
+    progIdx = _useState154[0],
+    setProgIdx = _useState154[1];
+  const _useState155 = useState([]),
+    _useState156 = _slicedToArray(_useState155, 2),
+    cmp = _useState156[0],
+    setCmp = _useState156[1];
+  const _useState157 = useState(null),
+    _useState158 = _slicedToArray(_useState157, 2),
+    msg = _useState158[0],
+    setMsg = _useState158[1];
   const programs = PROGRAMMI();
   const prog = programs[progIdx] || programs[0];
   const logCorrente = storage.get(prog.config.storageKey) || {};
@@ -24557,10 +24757,10 @@ function UltimaVolta(_ref77) {
 // ============================================================
 function BilanciereScreen(_ref78) {
   let goBack = _ref78.goBack;
-  const _useState155 = useState(plateCfg),
-    _useState156 = _slicedToArray(_useState155, 2),
-    cfg = _useState156[0],
-    setCfg = _useState156[1];
+  const _useState159 = useState(plateCfg),
+    _useState160 = _slicedToArray(_useState159, 2),
+    cfg = _useState160[0],
+    setCfg = _useState160[1];
   const salva = next => {
     setCfg(next);
     storage.set('bilanciere', next);
@@ -24708,23 +24908,25 @@ const usaBilanciere = ex => {
 // ============================================================
 function TodayCard(_ref79) {
   let navigate = _ref79.navigate;
-  const log = storage.get(MAIN_CONFIG.storageKey) || {};
-  const settimane = MAIN_CONFIG.weeks;
+  const att = schedaAttiva();
+  const CFG = att.config;
+  const log = storage.get(CFG.storageKey) || {};
+  const settimane = CFG.weeks;
   // settimana corrente = la prima non completata del tutto
   let week = settimane[0];
   for (const w of settimane) {
-    const fatti = MAIN_CONFIG.days.filter(d => log[w] && log[w][d.id] && log[w][d.id].completato).length;
-    if (fatti < MAIN_CONFIG.days.length) {
+    const fatti = CFG.days.filter(d => log[w] && log[w][d.id] && log[w][d.id].completato).length;
+    if (fatti < CFG.days.length) {
       week = w;
       break;
     }
     week = w;
   }
   const oggi = ['DOM', 'LUN', 'MAR', 'MER', 'GIO', 'VEN', 'SAB'][new Date().getDay()];
-  const giorno = MAIN_CONFIG.days.find(d => d.dayName === oggi);
+  const giorno = CFG.days.find(d => d.dayName === oggi);
   const fatto = giorno && log[week] && log[week][giorno.id] && log[week][giorno.id].completato;
-  const nEs = giorno ? (MAIN_CONFIG.exercises[giorno.id] || []).length : 0;
-  const nSerie = giorno ? (MAIN_CONFIG.exercises[giorno.id] || []).reduce((a, e) => a + (e.sets || 0), 0) : 0;
+  const nEs = giorno ? (CFG.exercises[giorno.id] || []).length : 0;
+  const nSerie = giorno ? (CFG.exercises[giorno.id] || []).reduce((a, e) => a + (e.sets || 0), 0) : 0;
   return /*#__PURE__*/React.createElement("div", {
     style: {
       margin: '0 -12px 22px',
@@ -24737,7 +24939,7 @@ function TodayCard(_ref79) {
     style: {
       ...lblStyle
     }
-  }, "Oggi \xB7 ", oggi, " \xB7 settimana ", week, " di ", settimane.length), giorno ? /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+  }, att.label, " \xB7 ", oggi, " \xB7 settimana ", week, " di ", settimane.length), giorno ? /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
     style: {
       ...dispStyle,
       fontSize: '44px',
@@ -24785,7 +24987,7 @@ function TodayCard(_ref79) {
       }
     }, l));
   })), /*#__PURE__*/React.createElement("button", {
-    onClick: () => navigate('workout'),
+    onClick: () => navigate(att.integrata && att.id === 'main' ? 'workout' : 'library'),
     style: {
       marginTop: '15px',
       width: '100%',
@@ -25084,13 +25286,259 @@ const btnCentro = {
   padding: '0 8px'
 };
 
+// ============================================================
+// REGISTRO · ELENCO UNIFICATO DELLE SCHEDE
+// Integrate e personali nello stesso posto. Una sola è "attiva":
+// la home e la dashboard seguono quella.
+// ============================================================
+const SCHEDE_INTEGRATE = () => [{
+  id: 'main',
+  label: 'V8.3.4',
+  sub: '5 giorni · blocco 8 settimane',
+  config: MAIN_CONFIG,
+  integrata: true
+}, {
+  id: 'summer2',
+  label: 'Estate · 4 giorni',
+  sub: 'Solo manubri · viaggio',
+  config: SUMMER2_CONFIG,
+  integrata: true
+}];
+function tutteLeSchede() {
+  const custom = (storage.get('custom_schedules') || []).map(s => {
+    let cfg = null;
+    try {
+      cfg = rehydrateSchedule(s);
+    } catch (e) {
+      cfg = null;
+    }
+    return cfg ? {
+      id: s.id,
+      label: s.name || 'Scheda',
+      sub: s.subtitle || '',
+      config: cfg,
+      raw: s,
+      integrata: false
+    } : null;
+  }).filter(Boolean);
+  return SCHEDE_INTEGRATE().concat(custom);
+}
+const schedaAttivaId = () => storage.get('scheda_attiva') || 'main';
+function schedaAttiva() {
+  const tutte = tutteLeSchede();
+  return tutte.find(s => s.id === schedaAttivaId()) || tutte[0];
+}
+
+// ============================================================
+// REGISTRO · SUPERSET E TECNICHE DI ESECUZIONE
+// Nel .v8w un esercizio può portare due campi in più:
+//   "sup": "A"    → superset: gli esercizi con la stessa lettera si alternano
+//   "tec": "MYO"  → tecnica: cambia la struttura delle serie a schermo
+// ============================================================
+const TECNICHE = {
+  MYO: {
+    nome: 'Myo-reps',
+    colore: '#A855F7',
+    riga: (i, tot) => i === 0 ? 'ATTIVAZIONE' : 'MINI ' + i,
+    recupero: i => i === 0 ? null : 20,
+    breve: 'Serie di attivazione a RIR 0-1, poi mini-serie con 20 secondi di stacco.',
+    passi: ['Serie di attivazione: 12-15 ripetizioni fino a RIR 0-1', 'Stacca 15-20 secondi restando in posizione', 'Mini-serie da 3-5 ripetizioni', 'Ripeti finché non riesci più a chiudere 3 ripetizioni pulite']
+  },
+  LLP: {
+    nome: 'Parziali allungati',
+    colore: '#22D3EE',
+    riga: (i, tot) => i === tot - 1 ? 'PARZIALI' : String(i + 1).padStart(2, '0'),
+    recupero: () => null,
+    breve: "Dopo l'ultima serie completa, continui solo nella metà bassa del movimento.",
+    passi: ['Esegui le serie a ROM completo come previsto', "Sull'ultima, raggiunto il cedimento tecnico, non fermarti", 'Continua 5-8 ripetizioni nella sola metà allungata', 'Nessun rimbalzo: la posizione allungata è quella che stimola']
+  },
+  AMRAP: {
+    nome: 'Ultima serie a esaurimento',
+    colore: '#E5A82B',
+    riga: (i, tot) => i === tot - 1 ? 'AMRAP' : String(i + 1).padStart(2, '0'),
+    recupero: () => null,
+    breve: "Sull'ultima serie vai a RIR 0 e registri quante ripetizioni chiudi.",
+    passi: ['Serie normali come da scheda', "Sull'ultima, stesso carico, massimo numero di ripetizioni", 'Fermati alla perdita di tecnica, non oltre', "Il numero serve a stimare l'1RM: registralo con precisione"]
+  },
+  ECC: {
+    nome: 'Eccentrica accentuata',
+    colore: '#2FA055',
+    riga: i => String(i + 1).padStart(2, '0'),
+    recupero: () => null,
+    breve: 'Discesa controllata in 3 secondi su ogni ripetizione.',
+    passi: ['Conta tre secondi nella fase di discesa', 'Nessuna pausa in fondo: inverti subito', 'Salita normale, senza slancio', 'Se non riesci a contare fino a tre, il carico è troppo alto']
+  },
+  DROP: {
+    nome: 'Drop set',
+    colore: '#D8342C',
+    riga: (i, tot) => i === tot - 1 ? 'DROP' : String(i + 1).padStart(2, '0'),
+    recupero: () => null,
+    breve: "Sull'ultima serie togli carico e riparti subito, senza recupero.",
+    passi: ["Porta l'ultima serie a RIR 0", 'Togli il 20-30% del carico in pochi secondi', 'Riparti subito fino a nuovo cedimento', 'Una sola riduzione: due o più aggiungono fatica senza stimolo']
+  }
+};
+
+// Etichetta di riga della serie secondo la tecnica
+const rigaSerie = (tec, i, tot) => {
+  const t = TECNICHE[tec];
+  return t ? t.riga(i, tot) : String(i + 1).padStart(2, '0');
+};
+// Recupero specifico fra le serie (le myo-reps hanno stacchi brevissimi)
+const recuperoSerie = (tec, i, standard) => {
+  const t = TECNICHE[tec];
+  const r = t && t.recupero ? t.recupero(i) : null;
+  return r != null ? r : standard;
+};
+
+// Intestazione della tecnica sopra la tabella delle serie
+function IntestazioneTecnica(_ref84) {
+  let tec = _ref84.tec;
+  const t = TECNICHE[tec];
+  const _ref85 = useContext(TechModalContext) || {},
+    showTech = _ref85.showTech;
+  const _useState161 = useState(false),
+    _useState162 = _slicedToArray(_useState161, 2),
+    aperto = _useState162[0],
+    setAperto = _useState162[1];
+  if (!t) return null;
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      border: '1px solid ' + t.colore + '55',
+      borderLeft: '3px solid ' + t.colore,
+      background: t.colore + '12',
+      borderRadius: '3px',
+      marginBottom: '10px'
+    }
+  }, /*#__PURE__*/React.createElement("button", {
+    onClick: () => setAperto(!aperto),
+    style: {
+      width: '100%',
+      background: 'none',
+      border: 'none',
+      padding: '10px 12px',
+      cursor: 'pointer',
+      textAlign: 'left',
+      display: 'flex',
+      alignItems: 'center',
+      gap: '9px'
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      ...lblStyle,
+      color: t.colore,
+      fontSize: '9.5px'
+    }
+  }, t.nome), /*#__PURE__*/React.createElement("span", {
+    style: {
+      flex: 1,
+      fontSize: '11px',
+      color: IRON.dust,
+      lineHeight: 1.4
+    }
+  }, t.breve), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontFamily: monoFont,
+      fontSize: '13px',
+      color: t.colore
+    }
+  }, aperto ? '−' : '+')), aperto && /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: '0 12px 11px 12px'
+    }
+  }, t.passi.map((p, i) => /*#__PURE__*/React.createElement("div", {
+    key: i,
+    style: {
+      display: 'flex',
+      gap: '9px',
+      marginBottom: '5px'
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontFamily: monoFont,
+      fontSize: '10px',
+      color: t.colore,
+      flexShrink: 0
+    }
+  }, i + 1), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: '11.5px',
+      color: '#C7C2D0',
+      lineHeight: 1.5
+    }
+  }, p)))));
+}
+
+// Fascia del superset: mostra la coppia e come alternarla
+function FasciaSuperset(_ref86) {
+  let lettera = _ref86.lettera,
+    esercizi = _ref86.esercizi,
+    correnteIdx = _ref86.correnteIdx;
+  if (!esercizi || esercizi.length < 2) return null;
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      border: '1px solid #A855F755',
+      borderLeft: '3px solid #A855F7',
+      background: 'rgba(168,85,247,0.08)',
+      borderRadius: '3px',
+      padding: '10px 12px',
+      marginBottom: '11px'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      ...lblStyle,
+      color: '#A855F7',
+      marginBottom: '7px'
+    }
+  }, "Superset ", lettera, " \xB7 si alternano senza recupero"), esercizi.map((e, i) => /*#__PURE__*/React.createElement("div", {
+    key: i,
+    style: {
+      display: 'flex',
+      alignItems: 'center',
+      gap: '9px',
+      padding: '3px 0'
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontFamily: monoFont,
+      fontSize: '10px',
+      color: '#A855F7',
+      width: '14px',
+      flexShrink: 0
+    }
+  }, String.fromCharCode(65 + i)), /*#__PURE__*/React.createElement("span", {
+    style: {
+      flex: 1,
+      fontSize: '12px',
+      fontWeight: e.idx === correnteIdx ? '700' : '400',
+      color: e.idx === correnteIdx ? IRON.chalk : IRON.dust
+    }
+  }, e.name), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontFamily: monoFont,
+      fontSize: '10px',
+      color: IRON.ash
+    }
+  }, e.sets, "\xD7", e.reps))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: '10.5px',
+      color: IRON.dust,
+      marginTop: '7px',
+      lineHeight: 1.45
+    }
+  }, "Fai una serie di A, subito una di B, ", /*#__PURE__*/React.createElement("b", {
+    style: {
+      color: IRON.chalk
+    }
+  }, "poi recuperi"), ". Ripeti per il numero di serie previsto."));
+}
+
 // ============= MAIN =============
 
 function App() {
-  const _useState157 = useState('home'),
-    _useState158 = _slicedToArray(_useState157, 2),
-    screen = _useState158[0],
-    setScreen = _useState158[1];
+  const _useState163 = useState('home'),
+    _useState164 = _slicedToArray(_useState163, 2),
+    screen = _useState164[0],
+    setScreen = _useState164[1];
   const goHome = useCallback(() => setScreen('home'), []);
   // Quando siamo fuori da home, intercetta il tasto indietro per tornare alla home
   useAndroidBack(goHome, screen !== 'home');
