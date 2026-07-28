@@ -24,7 +24,7 @@
      ============================================================ */
   :root {
     --bg: #0B0A0F; --surface: #16141C; --surface-2: #1C1925;
-    --line: rgba(255,255,255,0.07); --ink: #F4F2F8; --muted: #908AA0;
+    --line: rgba(255,255,255,0.07); --ink: #F2F1ED; --muted: #8A8A93;
     --violet: #A855F7; --violet-2: #7C3AED; --violet-soft: rgba(168,85,247,0.16);
     /* dischi calibrati per i giorni */
     --p-red: #E0524A; --p-blue: #4D82E8; --p-yellow: #E8B43C; --p-green: #3FB66C; --p-purple: #A855F7;
@@ -61,7 +61,7 @@
   @keyframes pulseGlow { 0%, 100% { box-shadow: 0 0 0 rgba(168, 85, 247, 0); } 50% { box-shadow: 0 0 14px rgba(168, 85, 247, 0.45); } }
   @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
   @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
-  .shimmer-bg { background: linear-gradient(90deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.04) 100%); background-size: 200% 100%; animation: shimmer 2s infinite; }
+  .shimmer-bg { background: linear-gradient(90deg, rgba(255,255,255,0.04) 0%, #2A2A31 50%, rgba(255,255,255,0.04) 100%); background-size: 200% 100%; animation: shimmer 2s infinite; }
 </style>
 </head>
 <body>
@@ -749,7 +749,7 @@ function TechModalProvider(_ref2) {
       width: '100%',
       maxWidth: '560px',
       background: 'linear-gradient(180deg, #1a2238 0%, #101626 100%)',
-      borderTop: '1px solid rgba(255,255,255,0.1)',
+      borderTop: '1px solid #2A2A31',
       borderRadius: '20px 20px 0 0',
       padding: '20px 18px 24px',
       maxHeight: '85vh',
@@ -778,7 +778,7 @@ function TechModalProvider(_ref2) {
     style: {
       fontSize: '16px',
       fontWeight: '700',
-      color: '#F4F2F8',
+      color: '#F2F1ED',
       flex: 1
     }
   }, TECH_INFO[activeTech].name), /*#__PURE__*/React.createElement("button", {
@@ -786,7 +786,7 @@ function TechModalProvider(_ref2) {
     style: {
       background: 'rgba(255,255,255,0.06)',
       border: 'none',
-      color: '#908AA0',
+      color: '#8A8A93',
       width: '32px',
       height: '32px',
       borderRadius: '50%',
@@ -796,18 +796,18 @@ function TechModalProvider(_ref2) {
   }, "\u2715")), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: '13px',
-      color: '#d8d8e0',
+      color: '#C0BEC6',
       lineHeight: 1.65,
       marginBottom: '14px'
     }
   }, TECH_INFO[activeTech].desc), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: '11px',
-      color: '#908AA0',
+      color: '#8A8A93',
       fontStyle: 'italic',
       background: 'rgba(255,255,255,0.04)',
       padding: '10px 12px',
-      borderRadius: '10px',
+      borderRadius: '3px',
       border: '1px solid rgba(255,255,255,0.06)'
     }
   }, /*#__PURE__*/React.createElement("strong", {
@@ -2047,7 +2047,7 @@ document.addEventListener('visibilitychange', () => {
 // ============= TEMA v5 "VETRO & VIOLA" =============
 // Card-vetro semitrasparenti (img2) che lasciano filtrare le sfere viola;
 // accento UI viola elettrico (img1). Colori-disco solo per i giorni.
-const APP_VERSION = 'v15.2';
+const APP_VERSION = 'v15.3';
 const APP_BUILD = '2026-07-27';
 const displayFont = "'Archivo', -apple-system, system-ui, sans-serif";
 const monoFont = "'IBM Plex Mono', ui-monospace, 'SF Mono', monospace";
@@ -2306,9 +2306,9 @@ function useTimer() {
 const timerBtn = {
   background: 'rgba(255,255,255,0.2)',
   border: 'none',
-  color: '#F4F2F8',
+  color: '#F2F1ED',
   padding: '8px',
-  borderRadius: '10px',
+  borderRadius: '3px',
   cursor: 'pointer',
   display: 'flex',
   alignItems: 'center',
@@ -2347,7 +2347,7 @@ function FloatingTimer() {
         ...glassCard,
         background: bg,
         padding: '8px 12px',
-        borderRadius: '14px',
+        borderRadius: '3px',
         cursor: 'pointer',
         display: 'flex',
         alignItems: 'center',
@@ -2362,7 +2362,7 @@ function FloatingTimer() {
       style: {
         fontSize: '14px',
         fontWeight: '700',
-        color: '#F4F2F8',
+        color: '#F2F1ED',
         minWidth: '40px'
       }
     }, String(min).padStart(2, '0'), ":", String(sec).padStart(2, '0')));
@@ -2379,7 +2379,7 @@ function FloatingTimer() {
       maxWidth: '460px',
       background: bg,
       border: `1px solid ${isFinished ? '#3FB66C' : isLowTime ? '#E0524A' : 'rgba(232,176,40,0.4)'}`,
-      borderRadius: '14px',
+      borderRadius: '3px',
       padding: '12px 14px',
       animation: 'slideUp 0.3s ease-out',
       boxShadow: '0 8px 32px rgba(0,0,0,0.55)'
@@ -2401,7 +2401,7 @@ function FloatingTimer() {
   }, /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: '10px',
-      color: isFinished || isLowTime ? 'rgba(255,255,255,0.9)' : '#908AA0',
+      color: isFinished || isLowTime ? 'rgba(255,255,255,0.9)' : '#8A8A93',
       textTransform: 'uppercase',
       letterSpacing: '0.1em',
       fontWeight: '600',
@@ -2414,7 +2414,7 @@ function FloatingTimer() {
       fontFamily: displayFont,
       fontSize: '28px',
       fontWeight: '800',
-      color: isFinished || isLowTime ? '#fff' : '#F4F2F8',
+      color: isFinished || isLowTime ? '#fff' : '#F2F1ED',
       lineHeight: 1,
       letterSpacing: '0.02em'
     }
@@ -2476,7 +2476,7 @@ function FloatingTimer() {
 function Tag(_ref7) {
   let name = _ref7.name;
   const c = TAG_COLORS[name] || {
-    bg: 'rgba(255,255,255,0.1)',
+    bg: '#2A2A31',
     border: 'rgba(255,255,255,0.2)',
     text: '#999'
   };
@@ -2484,7 +2484,7 @@ function Tag(_ref7) {
     style: {
       display: 'inline-block',
       padding: '3px 9px',
-      borderRadius: '6px',
+      borderRadius: '3px',
       fontSize: '9px',
       fontWeight: '700',
       color: c.text,
@@ -2502,7 +2502,7 @@ function Badge(_ref8) {
     _ref8$clickable = _ref8.clickable,
     clickable = _ref8$clickable === void 0 ? true : _ref8$clickable;
   const c = BADGE_COLORS[name] || {
-    bg: 'rgba(255,255,255,0.1)',
+    bg: '#2A2A31',
     border: 'rgba(255,255,255,0.2)',
     text: '#999'
   };
@@ -2512,7 +2512,7 @@ function Badge(_ref8) {
   const baseStyle = {
     display: 'inline-block',
     padding: '3px 9px',
-    borderRadius: '6px',
+    borderRadius: '3px',
     fontSize: '9px',
     fontWeight: '700',
     color: c.text,
@@ -2552,12 +2552,12 @@ function MetaPill(_ref9) {
       alignItems: 'center',
       gap: '5px',
       padding: '4px 9px',
-      borderRadius: '7px',
+      borderRadius: '3px',
       fontSize: '10px',
       textTransform: 'uppercase',
       letterSpacing: '0.06em',
       fontWeight: '600',
-      color: color || '#908AA0',
+      color: color || '#8A8A93',
       backgroundColor: color ? `${color}16` : 'rgba(244,242,248,0.05)',
       border: `1px solid ${color ? `${color}44` : 'var(--line)'}`,
       marginRight: '5px',
@@ -2567,7 +2567,7 @@ function MetaPill(_ref9) {
     size: 11
   }), " ", label, " ", /*#__PURE__*/React.createElement("strong", {
     style: {
-      color: color || '#F4F2F8',
+      color: color || '#F2F1ED',
       fontFamily: displayFont,
       fontSize: '13px',
       fontWeight: '800'
@@ -2599,9 +2599,9 @@ function Header(_ref0) {
     style: {
       background: 'transparent',
       border: '1px solid rgba(244,242,248,0.14)',
-      color: '#F4F2F8',
+      color: '#F2F1ED',
       padding: '8px',
-      borderRadius: '10px',
+      borderRadius: '3px',
       cursor: 'pointer',
       display: 'flex',
       alignItems: 'center',
@@ -2619,14 +2619,14 @@ function Header(_ref0) {
       fontFamily: displayFont,
       fontSize: '21px',
       fontWeight: '700',
-      color: '#F4F2F8',
+      color: '#F2F1ED',
       lineHeight: 1.1,
       letterSpacing: '-0.01em'
     }
   }, title), subtitle && /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: '11px',
-      color: '#908AA0',
+      color: '#8A8A93',
       marginTop: '4px',
       fontWeight: '500',
       letterSpacing: '0.01em'
@@ -2720,7 +2720,7 @@ function ExerciseImage(_ref10) {
       width: '100%',
       height: `${height}px`,
       background: 'radial-gradient(ellipse at 50% 35%, #211D17 0%, #14120E 100%)',
-      borderRadius: '12px',
+      borderRadius: '3px',
       overflow: 'hidden',
       position: 'relative',
       border: '1px solid var(--line)'
@@ -2781,7 +2781,7 @@ function MesocycleWave(_ref11) {
       fontSize: '12px',
       fontWeight: '600',
       letterSpacing: '0.04em',
-      color: '#908AA0'
+      color: '#8A8A93'
     }
   }, "Mesociclo"), /*#__PURE__*/React.createElement("span", {
     style: {
@@ -2822,7 +2822,7 @@ function MesocycleWave(_ref11) {
         width: '100%',
         height: `${Math.round(v * 100)}%`,
         background: isNow ? `linear-gradient(180deg, ${c}, ${c})` : `linear-gradient(180deg, ${c}99, ${c}55)`,
-        borderRadius: '5px',
+        borderRadius: '3px',
         boxShadow: isNow ? `0 0 20px ${c}, 0 0 8px ${c}` : `0 0 6px ${c}55`,
         transition: 'height 0.3s ease'
       }
@@ -2830,7 +2830,7 @@ function MesocycleWave(_ref11) {
       style: {
         fontSize: '9px',
         fontWeight: '700',
-        color: isNow ? c : '#5A5468'
+        color: isNow ? c : '#55555E'
       }
     }, w));
   })));
@@ -2964,7 +2964,7 @@ function HomeScreen(_ref12) {
     id: 'settings',
     label: 'Impostazioni & Backup',
     IconComp: Settings,
-    color: '#908AA0',
+    color: '#8A8A93',
     desc: 'Esporta / importa dati'
   }];
   const statItems = [{
@@ -2999,7 +2999,7 @@ function HomeScreen(_ref12) {
       height: '44px',
       borderRadius: '50%',
       background: 'rgba(255,255,255,0.07)',
-      border: '1px solid rgba(255,255,255,0.14)',
+      border: '1px solid #2A2A31',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center'
@@ -3019,7 +3019,7 @@ function HomeScreen(_ref12) {
       height: '44px',
       borderRadius: '50%',
       background: 'rgba(255,255,255,0.07)',
-      border: '1px solid rgba(255,255,255,0.14)',
+      border: '1px solid #2A2A31',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
@@ -3027,7 +3027,7 @@ function HomeScreen(_ref12) {
     }
   }, /*#__PURE__*/React.createElement(BarChart3, {
     size: 18,
-    color: "#C7C2D0"
+    color: "#C0BEC6"
   })), /*#__PURE__*/React.createElement("button", {
     onClick: () => navigate('settings'),
     style: {
@@ -3035,7 +3035,7 @@ function HomeScreen(_ref12) {
       height: '44px',
       borderRadius: '50%',
       background: 'rgba(255,255,255,0.07)',
-      border: '1px solid rgba(255,255,255,0.14)',
+      border: '1px solid #2A2A31',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
@@ -3043,7 +3043,7 @@ function HomeScreen(_ref12) {
     }
   }, /*#__PURE__*/React.createElement(Settings, {
     size: 18,
-    color: "#C7C2D0"
+    color: "#C0BEC6"
   })))), /*#__PURE__*/React.createElement("div", {
     style: {
       padding: '12px 16px 18px'
@@ -3181,7 +3181,7 @@ function HomeScreen(_ref12) {
   }), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: '10px',
-      color: '#5A5468',
+      color: '#55555E',
       textAlign: 'center',
       marginTop: '22px',
       lineHeight: 1.7,
@@ -3275,7 +3275,7 @@ function ExerciseDetailScreen(_ref17) {
       border: '1px solid rgba(60, 111, 223, 0.4)',
       color: '#4D82E8',
       padding: '10px',
-      borderRadius: '10px',
+      borderRadius: '3px',
       fontSize: '12px',
       cursor: 'pointer',
       display: 'flex',
@@ -3314,7 +3314,7 @@ function ExerciseDetailScreen(_ref17) {
   }, "Note dal PDF")), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: '12px',
-      color: '#d8d8e0',
+      color: '#C0BEC6',
       lineHeight: 1.6,
       fontStyle: 'italic'
     }
@@ -3328,10 +3328,10 @@ function ExerciseDetailScreen(_ref17) {
     style: {
       fontSize: '13px',
       fontWeight: '700',
-      color: '#F4F2F8',
+      color: '#F2F1ED',
       marginBottom: '12px'
     }
-  }, "\uD83D\uDCCB Esecuzione corretta"), exercise.execution.map((step, i) => /*#__PURE__*/React.createElement("div", {
+  }, "Esecuzione corretta"), exercise.execution.map((step, i) => /*#__PURE__*/React.createElement("div", {
     key: i,
     style: {
       display: 'flex',
@@ -3377,10 +3377,10 @@ function ExerciseDetailScreen(_ref17) {
       color: '#E8B43C',
       marginBottom: '8px'
     }
-  }, "\uD83D\uDCA1 Cue chiave"), /*#__PURE__*/React.createElement("div", {
+  }, "Cue chiave"), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: '12px',
-      color: '#D9CFE8',
+      color: '#C0BEC6',
       lineHeight: 1.6
     }
   }, exercise.cues))));
@@ -3639,7 +3639,7 @@ function WorkoutScreen(_ref18) {
         fontFamily: displayFont,
         fontSize: '12px',
         textTransform: 'uppercase',
-        color: '#908AA0',
+        color: '#8A8A93',
         marginBottom: '10px',
         letterSpacing: '0.16em',
         fontWeight: '700'
@@ -3659,9 +3659,9 @@ function WorkoutScreen(_ref18) {
         style: {
           padding: '11px 0',
           background: active ? b.color : '#0E0D0B',
-          color: active ? '#100F0D' : '#908AA0',
+          color: active ? '#100F0D' : '#8A8A93',
           border: active ? `1px solid ${b.color}` : '1px solid var(--line)',
-          borderRadius: '10px',
+          borderRadius: '3px',
           fontWeight: '800',
           fontSize: '17px',
           cursor: 'pointer',
@@ -3675,7 +3675,7 @@ function WorkoutScreen(_ref18) {
         padding: '11px 13px',
         background: `${block.color}14`,
         borderLeft: `3px solid ${block.color}`,
-        borderRadius: '10px'
+        borderRadius: '3px'
       }
     }, /*#__PURE__*/React.createElement("div", {
       style: {
@@ -3689,14 +3689,14 @@ function WorkoutScreen(_ref18) {
     }, block.label), /*#__PURE__*/React.createElement("div", {
       style: {
         fontSize: '11px',
-        color: '#F4F2F8',
+        color: '#F2F1ED',
         marginTop: '3px',
         fontWeight: '600'
       }
     }, (PHASE[selectedWeek] || {}).name, ": ", (PHASE[selectedWeek] || {}).variable), /*#__PURE__*/React.createElement("div", {
       style: {
         fontSize: '10px',
-        color: '#908AA0',
+        color: '#8A8A93',
         marginTop: '3px'
       }
     }, rotation ? 'Volume fisso · una sola variabile per settimana' : '3 settimane · solo manubri + panca · mantenimento'))), /*#__PURE__*/React.createElement("div", {
@@ -3729,7 +3729,7 @@ function WorkoutScreen(_ref18) {
           background: `${d.color}1A`,
           border: `1px solid ${d.color}44`,
           padding: '7px 10px',
-          borderRadius: '10px',
+          borderRadius: '3px',
           minWidth: '54px',
           textAlign: 'center'
         }
@@ -3756,20 +3756,20 @@ function WorkoutScreen(_ref18) {
       }, /*#__PURE__*/React.createElement("div", {
         style: {
           fontSize: '13px',
-          color: '#F4F2F8',
+          color: '#F2F1ED',
           fontWeight: '600'
         }
       }, d.subtitle), /*#__PURE__*/React.createElement("div", {
         style: {
           fontSize: '11px',
-          color: '#908AA0',
+          color: '#8A8A93',
           marginTop: '2px'
         }
       }, d.dur)), completed && /*#__PURE__*/React.createElement("div", {
         style: {
           background: `${PLATE.green}1F`,
           border: `1px solid ${PLATE.green}55`,
-          borderRadius: '8px',
+          borderRadius: '3px',
           padding: '4px 8px',
           display: 'flex',
           alignItems: 'center',
@@ -3870,7 +3870,7 @@ function WorkoutScreen(_ref18) {
     style: {
       background: isRotA ? 'rgba(232, 176, 40, 0.1)' : 'rgba(38, 198, 218, 0.1)',
       border: `1px solid ${isRotA ? 'rgba(232, 176, 40, 0.3)' : 'rgba(38, 198, 218, 0.3)'}`,
-      borderRadius: '10px',
+      borderRadius: '3px',
       padding: '8px 12px',
       marginBottom: '12px',
       fontSize: '11px',
@@ -3939,8 +3939,8 @@ function WorkoutScreen(_ref18) {
       title: "Sostituisci",
       style: {
         background: ex._orig ? 'rgba(232,180,60,0.16)' : 'rgba(255,255,255,0.05)',
-        border: '1px solid ' + (ex._orig ? 'rgba(232,180,60,0.45)' : 'rgba(255,255,255,0.1)'),
-        borderRadius: '9px',
+        border: '1px solid ' + (ex._orig ? 'rgba(232,180,60,0.45)' : '#2A2A31'),
+        borderRadius: '3px',
         padding: '5px 9px',
         cursor: 'pointer',
         flexShrink: 0,
@@ -3950,12 +3950,12 @@ function WorkoutScreen(_ref18) {
       }
     }, /*#__PURE__*/React.createElement(CopyIcon, {
       size: 12,
-      color: ex._orig ? '#E8B43C' : '#908AA0'
+      color: ex._orig ? '#E8B43C' : '#8A8A93'
     }), /*#__PURE__*/React.createElement("span", {
       style: {
         fontSize: '9.5px',
         fontWeight: '700',
-        color: ex._orig ? '#E8B43C' : '#908AA0'
+        color: ex._orig ? '#E8B43C' : '#8A8A93'
       }
     }, ex._orig ? 'sostituito' : 'cambia'))), ex._orig && /*#__PURE__*/React.createElement("div", {
       style: {
@@ -3983,7 +3983,7 @@ function WorkoutScreen(_ref18) {
         fontFamily: displayFont,
         fontSize: '16px',
         fontWeight: '700',
-        color: '#F4F2F8',
+        color: '#F2F1ED',
         lineHeight: 1.2,
         flex: 1,
         letterSpacing: '-0.01em'
@@ -4001,13 +4001,13 @@ function WorkoutScreen(_ref18) {
     })), ex.shortNote && /*#__PURE__*/React.createElement("div", {
       style: {
         fontSize: '10px',
-        color: '#908AA0',
+        color: '#8A8A93',
         fontStyle: 'italic',
         marginBottom: '10px',
         lineHeight: 1.5,
         padding: '7px 10px',
         background: 'rgba(244,242,248,0.03)',
-        borderRadius: '8px',
+        borderRadius: '3px',
         borderLeft: `2px solid ${day.color}66`
       }
     }, ex.shortNote), /*#__PURE__*/React.createElement("div", {
@@ -4034,7 +4034,7 @@ function WorkoutScreen(_ref18) {
       style: {
         background: `${PLATE.yellow}14`,
         border: `1px solid ${PLATE.yellow}44`,
-        borderRadius: '10px',
+        borderRadius: '3px',
         padding: '8px 12px',
         marginBottom: '10px',
         display: 'flex',
@@ -4049,7 +4049,7 @@ function WorkoutScreen(_ref18) {
       style: {
         flex: 1,
         fontSize: '11px',
-        color: '#D9CFE8'
+        color: '#C0BEC6'
       }
     }, "Suggerito: ", /*#__PURE__*/React.createElement("strong", {
       style: {
@@ -4061,7 +4061,7 @@ function WorkoutScreen(_ref18) {
       style: {
         fontSize: '10px',
         marginLeft: '6px',
-        color: '#D9CFE8'
+        color: '#C0BEC6'
       }
     }, "(+carico)")), /*#__PURE__*/React.createElement("button", {
       onClick: () => updateExercise(selectedWeek, selectedDay, idx, 'kg', suggested),
@@ -4072,7 +4072,7 @@ function WorkoutScreen(_ref18) {
         fontSize: '11px',
         fontWeight: '800',
         padding: '5px 12px',
-        borderRadius: '8px',
+        borderRadius: '3px',
         cursor: 'pointer',
         fontFamily: displayFont,
         letterSpacing: '0.04em'
@@ -4081,7 +4081,7 @@ function WorkoutScreen(_ref18) {
       style: {
         background: `${PLATE.green}14`,
         border: `1px solid ${PLATE.green}44`,
-        borderRadius: '10px',
+        borderRadius: '3px',
         padding: '8px 12px',
         marginBottom: '10px',
         display: 'flex',
@@ -4864,7 +4864,7 @@ function PesoScreen(_ref19) {
       style: {
         flex: 1,
         fontSize: '12px',
-        color: '#C7C2D0'
+        color: '#C0BEC6'
       }
     }, pnt), /*#__PURE__*/React.createElement("span", {
       style: {
@@ -4914,7 +4914,7 @@ function PesoScreen(_ref19) {
       style: {
         flex: 1,
         fontSize: '12px',
-        color: '#C7C2D0'
+        color: '#C0BEC6'
       }
     }, pnt), /*#__PURE__*/React.createElement("div", {
       style: {
@@ -5171,21 +5171,22 @@ function DashboardScreen(_ref24) {
   }, /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: '9px',
-      color: '#908AA0',
+      color: '#8A8A93',
       textTransform: 'uppercase',
       letterSpacing: '0.6px'
     }
   }, stat.label), /*#__PURE__*/React.createElement("div", {
     style: {
+      ...numStyle,
       fontSize: '24px',
-      fontWeight: '700',
+      fontWeight: '600',
       color: stat.color,
       marginTop: '4px'
     }
   }, stat.value), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: '10px',
-      color: '#908AA0'
+      color: '#8A8A93'
     }
   }, stat.unit)))), /*#__PURE__*/React.createElement("div", {
     style: {
@@ -5207,12 +5208,12 @@ function DashboardScreen(_ref24) {
     style: {
       fontSize: '13px',
       fontWeight: '700',
-      color: '#F4F2F8'
+      color: '#F2F1ED'
     }
   }, "1RM Stimato (Epley)")), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: '10px',
-      color: '#908AA0',
+      color: '#8A8A93',
       marginBottom: '12px'
     }
   }, "1RM = peso \xD7 (1 + reps/30). Affidabile 3-10 rep."), COMPOUNDS.slice(0, 5).map((c, i) => {
@@ -5230,7 +5231,7 @@ function DashboardScreen(_ref24) {
       style: {
         fontSize: '12px',
         fontWeight: '600',
-        color: '#F4F2F8',
+        color: '#F2F1ED',
         marginBottom: '6px'
       }
     }, c.name), /*#__PURE__*/React.createElement("div", {
@@ -5255,12 +5256,12 @@ function DashboardScreen(_ref24) {
         background: 'rgba(155, 93, 229, 0.1)',
         border: '1px solid rgba(155, 93, 229, 0.2)',
         padding: '6px 4px',
-        borderRadius: '8px'
+        borderRadius: '3px'
       }
     }, /*#__PURE__*/React.createElement("div", {
       style: {
         fontSize: '8px',
-        color: '#908AA0',
+        color: '#8A8A93',
         textTransform: 'uppercase'
       }
     }, b.label), /*#__PURE__*/React.createElement("div", {
@@ -5275,12 +5276,12 @@ function DashboardScreen(_ref24) {
         background: finC > ini ? 'rgba(47, 164, 92, 0.15)' : 'rgba(210, 59, 46, 0.15)',
         border: `1px solid ${finC > ini ? 'rgba(47, 164, 92, 0.3)' : 'rgba(210, 59, 46, 0.3)'}`,
         padding: '6px 4px',
-        borderRadius: '8px'
+        borderRadius: '3px'
       }
     }, /*#__PURE__*/React.createElement("div", {
       style: {
         fontSize: '8px',
-        color: '#908AA0',
+        color: '#8A8A93',
         textTransform: 'uppercase'
       }
     }, "\u0394"), /*#__PURE__*/React.createElement("div", {
@@ -5293,20 +5294,20 @@ function DashboardScreen(_ref24) {
       style: {
         textAlign: 'center',
         padding: '6px 4px',
-        borderRadius: '8px',
+        borderRadius: '3px',
         background: 'rgba(255,255,255,0.03)',
         border: '1px solid rgba(255,255,255,0.05)'
       }
     }, /*#__PURE__*/React.createElement("div", {
       style: {
         fontSize: '8px',
-        color: '#908AA0',
+        color: '#8A8A93',
         textTransform: 'uppercase'
       }
     }, "\u0394"), /*#__PURE__*/React.createElement("div", {
       style: {
         fontSize: '13px',
-        color: '#5A5468'
+        color: '#55555E'
       }
     }, "\u2014"))));
   })), /*#__PURE__*/React.createElement("div", {
@@ -5329,7 +5330,7 @@ function DashboardScreen(_ref24) {
     style: {
       fontSize: '13px',
       fontWeight: '700',
-      color: '#F4F2F8'
+      color: '#F2F1ED'
     }
   }, "Andamento peso settimanale")), [1, 2, 3, 4, 5, 6, 7, 8].map(w => {
     var _pesoData;
@@ -5348,7 +5349,7 @@ function DashboardScreen(_ref24) {
         fontSize: '11px',
         fontWeight: '700',
         width: '30px',
-        color: '#5A5468'
+        color: '#55555E'
       }
     }, "S", w), /*#__PURE__*/React.createElement("div", {
       style: {
@@ -5359,20 +5360,20 @@ function DashboardScreen(_ref24) {
     }, "\u2014"));
     const prev = ((_pesoData = pesoData[w - 1]) === null || _pesoData === void 0 ? void 0 : _pesoData.media) || pesoIniziale;
     const delta = wd.media - prev;
-    let statusColor = '#908AA0',
+    let statusColor = '#8A8A93',
       statusText = '○';
     if (delta <= -0.5 && delta >= -0.8) {
       statusColor = '#3FB66C';
-      statusText = '✓';
+      statusText = 'ok';
     } else if (delta < -0.8) {
       statusColor = '#E8B43C';
-      statusText = '⚠';
+      statusText = '!';
     } else if (delta > 0.3) {
       statusColor = '#E0524A';
-      statusText = '⚠';
+      statusText = '!';
     }
     const I = delta < -0.1 ? TrendingDown : delta > 0.1 ? TrendingUp : Minus;
-    const iconColor = delta < -0.1 ? '#3FB66C' : delta > 0.1 ? '#E0524A' : '#908AA0';
+    const iconColor = delta < -0.1 ? '#3FB66C' : delta > 0.1 ? '#E0524A' : '#8A8A93';
     return /*#__PURE__*/React.createElement("div", {
       key: w,
       style: {
@@ -5387,7 +5388,7 @@ function DashboardScreen(_ref24) {
         fontSize: '11px',
         fontWeight: '700',
         width: '30px',
-        color: '#908AA0'
+        color: '#8A8A93'
       }
     }, "S", w), /*#__PURE__*/React.createElement(I, {
       size: 14,
@@ -5397,7 +5398,7 @@ function DashboardScreen(_ref24) {
         flex: 1,
         fontSize: '13px',
         fontWeight: '700',
-        color: '#F4F2F8'
+        color: '#F2F1ED'
       }
     }, wd.media.toFixed(1), " kg"), /*#__PURE__*/React.createElement("div", {
       style: {
@@ -5418,11 +5419,11 @@ function DashboardScreen(_ref24) {
   }), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: '9px',
-      color: '#908AA0',
+      color: '#8A8A93',
       marginTop: '10px',
       lineHeight: 1.6
     }
-  }, "\u2713 optimal (-0.5/-0.8) \xB7 \u26A0 troppo veloce o no progress \xB7 \u25CB lento"))));
+  }, "ok  \u22120,5 / \u22120,8 kg sett \xB7 !  troppo veloce o no progress \xB7 \u25CB lento"))));
 }
 
 // ============= RECOVERY =============
@@ -5465,12 +5466,12 @@ function RecoveryScreen(_ref27) {
   }, /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: '11px',
-      color: '#908AA0',
+      color: '#8A8A93',
       marginBottom: '14px',
       padding: '12px',
       background: 'rgba(232, 176, 40, 0.1)',
       borderLeft: '3px solid #E8B43C',
-      borderRadius: '8px',
+      borderRadius: '3px',
       lineHeight: 1.6
     }
   }, "Compila settimanalmente. Energia/recupero 1-10. Sonno: media ore/notte.", /*#__PURE__*/React.createElement("br", null), /*#__PURE__*/React.createElement("br", null), /*#__PURE__*/React.createElement("strong", {
@@ -5492,7 +5493,7 @@ function RecoveryScreen(_ref27) {
         ...glassCard,
         padding: '14px',
         marginBottom: '10px',
-        borderLeft: isWarn ? '3px solid #E8B43C' : '1px solid rgba(255,255,255,0.08)'
+        borderLeft: isWarn ? '3px solid #E8B43C' : '1px solid #2A2A31'
       }
     }, /*#__PURE__*/React.createElement("div", {
       style: {
@@ -5542,7 +5543,7 @@ function RecoveryScreen(_ref27) {
       style: {
         fontSize: '9px',
         textTransform: 'uppercase',
-        color: '#908AA0',
+        color: '#8A8A93',
         marginBottom: '4px'
       }
     }, field.label), /*#__PURE__*/React.createElement("input", {
@@ -5653,7 +5654,7 @@ function GuideScreen(_ref28) {
     style: {
       fontSize: '13px',
       fontWeight: '700',
-      color: '#F4F2F8'
+      color: '#F2F1ED'
     }
   }, "Le 7 regole non negoziabili")), ['Tracking carichi obbligatorio: app o quaderno. Senza log la double progression non funziona.', 'Tecnica > peso: ROM compromesso = ipertrofia compromessa (Schoenfeld 2020).', 'Riposi rispettati: 3 min compound, 90s isolamenti SMH (Schoenfeld 2016).', 'RIR onesto: programma RIR 2 = lascia 2 rep nel serbatoio (Pareja-Blanco 2017).', 'Sonno minimo 7,5h: <7h riduce ipertrofia 60% (Dattilo 2020).', 'Cutting lineare: 500-700 g/sett (0,5-0,7% BW). Sopra 0,8 = perdita LBM.', 'Niente experimentation: nuovi esercizi/integratori solo tra cicli.'].map((r, i) => /*#__PURE__*/React.createElement("div", {
     key: i,
@@ -5691,7 +5692,7 @@ function GuideScreen(_ref28) {
     style: {
       fontSize: '13px',
       fontWeight: '700',
-      color: '#F4F2F8'
+      color: '#F2F1ED'
     }
   }, "Funzione peso suggerito")), /*#__PURE__*/React.createElement("div", {
     style: {
@@ -5744,7 +5745,7 @@ function GuideScreen(_ref28) {
     style: {
       fontSize: '13px',
       fontWeight: '700',
-      color: '#F4F2F8'
+      color: '#F2F1ED'
     }
   }, "Timer recupero persistente")), /*#__PURE__*/React.createElement("div", {
     style: {
@@ -5756,11 +5757,11 @@ function GuideScreen(_ref28) {
     style: {
       fontSize: '13px',
       fontWeight: '700',
-      color: '#F4F2F8',
+      color: '#F2F1ED',
       marginBottom: '10px',
       padding: '0 4px'
     }
-  }, "\uD83D\uDCDA Tecniche e badge"), techniques.map((t, i) => /*#__PURE__*/React.createElement("div", {
+  }, "Tecniche e badge"), techniques.map((t, i) => /*#__PURE__*/React.createElement("div", {
     key: i,
     style: {
       ...glassCard,
@@ -5780,7 +5781,7 @@ function GuideScreen(_ref28) {
     style: {
       fontSize: '14px',
       fontWeight: '700',
-      color: '#F4F2F8'
+      color: '#F2F1ED'
     }
   }, t.name)), /*#__PURE__*/React.createElement("div", {
     style: {
@@ -5792,11 +5793,11 @@ function GuideScreen(_ref28) {
   }, t.desc), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: '10px',
-      color: '#908AA0',
+      color: '#8A8A93',
       fontStyle: 'italic',
       background: 'rgba(255,255,255,0.04)',
       padding: '6px 10px',
-      borderRadius: '6px',
+      borderRadius: '3px',
       border: '1px solid rgba(255,255,255,0.06)'
     }
   }, /*#__PURE__*/React.createElement("strong", {
@@ -5824,7 +5825,7 @@ function GuideScreen(_ref28) {
     style: {
       fontSize: '13px',
       fontWeight: '700',
-      color: '#F4F2F8'
+      color: '#F2F1ED'
     }
   }, "Timing V8 (WO 17:00-18:15)")), [{
     time: '16:30',
@@ -5947,7 +5948,7 @@ function SettingsScreen(_ref29) {
     style: {
       padding: '10px 14px',
       marginBottom: '14px',
-      borderRadius: '10px',
+      borderRadius: '3px',
       background: msg.type === 'success' ? 'rgba(47, 164, 92, 0.2)' : 'rgba(210, 59, 46, 0.2)',
       border: `1px solid ${msg.type === 'success' ? '#3FB66C' : '#E0524A'}`,
       color: msg.type === 'success' ? '#3FB66C' : '#E0524A',
@@ -5964,13 +5965,13 @@ function SettingsScreen(_ref29) {
     style: {
       fontSize: '13px',
       fontWeight: '700',
-      color: '#F4F2F8',
+      color: '#F2F1ED',
       marginBottom: '8px'
     }
   }, "Backup dati"), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: '11px',
-      color: '#908AA0',
+      color: '#8A8A93',
       lineHeight: 1.5,
       marginBottom: '14px'
     }
@@ -5983,7 +5984,7 @@ function SettingsScreen(_ref29) {
       background: 'linear-gradient(135deg, #3FB66C 0%, #2E8F54 100%)',
       color: 'white',
       border: 'none',
-      borderRadius: '12px',
+      borderRadius: '3px',
       fontSize: '13px',
       fontWeight: '700',
       cursor: 'pointer',
@@ -6078,7 +6079,7 @@ function SettingsScreen(_ref29) {
       background: 'rgba(77,130,232,0.14)',
       border: '1px solid rgba(77,130,232,0.4)',
       color: '#4D82E8',
-      borderRadius: '11px',
+      borderRadius: '3px',
       fontSize: '11px',
       fontWeight: '700',
       cursor: 'pointer'
@@ -6091,7 +6092,7 @@ function SettingsScreen(_ref29) {
       background: 'rgba(77,130,232,0.14)',
       border: '1px solid rgba(77,130,232,0.4)',
       color: '#4D82E8',
-      borderRadius: '11px',
+      borderRadius: '3px',
       fontSize: '11px',
       fontWeight: '700',
       cursor: 'pointer'
@@ -6104,7 +6105,7 @@ function SettingsScreen(_ref29) {
       background: 'rgba(77,130,232,0.14)',
       border: '1px solid rgba(77,130,232,0.4)',
       color: '#4D82E8',
-      borderRadius: '11px',
+      borderRadius: '3px',
       fontSize: '11px',
       fontWeight: '700',
       cursor: 'pointer'
@@ -6128,7 +6129,7 @@ function SettingsScreen(_ref29) {
       background: 'linear-gradient(135deg, #4D82E8 0%, #1e88e5 100%)',
       color: 'white',
       border: 'none',
-      borderRadius: '12px',
+      borderRadius: '3px',
       fontSize: '13px',
       fontWeight: '700',
       cursor: 'pointer',
@@ -6156,7 +6157,7 @@ function SettingsScreen(_ref29) {
   }, "Zona pericolo"), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: '11px',
-      color: '#908AA0',
+      color: '#8A8A93',
       lineHeight: 1.5,
       marginBottom: '14px'
     }
@@ -6168,7 +6169,7 @@ function SettingsScreen(_ref29) {
       background: 'rgba(210, 59, 46, 0.2)',
       color: '#E0524A',
       border: '1px solid rgba(210, 59, 46, 0.5)',
-      borderRadius: '12px',
+      borderRadius: '3px',
       fontSize: '13px',
       fontWeight: '700',
       cursor: 'pointer'
@@ -6182,18 +6183,18 @@ function SettingsScreen(_ref29) {
     style: {
       fontSize: '13px',
       fontWeight: '700',
-      color: '#F4F2F8',
+      color: '#F2F1ED',
       marginBottom: '8px'
     }
   }, "Info app"), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: '11px',
-      color: '#908AA0',
+      color: '#8A8A93',
       lineHeight: 1.6
     }
   }, /*#__PURE__*/React.createElement("strong", {
     style: {
-      color: '#F4F2F8'
+      color: '#F2F1ED'
     }
   }, "V8 Tracker ", APP_VERSION, " \xB7 Protocollo V8.3.4"), /*#__PURE__*/React.createElement("br", null), "Programma: V8 Block Cutting \xB7 8 Settimane \xB7 92kg (progressione a singola variabile)", /*#__PURE__*/React.createElement("br", null), "Storage: localStorage del browser", /*#__PURE__*/React.createElement("br", null), "Funziona offline dopo la prima apertura", /*#__PURE__*/React.createElement("br", null), "Immagini esercizi: Wikimedia Commons (con fallback SVG)"))));
 }
@@ -18013,7 +18014,7 @@ function InfoBox(_ref32) {
     style: {
       background: `${color}14`,
       border: `1px solid ${color}40`,
-      borderRadius: '12px',
+      borderRadius: '3px',
       padding: '12px',
       marginBottom: '12px'
     }
@@ -18027,7 +18028,7 @@ function InfoBox(_ref32) {
   }, title), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: '11px',
-      color: '#C7C2D0',
+      color: '#C0BEC6',
       lineHeight: 1.55
     }
   }, children));
@@ -18068,7 +18069,7 @@ function SummerScreen(_ref33) {
       background: 'linear-gradient(135deg, #E8B43C 0%, #9A6A1E 100%)',
       color: 'white',
       border: 'none',
-      borderRadius: '16px',
+      borderRadius: '3px',
       fontSize: '15px',
       fontWeight: '700',
       cursor: 'pointer',
@@ -18083,25 +18084,25 @@ function SummerScreen(_ref33) {
   }), " Apri allenamento (tracking interattivo)"), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: '10px',
-      color: '#908AA0',
+      color: '#8A8A93',
       textAlign: 'center',
       marginTop: '-8px',
       marginBottom: '14px'
     }
   }, "Stessa scheda interattiva delle normali: selezioni settimana e giorno, registri kg/reps/RIR, timer di recupero, salvataggio automatico."), /*#__PURE__*/React.createElement(InfoBox, {
     color: "#E8B43C",
-    title: "\u2600 A cosa serve"
+    title: "A cosa serve"
   }, "Tre settimane in viaggio con solo ", /*#__PURE__*/React.createElement("b", {
     style: {
-      color: '#F4F2F8'
+      color: '#F2F1ED'
     }
   }, "manubri regolabili + panca"), ". Obiettivo: ", /*#__PURE__*/React.createElement("b", {
     style: {
-      color: '#F4F2F8'
+      color: '#F2F1ED'
     }
   }, "mantenere la massa"), " (basta poco volume) e restare asciutto senza stress. Coincide con le ", /*#__PURE__*/React.createElement("b", {
     style: {
-      color: '#F4F2F8'
+      color: '#F2F1ED'
     }
   }, "2 settimane OFF stimolanti"), ": lasci a casa tutto il termogenico."), /*#__PURE__*/React.createElement("div", {
     style: {
@@ -18113,7 +18114,7 @@ function SummerScreen(_ref33) {
   }, /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: '10px',
-      color: '#908AA0',
+      color: '#8A8A93',
       textTransform: 'uppercase',
       letterSpacing: '0.6px',
       marginBottom: '6px'
@@ -18121,13 +18122,13 @@ function SummerScreen(_ref33) {
   }, "Split \xB7 Upper/Lower 4 giorni"), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: '11px',
-      color: '#F4F2F8',
+      color: '#F2F1ED',
       fontWeight: '600'
     }
   }, "LUN Upper \xB7 MAR Lower \xB7 MER rest \xB7 GIO Upper \xB7 VEN Lower"), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: '9.5px',
-      color: '#908AA0',
+      color: '#8A8A93',
       marginTop: '4px'
     }
   }, "Ogni gruppo 2\xD7 a settimana \xB7 ~45 min a seduta \xB7 3 settimane")), /*#__PURE__*/React.createElement("div", {
@@ -18143,15 +18144,15 @@ function SummerScreen(_ref33) {
       color: '#E8B43C',
       marginBottom: '8px'
     }
-  }, "\uD83C\uDF7D Dieta veloce (2 opzioni)"), /*#__PURE__*/React.createElement("div", {
+  }, "Dieta veloce (2 opzioni)"), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: '11px',
-      color: '#C7C2D0',
+      color: '#C0BEC6',
       lineHeight: 1.6
     }
   }, /*#__PURE__*/React.createElement("b", {
     style: {
-      color: '#D9CFE8'
+      color: '#C0BEC6'
     }
   }, "A \xB7 Mantenimento (consigliata):"), " ~2.250 kcal \xB7 200g P \xB7 210g C \xB7 60g F. Tieni il peso, recuperi leptina/T3, arrivi a ~90 e chiudi il cut a casa.", /*#__PURE__*/React.createElement("br", null), /*#__PURE__*/React.createElement("b", {
     style: {
@@ -18159,18 +18160,18 @@ function SummerScreen(_ref33) {
     }
   }, "B \xB7 Cut leggero:"), " ~1.950 kcal \xB7 200g P \xB7 150g C \xB7 55g F. Perdita ~0,4-0,6 kg/sett.", /*#__PURE__*/React.createElement("br", null), /*#__PURE__*/React.createElement("span", {
     style: {
-      color: '#908AA0'
+      color: '#8A8A93'
     }
   }, "Proteine ", /*#__PURE__*/React.createElement("b", {
     style: {
-      color: '#F4F2F8'
+      color: '#F2F1ED'
     }
   }, "200g"), " in entrambe. IF 16:8 rilassabile in viaggio: conta il totale, non la finestra. Dettagli pasti e opzioni veloci nella sezione Alimentazione."))), /*#__PURE__*/React.createElement(InfoBox, {
     color: "#E0524A",
     title: "\u26A0 Coi soli manubri: arti inferiori"
   }, "Carico limitato sulle gambe \u2192 ", /*#__PURE__*/React.createElement("b", {
     style: {
-      color: '#F4F2F8'
+      color: '#F2F1ED'
     }
   }, "pi\xF9 ripetizioni, pi\xF9 vicino al cedimento (RIR 0-1), eccentrica lenta"), ". Con carichi leggeri serve avvicinarsi al cedimento per reclutare le fibre veloci. Affondi bulgari e Nordic restano i due esercizi pi\xF9 preziosi."), /*#__PURE__*/React.createElement("div", {
     style: {
@@ -18185,10 +18186,10 @@ function SummerScreen(_ref33) {
       color: '#3FB66C',
       marginBottom: '8px'
     }
-  }, "\uD83D\uDC8A Integratori in valigia (minimal)"), /*#__PURE__*/React.createElement("div", {
+  }, "Integratori in valigia (minimal)"), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: '11px',
-      color: '#C7C2D0',
+      color: '#C0BEC6',
       lineHeight: 1.6
     }
   }, /*#__PURE__*/React.createElement("b", {
@@ -18201,34 +18202,34 @@ function SummerScreen(_ref33) {
     }
   }, "\u2717 Lascia a casa:"), " Baldini, Sinefrina, Forskolina, R-ALA, EGCG, Tirosina, Ghost Pump. Sono il ciclo OFF. Caffeina: solo il caff\xE8.")), /*#__PURE__*/React.createElement(InfoBox, {
     color: "#78909c",
-    title: "\uD83C\uDFD6 Tips estate"
+    title: "Tips estate"
   }, /*#__PURE__*/React.createElement("b", {
     style: {
-      color: '#F4F2F8'
+      color: '#F2F1ED'
     }
   }, "NEAT alto"), " (cammini/nuoti) = grasso facile senza recupero, punta a 10-12k passi. ", /*#__PURE__*/React.createElement("b", {
     style: {
-      color: '#F4F2F8'
+      color: '#F2F1ED'
     }
   }, "Bastano 2 sedute/sett"), " per mantenere se salti giorni. ", /*#__PURE__*/React.createElement("b", {
     style: {
-      color: '#F4F2F8'
+      color: '#F2F1ED'
     }
   }, "Non fidarti della bilancia"), " in viaggio (sale, acqua, caldo): pesati a casa. Idratati e aggiungi sale col caldo."), /*#__PURE__*/React.createElement(InfoBox, {
     color: "#3FB66C",
-    title: "\uD83D\uDD04 Al ritorno"
+    title: "Al ritorno"
   }, "Riprendi la scheda V8.3.4 dal blocco 1 ", /*#__PURE__*/React.createElement("b", {
     style: {
-      color: '#F4F2F8'
+      color: '#F2F1ED'
     }
   }, "ricalibrando i carichi base"), " (1-2 sedute e torni ai livelli). Reintroduci gli stimolanti gradualmente: la pausa li avr\xE0 resi di nuovo efficaci. La massa ", /*#__PURE__*/React.createElement("b", {
     style: {
-      color: '#F4F2F8'
+      color: '#F2F1ED'
     }
   }, "non si perde"), " in 3 settimane di allenamento leggero + proteine alte."), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: '9px',
-      color: '#5A5468',
+      color: '#55555E',
       textAlign: 'center',
       marginTop: '8px',
       lineHeight: 1.6
@@ -18254,7 +18255,7 @@ const DIET_TIMELINE = [{
   veloce: '2 scatolette tonno naturale Rio Mare + busta insalata pronta + 25g mandorle + 10g EVO · oppure petto pollo Amadori già cotto + zuppa verdure + 25g noci.'
 }, {
   time: '15:45',
-  phase: 'PRE-WO ★',
+  phase: 'PRE-WO',
   color: '#E8B43C',
   food: '1 banana + 15g miele (CHO pre-WO). Compensati con -40g riso a cena.',
   macro: 'P1 C40 F0 · 165',
@@ -18364,7 +18365,7 @@ const SUPP_STACK = [{
   n: 'DFH Multi',
   d: '2cap pranzo',
   e: 'Micronutrienti',
-  t: '#908AA0'
+  t: '#8A8A93'
 }];
 function NutritionScreen(_ref34) {
   let goBack = _ref34.goBack;
@@ -18408,13 +18409,13 @@ function NutritionScreen(_ref34) {
     onClick: () => setTab(t.id),
     style: {
       padding: '10px 0',
-      borderRadius: '12px',
+      borderRadius: '3px',
       cursor: 'pointer',
       fontWeight: '700',
       fontSize: '12px',
       background: tab === t.id ? 'linear-gradient(135deg, #E0524A 0%, #E0524Acc 100%)' : 'rgba(255,255,255,0.05)',
-      color: tab === t.id ? '#fff' : '#908AA0',
-      border: tab === t.id ? '1px solid #E0524A' : '1px solid rgba(255,255,255,0.08)'
+      color: tab === t.id ? '#fff' : '#8A8A93',
+      border: tab === t.id ? '1px solid #E0524A' : '1px solid #2A2A31'
     }
   }, t.label))), tab === 'dieta' && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
     style: {
@@ -18438,7 +18439,7 @@ function NutritionScreen(_ref34) {
     }, /*#__PURE__*/React.createElement("div", {
       style: {
         fontSize: '8px',
-        color: '#908AA0',
+        color: '#8A8A93',
         letterSpacing: '0.5px'
       }
     }, l), /*#__PURE__*/React.createElement("div", {
@@ -18480,7 +18481,7 @@ function NutritionScreen(_ref34) {
       color: m.color,
       background: `${m.color}22`,
       padding: '2px 8px',
-      borderRadius: '6px'
+      borderRadius: '3px'
     }
   }, m.phase)), /*#__PURE__*/React.createElement("div", {
     style: {
@@ -18491,7 +18492,7 @@ function NutritionScreen(_ref34) {
   }, m.food), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: '9px',
-      color: '#908AA0',
+      color: '#8A8A93',
       marginTop: '3px'
     }
   }, m.macro), m.veloce && /*#__PURE__*/React.createElement("div", {
@@ -18500,7 +18501,7 @@ function NutritionScreen(_ref34) {
       padding: '7px 9px',
       background: 'rgba(245,158,11,0.1)',
       border: '1px solid rgba(245,158,11,0.25)',
-      borderRadius: '8px'
+      borderRadius: '3px'
     }
   }, /*#__PURE__*/React.createElement("span", {
     style: {
@@ -18510,10 +18511,10 @@ function NutritionScreen(_ref34) {
       textTransform: 'uppercase',
       letterSpacing: '0.4px'
     }
-  }, "\u26A1 Veloce / pronto"), /*#__PURE__*/React.createElement("div", {
+  }, "Veloce / pronto"), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: '9.5px',
-      color: '#C7C2D0',
+      color: '#C0BEC6',
       lineHeight: 1.45,
       marginTop: '2px'
     }
@@ -18531,7 +18532,7 @@ function NutritionScreen(_ref34) {
       color: '#E8B43C',
       marginBottom: '8px'
     }
-  }, "\u26A1 Spuntini veloci (opzionali)"), QUICK_SNACKS.map((q, i) => /*#__PURE__*/React.createElement("div", {
+  }, "Spuntini veloci (opzionali)"), QUICK_SNACKS.map((q, i) => /*#__PURE__*/React.createElement("div", {
     key: i,
     style: {
       padding: '7px 0',
@@ -18547,17 +18548,17 @@ function NutritionScreen(_ref34) {
     style: {
       fontSize: '11px',
       fontWeight: '600',
-      color: '#F4F2F8'
+      color: '#F2F1ED'
     }
   }, q.n), /*#__PURE__*/React.createElement("span", {
     style: {
       fontSize: '8.5px',
-      color: '#908AA0'
+      color: '#8A8A93'
     }
   }, q.m)), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: '9.5px',
-      color: '#908AA0',
+      color: '#8A8A93',
       marginTop: '1px'
     }
   }, q.d)))), /*#__PURE__*/React.createElement("div", {
@@ -18573,10 +18574,10 @@ function NutritionScreen(_ref34) {
       color: '#3FB66C',
       marginBottom: '4px'
     }
-  }, "\uD83D\uDED2 Brand testati in Italia"), /*#__PURE__*/React.createElement("div", {
+  }, "Brand testati in Italia"), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: '9.5px',
-      color: '#908AA0',
+      color: '#8A8A93',
       lineHeight: 1.5
     }
   }, "Amadori Le Vie del Pollo \xB7 Rio Mare tonno naturale \xB7 Fage 0% \xB7 Galbusera cracker integrali \xB7 Rizopia/Riso Scotti pronto \xB7 Findus surgelati grigliati \xB7 Foppen salmone \xB7 Bresaola pre-affettata. Reperibili in Conad, Coop, Esselunga.")), /*#__PURE__*/React.createElement(InfoBox, {
@@ -18584,11 +18585,11 @@ function NutritionScreen(_ref34) {
     title: "Proteine \u2014 confermate dalla scienza 2025"
   }, "Helms 2025: la ritenzione di massa magra \xE8 massima a 2,3-3,1 g/kg di ", /*#__PURE__*/React.createElement("b", {
     style: {
-      color: '#F4F2F8'
+      color: '#F2F1ED'
     }
   }, "massa magra"), " (~78kg FFM \u2192 180-240g). I tuoi 200g sono perfetti. ", /*#__PURE__*/React.createElement("b", {
     style: {
-      color: '#F4F2F8'
+      color: '#F2F1ED'
     }
   }, "Mai sotto 200g"), ", nemmeno nei refeed.")), tab === 'stack' && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement(InfoBox, {
     color: "#E0524A",
@@ -18627,7 +18628,7 @@ function NutritionScreen(_ref34) {
     style: {
       fontSize: '12px',
       fontWeight: '700',
-      color: '#F4F2F8'
+      color: '#F2F1ED'
     }
   }, s.n), /*#__PURE__*/React.createElement("span", {
     style: {
@@ -18638,12 +18639,12 @@ function NutritionScreen(_ref34) {
   }, s.d)), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: '9.5px',
-      color: '#908AA0',
+      color: '#8A8A93',
       marginTop: '2px'
     }
   }, s.e))), /*#__PURE__*/React.createElement(InfoBox, {
     color: "#E0524A",
-    title: "\u2605 Ciclo ON/OFF \u2014 non negoziabile"
+    title: "Ciclo ON/OFF \u2014 non negoziabile"
   }, "Ogni 8-12 settimane fai 2 settimane OFF: salta Baldini, Sinefrina, Forskolina, R-ALA, EGCG, Tirosina. Mantieni creatina, HMB, multi, Omega-3, whey, citrullina, Mg, glicina. Ripristina la sensibilit\xE0 \u03B2-adrenergica.")), tab === 'refeed' && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
     style: {
       display: 'grid',
@@ -18666,7 +18667,7 @@ function NutritionScreen(_ref34) {
     }, /*#__PURE__*/React.createElement("div", {
       style: {
         fontSize: '8px',
-        color: '#908AA0',
+        color: '#8A8A93',
         letterSpacing: '0.5px'
       }
     }, l), /*#__PURE__*/React.createElement("div", {
@@ -18681,17 +18682,17 @@ function NutritionScreen(_ref34) {
     color: "#E0524A",
     title: "Quando \u2014 ogni 10-12 giorni (gioved\xEC gambe)"
   }, "A 92kg stringi da 14 a 10-12 giorni. Ripristina leptina (12-24h) e T3 (24-48h). Salta gli stimolanti (sei anabolic, non lipolitico). Mantieni creatina, HMB, whey+carnitina post-WO, Mg+glicina."), [{
-    n: '🍕 PIZZA (consigliata)',
+    n: 'PIZZA · consigliata',
     r: 'CHO/F 4,3',
     d: '2 pizze margherita a cena (~1.500 kcal) + giornata CHO puliti. Migliore equilibrio.',
     c: '#E8B43C'
   }, {
-    n: '🍣 SUSHI AYCE',
+    n: 'SUSHI a volontà',
     r: 'CHO/F 12',
     d: '20-25 nigiri + 12 hosomaki + 15 sashimi + edamame. Miglior profilo, +sodio (+1,5kg acqua).',
     c: '#4D82E8'
   }, {
-    n: '🍔 BURGER KING',
+    n: 'BURGER',
     r: 'CHO/F 2,4',
     d: 'Whopper + Long Chicken (no maio) + patatine medie + Coca regolare. Resto giornata zero-fat.',
     c: '#E0524A'
@@ -18714,7 +18715,7 @@ function NutritionScreen(_ref34) {
     style: {
       fontSize: '12px',
       fontWeight: '700',
-      color: '#F4F2F8'
+      color: '#F2F1ED'
     }
   }, o.n), /*#__PURE__*/React.createElement("span", {
     style: {
@@ -18725,7 +18726,7 @@ function NutritionScreen(_ref34) {
   }, o.r)), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: '10px',
-      color: '#C7C2D0',
+      color: '#C0BEC6',
       lineHeight: 1.5
     }
   }, o.d))), /*#__PURE__*/React.createElement(InfoBox, {
@@ -18733,11 +18734,11 @@ function NutritionScreen(_ref34) {
     title: "La mattina dopo"
   }, /*#__PURE__*/React.createElement("b", {
     style: {
-      color: '#F4F2F8'
+      color: '#F2F1ED'
     }
   }, "+1,5/2,5 kg"), " = acqua + glicogeno, NON grasso. Whoosh effect: peso reale scende in 3-5 giorni. ", /*#__PURE__*/React.createElement("b", {
     style: {
-      color: '#F4F2F8'
+      color: '#F2F1ED'
     }
   }, "Pesati il marted\xEC."), " Aspettati +1-2 rep nelle prime sedute = ha funzionato."), /*#__PURE__*/React.createElement(InfoBox, {
     color: "#E0524A",
@@ -18745,7 +18746,7 @@ function NutritionScreen(_ref34) {
   }, "1\xB7 Mai pi\xF9 di 1 refeed/sett. 2\xB7 Proteine mai sotto 200g. 3\xB7 Solo con training pesante. 4\xB7 Zero alcol (-30% MPS). 5\xB7 Se +3kg il giorno dopo = troppo sodio/porzioni.")), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: '9px',
-      color: '#5A5468',
+      color: '#55555E',
       textAlign: 'center',
       marginTop: '8px',
       lineHeight: 1.6
@@ -18806,7 +18807,7 @@ function Summer2Screen(_ref39) {
     goBack: () => setMode('info'),
     config: SUMMER2_CONFIG
   });
-  const cols = [['LUN', 'Push', '#3b82f6'], ['MAR', 'Pull', '#8b5cf6'], ['MER', 'riposo', '#5A5468'], ['GIO', 'Gambe', '#f59e0b'], ['VEN', 'Upper', '#14b8a6'], ['SAB', '—', '#5A5468'], ['DOM', '—', '#5A5468']];
+  const cols = [['LUN', 'Push', '#3b82f6'], ['MAR', 'Pull', '#8b5cf6'], ['MER', 'riposo', '#55555E'], ['GIO', 'Gambe', '#f59e0b'], ['VEN', 'Upper', '#14b8a6'], ['SAB', '—', '#55555E'], ['DOM', '—', '#55555E']];
   return /*#__PURE__*/React.createElement("div", {
     style: {
       minHeight: '100vh',
@@ -18830,7 +18831,7 @@ function Summer2Screen(_ref39) {
       background: 'linear-gradient(135deg, #14b8a6 0%, #0f766e 100%)',
       color: 'white',
       border: 'none',
-      borderRadius: '16px',
+      borderRadius: '3px',
       fontSize: '15px',
       fontWeight: '700',
       cursor: 'pointer',
@@ -18858,14 +18859,14 @@ function Summer2Screen(_ref39) {
       style: {
         ...glassCard,
         flex: 1,
-        borderRadius: '12px',
+        borderRadius: '3px',
         padding: '8px 2px',
         textAlign: 'center'
       }
     }, /*#__PURE__*/React.createElement("div", {
       style: {
         fontSize: '8px',
-        color: '#908AA0',
+        color: '#8A8A93',
         fontWeight: '700',
         letterSpacing: '0.3px'
       }
@@ -18882,40 +18883,40 @@ function Summer2Screen(_ref39) {
     title: "Come funziona"
   }, "4 giorni bilanciati: ", /*#__PURE__*/React.createElement("b", {
     style: {
-      color: '#F4F2F8'
+      color: '#F2F1ED'
     }
   }, "Push \xB7 Pull \xB7 Gambe \xB7 Upper"), ". Ogni muscolo dell'alto lavora ", /*#__PURE__*/React.createElement("b", {
     style: {
-      color: '#F4F2F8'
+      color: '#F2F1ED'
     }
   }, "2\xD7/sett"), ", le gambe ", /*#__PURE__*/React.createElement("b", {
     style: {
-      color: '#F4F2F8'
+      color: '#F2F1ED'
     }
   }, "1\xD7"), " ad alto volume. ~45 min a seduta, 3 settimane con accumulo rep progressivo."), /*#__PURE__*/React.createElement(InfoBox, {
     color: "#ef5350",
     title: "Coi soli manubri"
   }, "Carico limitato \u2192 ", /*#__PURE__*/React.createElement("b", {
     style: {
-      color: '#F4F2F8'
+      color: '#F2F1ED'
     }
   }, "avvicinati al cedimento (RIR 0-2), eccentrica lenta 2-3s, ROM completo"), ". Affondi bulgari e Nordic curl restano i due esercizi pi\xF9 preziosi per le gambe."), /*#__PURE__*/React.createElement(InfoBox, {
     color: "#78909c",
     title: "Riposo & viaggio"
   }, /*#__PURE__*/React.createElement("b", {
     style: {
-      color: '#F4F2F8'
+      color: '#F2F1ED'
     }
   }, "3 giorni off"), " (MER/SAB/DOM). NEAT alto (10-12k passi) per il grasso. Se salti giorni bastano ", /*#__PURE__*/React.createElement("b", {
     style: {
-      color: '#F4F2F8'
+      color: '#F2F1ED'
     }
   }, "2 sedute/sett"), " per mantenere: non perdi massa in 2-3 settimane di lavoro leggero + proteine alte."), /*#__PURE__*/React.createElement(InfoBox, {
     color: "#3FB66C",
     title: "Al ritorno"
   }, "Riprendi la ", /*#__PURE__*/React.createElement("b", {
     style: {
-      color: '#F4F2F8'
+      color: '#F2F1ED'
     }
   }, "V8.3.4"), " dal blocco 1 ricalibrando i carichi base (1-2 sedute e torni ai livelli).")));
 }
@@ -19031,7 +19032,7 @@ function LibraryScreenLegacy(_ref42) {
       background: panel ? 'rgba(168,85,247,0.15)' : 'linear-gradient(135deg, #A855F7 0%, #7C3AED 100%)',
       color: panel ? '#A855F7' : 'white',
       border: panel ? '1px solid rgba(168,85,247,0.4)' : 'none',
-      borderRadius: '16px',
+      borderRadius: '3px',
       fontSize: '14px',
       fontWeight: '700',
       cursor: 'pointer',
@@ -19067,7 +19068,7 @@ function LibraryScreenLegacy(_ref42) {
       background: 'rgba(77,130,232,0.15)',
       border: '1px solid rgba(77,130,232,0.4)',
       color: '#4D82E8',
-      borderRadius: '12px',
+      borderRadius: '3px',
       fontSize: '13px',
       fontWeight: '700',
       cursor: 'pointer',
@@ -19081,7 +19082,7 @@ function LibraryScreenLegacy(_ref42) {
   }), " Carica file .v8w / .json"), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: '10px',
-      color: '#908AA0',
+      color: '#8A8A93',
       textAlign: 'center',
       margin: '2px 0 10px'
     }
@@ -19095,9 +19096,9 @@ function LibraryScreenLegacy(_ref42) {
       minHeight: '110px',
       fontFamily: 'monospace',
       fontSize: '11px',
-      color: '#F4F2F8',
+      color: '#F2F1ED',
       padding: '10px',
-      borderRadius: '10px',
+      borderRadius: '3px',
       resize: 'vertical',
       boxSizing: 'border-box'
     }
@@ -19109,9 +19110,9 @@ function LibraryScreenLegacy(_ref42) {
       marginTop: '10px',
       padding: '12px',
       background: paste.trim() ? 'linear-gradient(135deg, #3FB66C 0%, #2E8B57 100%)' : 'rgba(255,255,255,0.06)',
-      color: paste.trim() ? 'white' : '#5A5468',
+      color: paste.trim() ? 'white' : '#55555E',
       border: 'none',
-      borderRadius: '12px',
+      borderRadius: '3px',
       fontSize: '13px',
       fontWeight: '700',
       cursor: paste.trim() ? 'pointer' : 'default',
@@ -19126,7 +19127,7 @@ function LibraryScreenLegacy(_ref42) {
     style: {
       background: msg.ok ? 'rgba(63,182,108,0.14)' : 'rgba(224,82,74,0.14)',
       border: '1px solid ' + (msg.ok ? 'rgba(63,182,108,0.4)' : 'rgba(224,82,74,0.4)'),
-      borderRadius: '12px',
+      borderRadius: '3px',
       padding: '11px 13px',
       marginBottom: '14px',
       fontSize: '12px',
@@ -19142,18 +19143,18 @@ function LibraryScreenLegacy(_ref42) {
     }
   }, /*#__PURE__*/React.createElement(Layers, {
     size: 30,
-    color: "#5A5468"
+    color: "#55555E"
   }), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: '13px',
-      color: '#C7C2D0',
+      color: '#C0BEC6',
       fontWeight: '600',
       marginTop: '10px'
     }
   }, "Nessuna scheda importata"), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: '11px',
-      color: '#908AA0',
+      color: '#8A8A93',
       marginTop: '6px',
       lineHeight: 1.5
     }
@@ -19180,7 +19181,7 @@ function LibraryScreenLegacy(_ref42) {
         border: '1px solid ' + col + '44',
         width: '40px',
         height: '40px',
-        borderRadius: '12px',
+        borderRadius: '3px',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -19205,7 +19206,7 @@ function LibraryScreenLegacy(_ref42) {
         fontFamily: displayFont,
         fontSize: '14px',
         fontWeight: '700',
-        color: '#F4F2F8',
+        color: '#F2F1ED',
         lineHeight: 1.2,
         flex: 1
       }
@@ -19218,7 +19219,7 @@ function LibraryScreenLegacy(_ref42) {
     }, "attiva")), /*#__PURE__*/React.createElement("div", {
       style: {
         fontSize: '10px',
-        color: '#908AA0',
+        color: '#8A8A93',
         marginTop: '3px'
       }
     }, s.subtitle ? s.subtitle + ' · ' : '', nGiorni, " giorni")), /*#__PURE__*/React.createElement("button", {
@@ -19226,7 +19227,7 @@ function LibraryScreenLegacy(_ref42) {
       style: {
         background: 'rgba(224,82,74,0.12)',
         border: '1px solid rgba(224,82,74,0.3)',
-        borderRadius: '10px',
+        borderRadius: '3px',
         width: '34px',
         height: '34px',
         display: 'flex',
@@ -19247,7 +19248,7 @@ function LibraryScreenLegacy(_ref42) {
         background: 'linear-gradient(135deg, ' + col + ' 0%, ' + col + 'cc 100%)',
         color: 'white',
         border: 'none',
-        borderRadius: '11px',
+        borderRadius: '3px',
         fontSize: '13px',
         fontWeight: '700',
         cursor: 'pointer',
@@ -19262,7 +19263,7 @@ function LibraryScreenLegacy(_ref42) {
   }), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: '10px',
-      color: '#5A5468',
+      color: '#55555E',
       textAlign: 'center',
       marginTop: '18px',
       lineHeight: 1.6
@@ -20005,7 +20006,7 @@ function Fld(_ref43) {
   }, label && /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: '8.5px',
-      color: '#908AA0',
+      color: '#8A8A93',
       fontWeight: '700',
       letterSpacing: '0.4px',
       marginBottom: '3px',
@@ -20040,7 +20041,7 @@ function BtnRow(_ref44) {
 function MiniBtn(_ref45) {
   let onClick = _ref45.onClick,
     _ref45$color = _ref45.color,
-    color = _ref45$color === void 0 ? '#908AA0' : _ref45$color,
+    color = _ref45$color === void 0 ? '#8A8A93' : _ref45$color,
     children = _ref45.children,
     title = _ref45.title;
   return /*#__PURE__*/React.createElement("button", {
@@ -20049,7 +20050,7 @@ function MiniBtn(_ref45) {
     style: {
       background: color + '18',
       border: '1px solid ' + color + '44',
-      borderRadius: '9px',
+      borderRadius: '3px',
       width: '30px',
       height: '30px',
       display: 'flex',
@@ -20075,7 +20076,7 @@ function BigBtn(_ref46) {
     style: {
       width: '100%',
       padding: '13px',
-      borderRadius: '14px',
+      borderRadius: '3px',
       fontSize: '13.5px',
       fontWeight: '700',
       cursor: disabled ? 'default' : 'pointer',
@@ -20084,7 +20085,7 @@ function BigBtn(_ref46) {
       justifyContent: 'center',
       gap: '8px',
       background: disabled ? 'rgba(255,255,255,0.06)' : ghost ? color + '1f' : 'linear-gradient(135deg, ' + color + ' 0%, ' + color + 'cc 100%)',
-      color: disabled ? '#5A5468' : ghost ? color : 'white',
+      color: disabled ? '#55555E' : ghost ? color : 'white',
       border: ghost ? '1px solid ' + color + '55' : 'none'
     }
   }, icon, children);
@@ -20113,7 +20114,7 @@ function Modal(_ref47) {
       display: 'flex',
       alignItems: 'center',
       gap: '10px',
-      borderBottom: '1px solid rgba(255,255,255,0.1)',
+      borderBottom: '1px solid #2A2A31',
       flexShrink: 0
     }
   }, /*#__PURE__*/React.createElement("div", {
@@ -20126,21 +20127,21 @@ function Modal(_ref47) {
       fontFamily: displayFont,
       fontSize: '17px',
       fontWeight: '700',
-      color: '#F4F2F8'
+      color: '#F2F1ED'
     }
   }, title), subtitle && /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: '10.5px',
-      color: '#908AA0',
+      color: '#8A8A93',
       marginTop: '2px'
     }
   }, subtitle)), /*#__PURE__*/React.createElement("button", {
     onClick: onClose,
     style: {
       background: 'rgba(255,255,255,0.07)',
-      border: '1px solid rgba(255,255,255,0.14)',
-      color: '#F4F2F8',
-      borderRadius: '10px',
+      border: '1px solid #2A2A31',
+      color: '#F2F1ED',
+      borderRadius: '3px',
       width: '34px',
       height: '34px',
       display: 'flex',
@@ -20186,18 +20187,18 @@ function MacroBar(_ref48) {
     style: {
       fontSize: '9.5px',
       fontWeight: '700',
-      color: '#908AA0',
+      color: '#8A8A93',
       letterSpacing: '0.4px'
     }
   }, label), /*#__PURE__*/React.createElement("span", {
     style: {
       fontSize: '11px',
       fontWeight: '700',
-      color: '#F4F2F8'
+      color: '#F2F1ED'
     }
   }, r0(value), t > 0 && /*#__PURE__*/React.createElement("span", {
     style: {
-      color: '#5A5468',
+      color: '#55555E',
       fontWeight: '600'
     }
   }, " / ", r0(t)), delta != null && /*#__PURE__*/React.createElement("span", {
@@ -20295,7 +20296,7 @@ function ExercisePicker(_ref49) {
     }
   }, /*#__PURE__*/React.createElement(Search, {
     size: 16,
-    color: "#5A5468"
+    color: "#55555E"
   })))), /*#__PURE__*/React.createElement("div", {
     style: {
       display: 'flex',
@@ -20309,13 +20310,13 @@ function ExercisePicker(_ref49) {
     style: {
       flexShrink: 0,
       padding: '6px 11px',
-      borderRadius: '20px',
+      borderRadius: '3px',
       fontSize: '10.5px',
       fontWeight: '700',
       cursor: 'pointer',
       background: !tag ? VIOLET : 'rgba(255,255,255,0.06)',
-      color: !tag ? '#fff' : '#908AA0',
-      border: '1px solid ' + (!tag ? VIOLET : 'rgba(255,255,255,0.1)')
+      color: !tag ? '#fff' : '#8A8A93',
+      border: '1px solid ' + (!tag ? VIOLET : '#2A2A31')
     }
   }, "Tutti"), tags.map(t => /*#__PURE__*/React.createElement("button", {
     key: t,
@@ -20323,13 +20324,13 @@ function ExercisePicker(_ref49) {
     style: {
       flexShrink: 0,
       padding: '6px 11px',
-      borderRadius: '20px',
+      borderRadius: '3px',
       fontSize: '10.5px',
       fontWeight: '700',
       cursor: 'pointer',
       background: tag === t ? VIOLET : 'rgba(255,255,255,0.06)',
-      color: tag === t ? '#fff' : '#908AA0',
-      border: '1px solid ' + (tag === t ? VIOLET : 'rgba(255,255,255,0.1)')
+      color: tag === t ? '#fff' : '#8A8A93',
+      border: '1px solid ' + (tag === t ? VIOLET : '#2A2A31')
     }
   }, t))), /*#__PURE__*/React.createElement("button", {
     onClick: addCustom,
@@ -20340,7 +20341,7 @@ function ExercisePicker(_ref49) {
       background: 'rgba(63,182,108,0.14)',
       border: '1px dashed rgba(63,182,108,0.5)',
       color: '#3FB66C',
-      borderRadius: '12px',
+      borderRadius: '3px',
       fontSize: '12.5px',
       fontWeight: '700',
       cursor: 'pointer',
@@ -20366,7 +20367,7 @@ function ExercisePicker(_ref49) {
       width: '100%',
       textAlign: 'left',
       ...glassCard,
-      borderRadius: '13px',
+      borderRadius: '3px',
       padding: '11px 12px',
       marginBottom: '7px',
       cursor: 'pointer',
@@ -20376,19 +20377,19 @@ function ExercisePicker(_ref49) {
     style: {
       fontSize: '13px',
       fontWeight: '700',
-      color: '#F4F2F8',
+      color: '#F2F1ED',
       lineHeight: 1.25
     }
   }, e.name), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: '9.5px',
-      color: '#908AA0',
+      color: '#8A8A93',
       marginTop: '3px'
     }
   }, (e.tags || []).join(' · '), e.tags && e.tags.length ? ' — ' : '', e.sets, "\xD7", e.reps, " \xB7 RIR ", e.rir))), list.length === 0 && /*#__PURE__*/React.createElement("div", {
     style: {
       textAlign: 'center',
-      color: '#5A5468',
+      color: '#55555E',
       fontSize: '12px',
       padding: '18px 0'
     }
@@ -20450,7 +20451,7 @@ function FoodPicker(_ref50) {
     }
   }, /*#__PURE__*/React.createElement(Search, {
     size: 16,
-    color: "#5A5468"
+    color: "#55555E"
   }))), /*#__PURE__*/React.createElement("div", {
     style: {
       display: 'flex',
@@ -20463,13 +20464,13 @@ function FoodPicker(_ref50) {
     style: {
       flexShrink: 0,
       padding: '6px 11px',
-      borderRadius: '20px',
+      borderRadius: '3px',
       fontSize: '10.5px',
       fontWeight: '700',
       cursor: 'pointer',
       background: !cat ? '#E0524A' : 'rgba(255,255,255,0.06)',
-      color: !cat ? '#fff' : '#908AA0',
-      border: '1px solid ' + (!cat ? '#E0524A' : 'rgba(255,255,255,0.1)')
+      color: !cat ? '#fff' : '#8A8A93',
+      border: '1px solid ' + (!cat ? '#E0524A' : '#2A2A31')
     }
   }, "Tutti"), FOOD_CATS.map(c => /*#__PURE__*/React.createElement("button", {
     key: c,
@@ -20477,13 +20478,13 @@ function FoodPicker(_ref50) {
     style: {
       flexShrink: 0,
       padding: '6px 11px',
-      borderRadius: '20px',
+      borderRadius: '3px',
       fontSize: '10.5px',
       fontWeight: '700',
       cursor: 'pointer',
       background: cat === c ? '#E0524A' : 'rgba(255,255,255,0.06)',
-      color: cat === c ? '#fff' : '#908AA0',
-      border: '1px solid ' + (cat === c ? '#E0524A' : 'rgba(255,255,255,0.1)')
+      color: cat === c ? '#fff' : '#8A8A93',
+      border: '1px solid ' + (cat === c ? '#E0524A' : '#2A2A31')
     }
   }, c))), /*#__PURE__*/React.createElement("button", {
     onClick: addCustom,
@@ -20494,7 +20495,7 @@ function FoodPicker(_ref50) {
       background: 'rgba(63,182,108,0.14)',
       border: '1px dashed rgba(63,182,108,0.5)',
       color: '#3FB66C',
-      borderRadius: '12px',
+      borderRadius: '3px',
       fontSize: '12.5px',
       fontWeight: '700',
       cursor: 'pointer',
@@ -20515,7 +20516,7 @@ function FoodPicker(_ref50) {
       width: '100%',
       textAlign: 'left',
       ...glassCard,
-      borderRadius: '13px',
+      borderRadius: '3px',
       padding: '11px 12px',
       marginBottom: '7px',
       cursor: 'pointer',
@@ -20532,7 +20533,7 @@ function FoodPicker(_ref50) {
     style: {
       fontSize: '13px',
       fontWeight: '700',
-      color: '#F4F2F8',
+      color: '#F2F1ED',
       lineHeight: 1.25
     }
   }, f.n), /*#__PURE__*/React.createElement("span", {
@@ -20545,17 +20546,17 @@ function FoodPicker(_ref50) {
   }, kcalOf(f.p, f.c, f.f), " kcal")), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: '9.5px',
-      color: '#908AA0',
+      color: '#8A8A93',
       marginTop: '3px'
     }
   }, "P ", f.p, " \xB7 C ", f.c, " \xB7 G ", f.f, " ", /*#__PURE__*/React.createElement("span", {
     style: {
-      color: '#5A5468'
+      color: '#55555E'
     }
   }, "/100 g"), f.nota ? ' — ' + f.nota : ''))), list.length === 0 && /*#__PURE__*/React.createElement("div", {
     style: {
       textAlign: 'center',
-      color: '#5A5468',
+      color: '#55555E',
       fontSize: '12px',
       padding: '18px 0'
     }
@@ -20907,7 +20908,7 @@ function ScheduleEditorScreen(_ref51) {
     style: {
       background: d.color + '22',
       border: '1px solid ' + d.color + '55',
-      borderRadius: '10px',
+      borderRadius: '3px',
       padding: '6px 9px',
       flexShrink: 0
     }
@@ -20926,22 +20927,22 @@ function ScheduleEditorScreen(_ref51) {
     style: {
       fontSize: '12.5px',
       fontWeight: '700',
-      color: '#F4F2F8'
+      color: '#F2F1ED'
     }
   }, d.subtitle || 'Giorno ' + (di + 1)), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: '9.5px',
-      color: '#908AA0',
+      color: '#8A8A93',
       marginTop: '2px'
     }
   }, d.dayName ? d.dayName + ' · ' : '', d.exercises.length, " esercizi")), /*#__PURE__*/React.createElement(ChevronRight, {
     size: 17,
-    color: "#5A5468"
+    color: "#55555E"
   })), open === di && /*#__PURE__*/React.createElement("div", {
     style: {
       marginTop: '11px',
       paddingTop: '11px',
-      borderTop: '1px solid rgba(255,255,255,0.08)'
+      borderTop: '1px solid #2A2A31'
     }
   }, /*#__PURE__*/React.createElement(BtnRow, null, /*#__PURE__*/React.createElement(Fld, {
     label: "Sigla",
@@ -20991,7 +20992,7 @@ function ScheduleEditorScreen(_ref51) {
     style: {
       width: '24px',
       height: '24px',
-      borderRadius: '7px',
+      borderRadius: '3px',
       background: c,
       cursor: 'pointer',
       border: d.color === c ? '2px solid #fff' : '1px solid rgba(255,255,255,0.2)'
@@ -21005,7 +21006,7 @@ function ScheduleEditorScreen(_ref51) {
     style: {
       background: 'rgba(255,255,255,0.035)',
       border: '1px solid rgba(255,255,255,0.07)',
-      borderRadius: '12px',
+      borderRadius: '3px',
       padding: '10px',
       marginBottom: '8px'
     }
@@ -21032,27 +21033,27 @@ function ScheduleEditorScreen(_ref51) {
     style: {
       fontSize: '12.5px',
       fontWeight: '700',
-      color: '#F4F2F8',
+      color: '#F2F1ED',
       lineHeight: 1.3
     }
   }, r.name), r.kind === 'ref' && /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: '9px',
-      color: '#5A5468',
+      color: '#55555E',
       marginTop: '2px'
     }
   }, "dal database \xB7 scheda tecnica inclusa")), /*#__PURE__*/React.createElement(MiniBtn, {
     onClick: () => moveRow(di, ri, -1),
-    color: "#908AA0"
+    color: "#8A8A93"
   }, /*#__PURE__*/React.createElement(ArrowUp, {
     size: 13,
-    color: "#908AA0"
+    color: "#8A8A93"
   })), /*#__PURE__*/React.createElement(MiniBtn, {
     onClick: () => moveRow(di, ri, 1),
-    color: "#908AA0"
+    color: "#8A8A93"
   }, /*#__PURE__*/React.createElement(ArrowDown, {
     size: 13,
-    color: "#908AA0"
+    color: "#8A8A93"
   })), /*#__PURE__*/React.createElement(MiniBtn, {
     onClick: () => delRow(di, ri),
     color: "#E0524A"
@@ -21092,7 +21093,7 @@ function ScheduleEditorScreen(_ref51) {
       background: 'rgba(168,85,247,0.12)',
       border: '1px dashed rgba(168,85,247,0.45)',
       color: VIOLET,
-      borderRadius: '12px',
+      borderRadius: '3px',
       fontSize: '12.5px',
       fontWeight: '700',
       cursor: 'pointer',
@@ -21112,7 +21113,7 @@ function ScheduleEditorScreen(_ref51) {
       background: 'transparent',
       border: '1px solid rgba(224,82,74,0.3)',
       color: '#E0524A',
-      borderRadius: '11px',
+      borderRadius: '3px',
       fontSize: '11.5px',
       fontWeight: '700',
       cursor: 'pointer'
@@ -21126,7 +21127,7 @@ function ScheduleEditorScreen(_ref51) {
       background: 'rgba(77,130,232,0.12)',
       border: '1px dashed rgba(77,130,232,0.45)',
       color: '#4D82E8',
-      borderRadius: '14px',
+      borderRadius: '3px',
       fontSize: '13px',
       fontWeight: '700',
       cursor: 'pointer',
@@ -21141,7 +21142,7 @@ function ScheduleEditorScreen(_ref51) {
     style: {
       background: msg.ok ? 'rgba(63,182,108,0.14)' : 'rgba(224,82,74,0.14)',
       border: '1px solid ' + (msg.ok ? 'rgba(63,182,108,0.4)' : 'rgba(224,82,74,0.4)'),
-      borderRadius: '12px',
+      borderRadius: '3px',
       padding: '11px 13px',
       marginBottom: '12px',
       fontSize: '12px',
@@ -21385,7 +21386,7 @@ function LibraryScreen(_ref52) {
   }, "Carica file .v8w / .json"), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: '10px',
-      color: '#908AA0',
+      color: '#8A8A93',
       textAlign: 'center',
       margin: '10px 0'
     }
@@ -21401,7 +21402,7 @@ function LibraryScreen(_ref52) {
       fontSize: '11px',
       textAlign: 'left',
       padding: '10px',
-      borderRadius: '10px',
+      borderRadius: '3px',
       resize: 'vertical',
       boxSizing: 'border-box'
     }
@@ -21420,7 +21421,7 @@ function LibraryScreen(_ref52) {
     style: {
       background: msg.ok ? 'rgba(63,182,108,0.14)' : 'rgba(224,82,74,0.14)',
       border: '1px solid ' + (msg.ok ? 'rgba(63,182,108,0.4)' : 'rgba(224,82,74,0.4)'),
-      borderRadius: '12px',
+      borderRadius: '3px',
       padding: '11px 13px',
       marginBottom: '14px',
       fontSize: '12px',
@@ -21548,7 +21549,7 @@ function LibraryScreen(_ref52) {
       background: 'rgba(63,182,108,0.12)',
       border: '1px solid rgba(63,182,108,0.35)',
       color: '#3FB66C',
-      borderRadius: '11px',
+      borderRadius: '3px',
       fontSize: '11.5px',
       fontWeight: '700',
       cursor: 'pointer'
@@ -21561,7 +21562,7 @@ function LibraryScreen(_ref52) {
       background: 'rgba(20,184,166,0.12)',
       border: '1px solid rgba(20,184,166,0.35)',
       color: '#14b8a6',
-      borderRadius: '11px',
+      borderRadius: '3px',
       fontSize: '11.5px',
       fontWeight: '700',
       cursor: 'pointer'
@@ -21569,7 +21570,7 @@ function LibraryScreen(_ref52) {
   }, "Duplica Estate")), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: '9.5px',
-      color: '#5A5468',
+      color: '#55555E',
       marginTop: '8px',
       lineHeight: 1.5
     }
@@ -21582,18 +21583,18 @@ function LibraryScreen(_ref52) {
     }
   }, /*#__PURE__*/React.createElement(Layers, {
     size: 30,
-    color: "#5A5468"
+    color: "#55555E"
   }), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: '13px',
-      color: '#C7C2D0',
+      color: '#C0BEC6',
       fontWeight: '600',
       marginTop: '10px'
     }
   }, "Nessuna scheda personale"), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: '11px',
-      color: '#908AA0',
+      color: '#8A8A93',
       marginTop: '6px',
       lineHeight: 1.5
     }
@@ -21621,7 +21622,7 @@ function LibraryScreen(_ref52) {
         border: '1px solid ' + col + '44',
         width: '40px',
         height: '40px',
-        borderRadius: '12px',
+        borderRadius: '3px',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -21646,7 +21647,7 @@ function LibraryScreen(_ref52) {
         fontFamily: displayFont,
         fontSize: '14px',
         fontWeight: '700',
-        color: '#F4F2F8',
+        color: '#F2F1ED',
         lineHeight: 1.2,
         flex: 1
       }
@@ -21659,7 +21660,7 @@ function LibraryScreen(_ref52) {
     }, "attiva")), /*#__PURE__*/React.createElement("div", {
       style: {
         fontSize: '10px',
-        color: '#908AA0',
+        color: '#8A8A93',
         marginTop: '3px'
       }
     }, s.subtitle ? s.subtitle + ' · ' : '', nGiorni, " giorni \xB7 ", nEs, " esercizi"))), /*#__PURE__*/React.createElement("div", {
@@ -21740,7 +21741,7 @@ function LibraryScreen(_ref52) {
   }), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: '10px',
-      color: '#5A5468',
+      color: '#55555E',
       textAlign: 'center',
       marginTop: '18px',
       lineHeight: 1.6
@@ -22019,13 +22020,13 @@ function DietEditorScreen(_ref53) {
     style: {
       flex: 1,
       padding: '9px 0',
-      borderRadius: '11px',
+      borderRadius: '3px',
       cursor: 'pointer',
       fontWeight: '700',
       fontSize: '11.5px',
       background: d.dayType === t.id ? t.color : 'rgba(255,255,255,0.05)',
-      color: d.dayType === t.id ? '#fff' : '#908AA0',
-      border: '1px solid ' + (d.dayType === t.id ? t.color : 'rgba(255,255,255,0.08)')
+      color: d.dayType === t.id ? '#fff' : '#8A8A93',
+      border: '1px solid ' + (d.dayType === t.id ? t.color : '#2A2A31')
     }
   }, t.label)))), /*#__PURE__*/React.createElement("div", {
     style: {
@@ -22037,7 +22038,7 @@ function DietEditorScreen(_ref53) {
     style: {
       fontSize: '11px',
       fontWeight: '700',
-      color: '#908AA0',
+      color: '#8A8A93',
       letterSpacing: '0.4px',
       textTransform: 'uppercase',
       marginBottom: '9px'
@@ -22062,7 +22063,7 @@ function DietEditorScreen(_ref53) {
       textAlign: 'center',
       marginTop: '10px',
       fontSize: '11px',
-      color: '#908AA0'
+      color: '#8A8A93'
     }
   }, "Target calorico calcolato: ", /*#__PURE__*/React.createElement("b", {
     style: {
@@ -22087,21 +22088,21 @@ function DietEditorScreen(_ref53) {
     style: {
       fontSize: '11px',
       fontWeight: '700',
-      color: '#908AA0',
+      color: '#8A8A93',
       letterSpacing: '0.4px',
       textTransform: 'uppercase'
     }
   }, "Totale attuale"), /*#__PURE__*/React.createElement("span", {
     style: {
-      fontFamily: displayFont,
+      ...numStyle,
       fontSize: '19px',
-      fontWeight: '800',
-      color: '#F4F2F8'
+      fontWeight: '600',
+      color: '#F2F1ED'
     }
   }, r0(tot.kcal), /*#__PURE__*/React.createElement("span", {
     style: {
       fontSize: '11px',
-      color: '#908AA0',
+      color: '#8A8A93',
       fontWeight: '600'
     }
   }, " kcal"))), /*#__PURE__*/React.createElement(MacroBar, {
@@ -22145,7 +22146,7 @@ function DietEditorScreen(_ref53) {
       style: {
         background: 'rgba(224,82,74,0.14)',
         border: '1px solid rgba(224,82,74,0.3)',
-        borderRadius: '10px',
+        borderRadius: '3px',
         width: '36px',
         height: '36px',
         display: 'flex',
@@ -22165,22 +22166,22 @@ function DietEditorScreen(_ref53) {
       style: {
         fontSize: '13px',
         fontWeight: '700',
-        color: '#F4F2F8'
+        color: '#F2F1ED'
       }
     }, m.name, m.time ? ' · ' + m.time : ''), /*#__PURE__*/React.createElement("div", {
       style: {
         fontSize: '9.5px',
-        color: '#908AA0',
+        color: '#8A8A93',
         marginTop: '2px'
       }
     }, (m.items || []).length, " alimenti \xB7 ", r0(ms.kcal), " kcal \xB7 P", r0(ms.p), " C", r0(ms.c), " G", r0(ms.f))), /*#__PURE__*/React.createElement(ChevronRight, {
       size: 17,
-      color: "#5A5468"
+      color: "#55555E"
     })), openMeal === mi && /*#__PURE__*/React.createElement("div", {
       style: {
         marginTop: '11px',
         paddingTop: '11px',
-        borderTop: '1px solid rgba(255,255,255,0.08)'
+        borderTop: '1px solid #2A2A31'
       }
     }, /*#__PURE__*/React.createElement(BtnRow, null, /*#__PURE__*/React.createElement(Fld, {
       label: "Nome pasto",
@@ -22209,7 +22210,7 @@ function DietEditorScreen(_ref53) {
         style: {
           background: 'rgba(255,255,255,0.035)',
           border: '1px solid rgba(255,255,255,0.07)',
-          borderRadius: '12px',
+          borderRadius: '3px',
           padding: '10px',
           marginBottom: '8px'
         }
@@ -22235,7 +22236,7 @@ function DietEditorScreen(_ref53) {
         style: {
           fontSize: '12.5px',
           fontWeight: '700',
-          color: '#F4F2F8',
+          color: '#F2F1ED',
           lineHeight: 1.3
         }
       }, nameOf(it))), /*#__PURE__*/React.createElement("div", {
@@ -22279,7 +22280,7 @@ function DietEditorScreen(_ref53) {
         style: {
           marginTop: '7px',
           fontSize: '10px',
-          color: '#908AA0'
+          color: '#8A8A93'
         }
       }, /*#__PURE__*/React.createElement("b", {
         style: {
@@ -22287,7 +22288,7 @@ function DietEditorScreen(_ref53) {
         }
       }, r0(mm.kcal), " kcal"), " \xB7 P ", r1(mm.p), " \xB7 C ", r1(mm.c), " \xB7 G ", r1(mm.f), !custom && FOOD_BY_ID[it.ref] && FOOD_BY_ID[it.ref].nota ? /*#__PURE__*/React.createElement("span", {
         style: {
-          color: '#5A5468'
+          color: '#55555E'
         }
       }, " \u2014 ", FOOD_BY_ID[it.ref].nota) : null));
     }), /*#__PURE__*/React.createElement("button", {
@@ -22298,7 +22299,7 @@ function DietEditorScreen(_ref53) {
         background: 'rgba(224,82,74,0.12)',
         border: '1px dashed rgba(224,82,74,0.45)',
         color: '#E0524A',
-        borderRadius: '12px',
+        borderRadius: '3px',
         fontSize: '12.5px',
         fontWeight: '700',
         cursor: 'pointer',
@@ -22318,7 +22319,7 @@ function DietEditorScreen(_ref53) {
         background: 'transparent',
         border: '1px solid rgba(224,82,74,0.3)',
         color: '#E0524A',
-        borderRadius: '11px',
+        borderRadius: '3px',
         fontSize: '11.5px',
         fontWeight: '700',
         cursor: 'pointer'
@@ -22333,7 +22334,7 @@ function DietEditorScreen(_ref53) {
       background: 'rgba(77,130,232,0.12)',
       border: '1px dashed rgba(77,130,232,0.45)',
       color: '#4D82E8',
-      borderRadius: '14px',
+      borderRadius: '3px',
       fontSize: '13px',
       fontWeight: '700',
       cursor: 'pointer',
@@ -22348,7 +22349,7 @@ function DietEditorScreen(_ref53) {
     style: {
       background: msg.ok ? 'rgba(63,182,108,0.14)' : 'rgba(224,82,74,0.14)',
       border: '1px solid ' + (msg.ok ? 'rgba(63,182,108,0.4)' : 'rgba(224,82,74,0.4)'),
-      borderRadius: '12px',
+      borderRadius: '3px',
       padding: '11px 13px',
       marginBottom: '12px',
       fontSize: '12px',
@@ -22556,7 +22557,7 @@ function DietScreen(_ref54) {
   }, /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: '11px',
-      color: '#908AA0',
+      color: '#8A8A93',
       marginBottom: '8px',
       fontWeight: '700'
     }
@@ -22571,20 +22572,20 @@ function DietScreen(_ref54) {
     style: {
       flex: 1,
       padding: '9px 0',
-      borderRadius: '10px',
+      borderRadius: '3px',
       cursor: 'pointer',
       fontWeight: '700',
       fontSize: '12px',
       background: days === n ? '#3FB66C' : 'rgba(255,255,255,0.05)',
-      color: days === n ? '#fff' : '#908AA0',
-      border: '1px solid ' + (days === n ? '#3FB66C' : 'rgba(255,255,255,0.08)')
+      color: days === n ? '#fff' : '#8A8A93',
+      border: '1px solid ' + (days === n ? '#3FB66C' : '#2A2A31')
     }
   }, n)))), /*#__PURE__*/React.createElement("pre", {
     style: {
       ...glassCard,
       padding: '13px',
       fontSize: '11.5px',
-      color: '#C7C2D0',
+      color: '#C0BEC6',
       lineHeight: 1.6,
       whiteSpace: 'pre-wrap',
       fontFamily: 'monospace',
@@ -22668,7 +22669,7 @@ function DietScreen(_ref54) {
   }, "Carica file .v8d / .json"), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: '10px',
-      color: '#908AA0',
+      color: '#8A8A93',
       textAlign: 'center',
       margin: '10px 0'
     }
@@ -22684,7 +22685,7 @@ function DietScreen(_ref54) {
       fontSize: '11px',
       textAlign: 'left',
       padding: '10px',
-      borderRadius: '10px',
+      borderRadius: '3px',
       resize: 'vertical',
       boxSizing: 'border-box'
     }
@@ -22703,7 +22704,7 @@ function DietScreen(_ref54) {
     style: {
       background: msg.ok ? 'rgba(63,182,108,0.14)' : 'rgba(224,82,74,0.14)',
       border: '1px solid ' + (msg.ok ? 'rgba(63,182,108,0.4)' : 'rgba(224,82,74,0.4)'),
-      borderRadius: '12px',
+      borderRadius: '3px',
       padding: '11px 13px',
       marginBottom: '14px',
       fontSize: '12px',
@@ -22719,7 +22720,7 @@ function DietScreen(_ref54) {
     style: {
       fontSize: '11px',
       fontWeight: '700',
-      color: '#908AA0',
+      color: '#8A8A93',
       letterSpacing: '0.4px',
       textTransform: 'uppercase',
       marginBottom: '9px'
@@ -22743,7 +22744,7 @@ function DietScreen(_ref54) {
         background: c + '1f',
         border: '1px solid ' + c + '55',
         color: c,
-        borderRadius: '11px',
+        borderRadius: '3px',
         fontSize: '11px',
         fontWeight: '700',
         cursor: 'pointer',
@@ -22758,7 +22759,7 @@ function DietScreen(_ref54) {
   })), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: '9.5px',
-      color: '#5A5468',
+      color: '#55555E',
       marginTop: '8px',
       lineHeight: 1.5
     }
@@ -22771,18 +22772,18 @@ function DietScreen(_ref54) {
     }
   }, /*#__PURE__*/React.createElement(Utensils, {
     size: 30,
-    color: "#5A5468"
+    color: "#55555E"
   }), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: '13px',
-      color: '#C7C2D0',
+      color: '#C0BEC6',
       fontWeight: '600',
       marginTop: '10px'
     }
   }, "Nessuna dieta salvata"), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: '11px',
-      color: '#908AA0',
+      color: '#8A8A93',
       marginTop: '6px',
       lineHeight: 1.5
     }
@@ -22810,7 +22811,7 @@ function DietScreen(_ref54) {
         border: '1px solid ' + c + '44',
         width: '40px',
         height: '40px',
-        borderRadius: '12px',
+        borderRadius: '3px',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -22829,13 +22830,13 @@ function DietScreen(_ref54) {
         fontFamily: displayFont,
         fontSize: '14px',
         fontWeight: '700',
-        color: '#F4F2F8',
+        color: '#F2F1ED',
         lineHeight: 1.2
       }
     }, d.name), /*#__PURE__*/React.createElement("div", {
       style: {
         fontSize: '10px',
-        color: '#908AA0',
+        color: '#8A8A93',
         marginTop: '3px'
       }
     }, r0(t.kcal), " kcal", tk ? ' / ' + tk : '', " \xB7 P", r0(t.p), " C", r0(t.c), " G", r0(t.f), " \xB7 ", (d.meals || []).length, " pasti"))), /*#__PURE__*/React.createElement("div", {
@@ -22855,7 +22856,7 @@ function DietScreen(_ref54) {
         background: 'linear-gradient(135deg, ' + c + ' 0%, ' + c + 'cc 100%)',
         color: 'white',
         border: 'none',
-        borderRadius: '11px',
+        borderRadius: '3px',
         fontSize: '12.5px',
         fontWeight: '700',
         cursor: 'pointer',
@@ -22898,7 +22899,7 @@ function DietScreen(_ref54) {
   }), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: '10px',
-      color: '#5A5468',
+      color: '#55555E',
       textAlign: 'center',
       marginTop: '18px',
       lineHeight: 1.6
@@ -22925,7 +22926,7 @@ function Thumb(_ref59) {
   }, [id]);
   if (!urls[i]) return /*#__PURE__*/React.createElement(Dumbbell, {
     size: 18,
-    color: "#3A3545"
+    color: "#2A2A31"
   });
   return /*#__PURE__*/React.createElement("img", {
     src: urls[i],
@@ -22956,7 +22957,7 @@ function ExDetailModal(_ref60) {
     key: i,
     style: {
       flex: 1,
-      borderRadius: '13px',
+      borderRadius: '3px',
       overflow: 'hidden',
       border: '1px solid rgba(255,255,255,0.12)',
       background: '#14120E'
@@ -22974,7 +22975,7 @@ function ExDetailModal(_ref60) {
   }), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: '8.5px',
-      color: '#5A5468',
+      color: '#55555E',
       textAlign: 'center',
       padding: '4px 0',
       fontWeight: '700',
@@ -22988,7 +22989,7 @@ function ExDetailModal(_ref60) {
       marginBottom: '12px'
     }
   }, (ex.tags || []).map(t => {
-    const c = TAG_COLORS[t] && TAG_COLORS[t].text || '#908AA0';
+    const c = TAG_COLORS[t] && TAG_COLORS[t].text || '#8A8A93';
     return /*#__PURE__*/React.createElement("span", {
       key: t,
       style: {
@@ -22998,7 +22999,7 @@ function ExDetailModal(_ref60) {
         background: c + '1f',
         border: '1px solid ' + c + '44',
         padding: '4px 9px',
-        borderRadius: '7px'
+        borderRadius: '3px'
       }
     }, t);
   }), ex.isCompound && /*#__PURE__*/React.createElement("span", {
@@ -23009,12 +23010,12 @@ function ExDetailModal(_ref60) {
       background: 'rgba(63,182,108,0.12)',
       border: '1px solid rgba(63,182,108,0.35)',
       padding: '4px 9px',
-      borderRadius: '7px'
+      borderRadius: '3px'
     }
   }, "MULTIARTICOLARE")), ex.shortNote && /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: '12px',
-      color: '#C7C2D0',
+      color: '#C0BEC6',
       lineHeight: 1.55,
       marginBottom: '12px',
       paddingLeft: '10px',
@@ -23041,7 +23042,7 @@ function ExDetailModal(_ref60) {
     }, /*#__PURE__*/React.createElement("div", {
       style: {
         fontSize: '8.5px',
-        color: '#908AA0',
+        color: '#8A8A93',
         fontWeight: '700',
         letterSpacing: '0.4px'
       }
@@ -23049,14 +23050,14 @@ function ExDetailModal(_ref60) {
       style: {
         fontSize: '14px',
         fontWeight: '800',
-        color: '#F4F2F8',
+        color: '#F2F1ED',
         marginTop: '2px'
       }
     }, v));
   })), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: '9px',
-      color: '#5A5468',
+      color: '#55555E',
       textAlign: 'center',
       marginTop: '9px'
     }
@@ -23077,7 +23078,7 @@ function ExDetailModal(_ref60) {
     style: {
       fontSize: '11px',
       fontWeight: '700',
-      color: '#908AA0',
+      color: '#8A8A93',
       letterSpacing: '0.4px',
       textTransform: 'uppercase'
     }
@@ -23089,7 +23090,7 @@ function ExDetailModal(_ref60) {
       background: 'rgba(232,180,60,0.12)',
       border: '1px solid rgba(232,180,60,0.3)',
       padding: '2px 7px',
-      borderRadius: '6px'
+      borderRadius: '3px'
     }
   }, "DA TRADURRE")), ex.execution.map((s, i) => /*#__PURE__*/React.createElement("div", {
     key: i,
@@ -23109,14 +23110,14 @@ function ExDetailModal(_ref60) {
   }, i + 1), /*#__PURE__*/React.createElement("span", {
     style: {
       fontSize: '11.5px',
-      color: '#C7C2D0',
+      color: '#C0BEC6',
       lineHeight: 1.55
     }
   }, s)))), ex.cues && /*#__PURE__*/React.createElement("div", {
     style: {
       background: 'rgba(168,85,247,0.1)',
       border: '1px solid rgba(168,85,247,0.3)',
-      borderRadius: '12px',
+      borderRadius: '3px',
       padding: '11px 13px',
       marginBottom: '12px'
     }
@@ -23130,13 +23131,13 @@ function ExDetailModal(_ref60) {
   }, "CUE"), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: '11.5px',
-      color: '#C7C2D0',
+      color: '#C0BEC6',
       lineHeight: 1.55
     }
   }, ex.cues)), ex.nameEn && /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: '9.5px',
-      color: '#5A5468',
+      color: '#55555E',
       textAlign: 'center',
       marginTop: '4px'
     }
@@ -23214,7 +23215,7 @@ function ExerciseDBScreen(_ref63) {
     }
   }, /*#__PURE__*/React.createElement(Search, {
     size: 16,
-    color: "#5A5468"
+    color: "#55555E"
   }))), /*#__PURE__*/React.createElement("div", {
     style: {
       display: 'flex',
@@ -23230,13 +23231,13 @@ function ExerciseDBScreen(_ref63) {
     style: {
       flexShrink: 0,
       padding: '6px 11px',
-      borderRadius: '20px',
+      borderRadius: '3px',
       fontSize: '10.5px',
       fontWeight: '700',
       cursor: 'pointer',
       background: !tag ? VIOLET : 'rgba(255,255,255,0.06)',
-      color: !tag ? '#fff' : '#908AA0',
-      border: '1px solid ' + (!tag ? VIOLET : 'rgba(255,255,255,0.1)')
+      color: !tag ? '#fff' : '#8A8A93',
+      border: '1px solid ' + (!tag ? VIOLET : '#2A2A31')
     }
   }, "Tutti"), TAG_LIST.map(t => {
     const c = TAG_COLORS[t] && TAG_COLORS[t].text || VIOLET;
@@ -23250,13 +23251,13 @@ function ExerciseDBScreen(_ref63) {
       style: {
         flexShrink: 0,
         padding: '6px 11px',
-        borderRadius: '20px',
+        borderRadius: '3px',
         fontSize: '10.5px',
         fontWeight: '700',
         cursor: 'pointer',
         background: on ? c : 'rgba(255,255,255,0.06)',
-        color: on ? '#fff' : '#908AA0',
-        border: '1px solid ' + (on ? c : 'rgba(255,255,255,0.1)')
+        color: on ? '#fff' : '#8A8A93',
+        border: '1px solid ' + (on ? c : '#2A2A31')
       }
     }, t);
   })), /*#__PURE__*/React.createElement("div", {
@@ -23277,24 +23278,24 @@ function ExerciseDBScreen(_ref63) {
       style: {
         flexShrink: 0,
         padding: '6px 11px',
-        borderRadius: '20px',
+        borderRadius: '3px',
         fontSize: '10.5px',
         fontWeight: '700',
         cursor: 'pointer',
         background: on ? '#4D82E8' : 'rgba(255,255,255,0.04)',
-        color: on ? '#fff' : '#5A5468',
-        border: '1px solid ' + (on ? '#4D82E8' : 'rgba(255,255,255,0.08)')
+        color: on ? '#fff' : '#55555E',
+        border: '1px solid ' + (on ? '#4D82E8' : '#2A2A31')
       }
     }, x);
   })), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: '10.5px',
-      color: '#908AA0',
+      color: '#8A8A93',
       marginBottom: '10px',
       fontWeight: '600'
     }
   }, list.length, " risultati", list.length > shown.length ? ' · ne mostro ' + shown.length : ''), shown.map(e => {
-    const c = TAG_COLORS[(e.tags || [])[0]] && TAG_COLORS[(e.tags || [])[0]].text || '#908AA0';
+    const c = TAG_COLORS[(e.tags || [])[0]] && TAG_COLORS[(e.tags || [])[0]].text || '#8A8A93';
     return /*#__PURE__*/React.createElement("button", {
       key: e.id,
       onClick: () => setSel(e),
@@ -23302,7 +23303,7 @@ function ExerciseDBScreen(_ref63) {
         width: '100%',
         textAlign: 'left',
         ...glassCard,
-        borderRadius: '14px',
+        borderRadius: '3px',
         padding: '10px',
         marginBottom: '8px',
         cursor: 'pointer',
@@ -23314,11 +23315,11 @@ function ExerciseDBScreen(_ref63) {
       style: {
         width: '58px',
         height: '46px',
-        borderRadius: '10px',
+        borderRadius: '3px',
         overflow: 'hidden',
         background: '#14120E',
         flexShrink: 0,
-        border: '1px solid rgba(255,255,255,0.08)',
+        border: '1px solid #2A2A31',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center'
@@ -23334,13 +23335,13 @@ function ExerciseDBScreen(_ref63) {
       style: {
         fontSize: '12.5px',
         fontWeight: '700',
-        color: '#F4F2F8',
+        color: '#F2F1ED',
         lineHeight: 1.25
       }
     }, e.name), /*#__PURE__*/React.createElement("div", {
       style: {
         fontSize: '9.5px',
-        color: '#908AA0',
+        color: '#8A8A93',
         marginTop: '3px'
       }
     }, /*#__PURE__*/React.createElement("span", {
@@ -23350,7 +23351,7 @@ function ExerciseDBScreen(_ref63) {
       }
     }, (e.tags || []).join(' · ')), e.equip ? ' — ' + e.equip : '')), /*#__PURE__*/React.createElement(ChevronRight, {
       size: 16,
-      color: "#5A5468"
+      color: "#55555E"
     }));
   }), list.length > shown.length && /*#__PURE__*/React.createElement("button", {
     onClick: () => setLimit(limit + 40),
@@ -23361,7 +23362,7 @@ function ExerciseDBScreen(_ref63) {
       background: 'rgba(168,85,247,0.12)',
       border: '1px solid rgba(168,85,247,0.35)',
       color: VIOLET,
-      borderRadius: '13px',
+      borderRadius: '3px',
       fontSize: '12.5px',
       fontWeight: '700',
       cursor: 'pointer'
@@ -23369,14 +23370,14 @@ function ExerciseDBScreen(_ref63) {
   }, "Mostra altri ", Math.min(40, list.length - shown.length)), list.length === 0 && /*#__PURE__*/React.createElement("div", {
     style: {
       textAlign: 'center',
-      color: '#5A5468',
+      color: '#55555E',
       fontSize: '12px',
       padding: '24px 0'
     }
   }, "Nessun esercizio trovato."), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: '9.5px',
-      color: '#5A5468',
+      color: '#55555E',
       textAlign: 'center',
       marginTop: '18px',
       lineHeight: 1.6
@@ -23464,7 +23465,7 @@ function VolumeScreen(_ref66) {
   const attivi = VOL_MUSCLES.filter(m => vol[m] > 0);
   const maxVal = Math.max(VOL_RANGES.max, ...VOL_MUSCLES.map(m => vol[m]));
   const statoOf = v => v === 0 ? {
-    c: '#3A3545',
+    c: '#2A2A31',
     t: '—'
   } : v < VOL_RANGES.min ? {
     c: '#E8B43C',
@@ -23503,13 +23504,13 @@ function VolumeScreen(_ref66) {
     style: {
       flexShrink: 0,
       padding: '8px 13px',
-      borderRadius: '20px',
+      borderRadius: '3px',
       fontSize: '11.5px',
       fontWeight: '700',
       cursor: 'pointer',
       background: i === progIdx ? VIOLET : 'rgba(255,255,255,0.06)',
-      color: i === progIdx ? '#fff' : '#908AA0',
-      border: '1px solid ' + (i === progIdx ? VIOLET : 'rgba(255,255,255,0.1)')
+      color: i === progIdx ? '#fff' : '#8A8A93',
+      border: '1px solid ' + (i === progIdx ? VIOLET : '#2A2A31')
     }
   }, p.label))), /*#__PURE__*/React.createElement("div", {
     style: {
@@ -23527,13 +23528,13 @@ function VolumeScreen(_ref66) {
         flexShrink: 0,
         minWidth: '36px',
         padding: '7px 0',
-        borderRadius: '10px',
+        borderRadius: '3px',
         fontSize: '12px',
         fontWeight: '700',
         cursor: 'pointer',
         background: w === week ? '#4D82E8' : 'rgba(255,255,255,0.05)',
-        color: w === week ? '#fff' : has ? '#C7C2D0' : '#3A3545',
-        border: '1px solid ' + (w === week ? '#4D82E8' : 'rgba(255,255,255,0.08)')
+        color: w === week ? '#fff' : has ? '#C0BEC6' : '#2A2A31',
+        border: '1px solid ' + (w === week ? '#4D82E8' : '#2A2A31')
       }
     }, w);
   })), totale === 0 ? /*#__PURE__*/React.createElement("div", {
@@ -23544,18 +23545,18 @@ function VolumeScreen(_ref66) {
     }
   }, /*#__PURE__*/React.createElement(BarChart3, {
     size: 30,
-    color: "#5A5468"
+    color: "#55555E"
   }), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: '13px',
-      color: '#C7C2D0',
+      color: '#C0BEC6',
       fontWeight: '600',
       marginTop: '10px'
     }
   }, "Nessuna serie registrata"), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: '11px',
-      color: '#908AA0',
+      color: '#8A8A93',
       marginTop: '6px',
       lineHeight: 1.5
     }
@@ -23568,21 +23569,21 @@ function VolumeScreen(_ref66) {
     }
   }, /*#__PURE__*/React.createElement("div", {
     style: {
-      fontFamily: displayFont,
+      ...numStyle,
       fontSize: '26px',
-      fontWeight: '800',
-      color: '#F4F2F8'
+      fontWeight: '600',
+      color: '#F2F1ED'
     }
   }, Math.round(totale)), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: '10.5px',
-      color: '#908AA0',
+      color: '#8A8A93',
       marginTop: '2px'
     }
   }, "serie totali \xB7 settimana ", week, " \xB7 ", attivi.length, " gruppi allenati")), VOL_MUSCLES.filter(m => vol[m] > 0).sort((a, b) => vol[b] - vol[a]).map(m => {
     const v = vol[m];
     const st = statoOf(v);
-    const col = TAG_COLORS[m] && TAG_COLORS[m].text || '#908AA0';
+    const col = TAG_COLORS[m] && TAG_COLORS[m].text || '#8A8A93';
     return /*#__PURE__*/React.createElement("div", {
       key: m,
       style: {
@@ -23606,7 +23607,7 @@ function VolumeScreen(_ref66) {
       style: {
         fontSize: '11.5px',
         fontWeight: '700',
-        color: '#F4F2F8'
+        color: '#F2F1ED'
       }
     }, v % 1 === 0 ? v : v.toFixed(1), " ", /*#__PURE__*/React.createElement("span", {
       style: {
@@ -23644,15 +23645,15 @@ function VolumeScreen(_ref66) {
     title: "Come si legge"
   }, "La fascia verde \xE8 ", /*#__PURE__*/React.createElement("b", {
     style: {
-      color: '#F4F2F8'
+      color: '#F2F1ED'
     }
   }, "10-20 serie a settimana"), ", il range con pi\xF9 supporto in letteratura per l'ipertrofia. Il primo gruppo muscolare di ogni esercizio conta ", /*#__PURE__*/React.createElement("b", {
     style: {
-      color: '#F4F2F8'
+      color: '#F2F1ED'
     }
   }, "una serie piena"), ", i successivi ", /*#__PURE__*/React.createElement("b", {
     style: {
-      color: '#F4F2F8'
+      color: '#F2F1ED'
     }
   }, "mezza"), ": il petto nella panca vale 1, i tricipiti 0,5."), /*#__PURE__*/React.createElement(InfoBox, {
     color: "#E8B43C",
@@ -23743,7 +23744,7 @@ function TdeeScreen(_ref67) {
     style: {
       fontSize: '11px',
       fontWeight: '700',
-      color: '#908AA0',
+      color: '#8A8A93',
       letterSpacing: '0.4px',
       textTransform: 'uppercase',
       marginBottom: '9px'
@@ -23751,7 +23752,7 @@ function TdeeScreen(_ref67) {
   }, "Quanti giorni a settimana per dieta"), diets.length === 0 && /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: '11.5px',
-      color: '#908AA0',
+      color: '#8A8A93',
       lineHeight: 1.5
     }
   }, "Nessuna dieta salvata. Creane una in \"Le mie diete\", oppure inserisci sotto la media calorica a mano."), diets.map(d => {
@@ -23773,12 +23774,12 @@ function TdeeScreen(_ref67) {
       style: {
         fontSize: '12.5px',
         fontWeight: '700',
-        color: '#F4F2F8'
+        color: '#F2F1ED'
       }
     }, d.name), /*#__PURE__*/React.createElement("div", {
       style: {
         fontSize: '10px',
-        color: '#908AA0'
+        color: '#8A8A93'
       }
     }, r0(t.kcal), " kcal")), /*#__PURE__*/React.createElement("div", {
       style: {
@@ -23791,12 +23792,12 @@ function TdeeScreen(_ref67) {
       style: {
         width: '25px',
         height: '25px',
-        borderRadius: '7px',
+        borderRadius: '3px',
         fontSize: '11px',
         fontWeight: '700',
         cursor: 'pointer',
         background: (parseFloat(assign[d.id]) || 0) === nn ? '#3FB66C' : 'rgba(255,255,255,0.05)',
-        color: (parseFloat(assign[d.id]) || 0) === nn ? '#fff' : '#5A5468',
+        color: (parseFloat(assign[d.id]) || 0) === nn ? '#fff' : '#55555E',
         border: 'none'
       }
     }, nn))));
@@ -23821,24 +23822,24 @@ function TdeeScreen(_ref67) {
     }
   }, /*#__PURE__*/React.createElement(Flame, {
     size: 28,
-    color: "#5A5468"
+    color: "#55555E"
   }), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: '13px',
-      color: '#C7C2D0',
+      color: '#C0BEC6',
       fontWeight: '600',
       marginTop: '10px'
     }
   }, "Dati insufficienti"), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: '11.5px',
-      color: '#908AA0',
+      color: '#8A8A93',
       marginTop: '7px',
       lineHeight: 1.6
     }
   }, "Servono ", /*#__PURE__*/React.createElement("b", {
     style: {
-      color: '#F4F2F8'
+      color: '#F2F1ED'
     }
   }, "almeno 2 settimane"), " di medie peso in \"Peso & Misure\" e le calorie giornaliere qui sopra.", /*#__PURE__*/React.createElement("br", null), "Al momento hai ", n, " settiman", n === 1 ? 'a' : 'e', " con media peso", intakeMedio > 0 ? '' : ' e nessun dato calorico', ".")) : /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
     style: {
@@ -23851,7 +23852,7 @@ function TdeeScreen(_ref67) {
   }, /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: '10.5px',
-      color: '#908AA0',
+      color: '#8A8A93',
       fontWeight: '700',
       letterSpacing: '0.4px'
     }
@@ -23860,14 +23861,14 @@ function TdeeScreen(_ref67) {
       fontFamily: displayFont,
       fontSize: '34px',
       fontWeight: '800',
-      color: '#F4F2F8',
+      color: '#F2F1ED',
       lineHeight: 1.1,
       marginTop: '4px'
     }
   }, tdee), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: '11px',
-      color: '#908AA0'
+      color: '#8A8A93'
     }
   }, "kcal al giorno")), /*#__PURE__*/React.createElement("div", {
     style: {
@@ -23890,12 +23891,12 @@ function TdeeScreen(_ref67) {
     }, /*#__PURE__*/React.createElement("span", {
       style: {
         fontSize: '11.5px',
-        color: '#908AA0'
+        color: '#8A8A93'
       }
     }, k), /*#__PURE__*/React.createElement("span", {
       style: {
         fontSize: '11.5px',
-        color: '#F4F2F8',
+        color: '#F2F1ED',
         fontWeight: '700'
       }
     }, v));
@@ -23909,11 +23910,11 @@ function TdeeScreen(_ref67) {
       title: troppoVeloce ? 'Stai calando troppo in fretta' : troppoLento ? 'Il calo si è fermato' : 'Ritmo nella norma'
     }, troppoVeloce && /*#__PURE__*/React.createElement(React.Fragment, null, "Oltre l'1% a settimana aumenta la perdita di massa magra. Alza di ", /*#__PURE__*/React.createElement("b", {
       style: {
-        color: '#F4F2F8'
+        color: '#F2F1ED'
       }
     }, "150-250 kcal"), " e rivaluta tra due settimane."), troppoLento && /*#__PURE__*/React.createElement(React.Fragment, null, "Col mantenimento stimato a ", tdee, " kcal, per riprendere a ~0,65%/sett dovresti stare intorno a ", /*#__PURE__*/React.createElement("b", {
       style: {
-        color: '#F4F2F8'
+        color: '#F2F1ED'
       }
     }, suggerito, " kcal"), ". Prima di tagliare, controlla NEAT e precisione delle pesate."), !troppoVeloce && !troppoLento && /*#__PURE__*/React.createElement(React.Fragment, null, "Stai calando a ", Math.abs(pctSett).toFixed(2), "% a settimana: un ritmo che preserva bene la massa magra. Non cambiare nulla finch\xE9 regge."));
   })(), /*#__PURE__*/React.createElement(InfoBox, {
@@ -23921,7 +23922,7 @@ function TdeeScreen(_ref67) {
     title: "Come funziona il calcolo"
   }, "Mantenimento = calorie medie \u2212 (variazione peso \xD7 7700 kcal/kg \xF7 7). Usa i dati reali invece di una formula, quindi include gi\xE0 il tuo NEAT e l'adattamento metabolico. Serve per\xF2 che ", /*#__PURE__*/React.createElement("b", {
     style: {
-      color: '#F4F2F8'
+      color: '#F2F1ED'
     }
   }, "pesate e porzioni siano precise"), ": se l'intake dichiarato \xE8 pi\xF9 basso del reale, il mantenimento risulta pi\xF9 basso del vero."))));
 }
@@ -23975,7 +23976,7 @@ function SwapModal(_ref70) {
       background: 'rgba(232,180,60,0.14)',
       border: '1px solid rgba(232,180,60,0.4)',
       color: '#E8B43C',
-      borderRadius: '12px',
+      borderRadius: '3px',
       fontSize: '12.5px',
       fontWeight: '700',
       cursor: 'pointer'
@@ -23992,13 +23993,13 @@ function SwapModal(_ref70) {
     style: {
       flexShrink: 0,
       padding: '6px 11px',
-      borderRadius: '20px',
+      borderRadius: '3px',
       fontSize: '10.5px',
       fontWeight: '700',
       cursor: 'pointer',
       background: !eq ? VIOLET : 'rgba(255,255,255,0.06)',
-      color: !eq ? '#fff' : '#908AA0',
-      border: '1px solid ' + (!eq ? VIOLET : 'rgba(255,255,255,0.1)')
+      color: !eq ? '#fff' : '#8A8A93',
+      border: '1px solid ' + (!eq ? VIOLET : '#2A2A31')
     }
   }, "Tutti"), SWAP_EQUIP.map(x => /*#__PURE__*/React.createElement("button", {
     key: x,
@@ -24006,18 +24007,18 @@ function SwapModal(_ref70) {
     style: {
       flexShrink: 0,
       padding: '6px 11px',
-      borderRadius: '20px',
+      borderRadius: '3px',
       fontSize: '10.5px',
       fontWeight: '700',
       cursor: 'pointer',
       background: eq === x ? VIOLET : 'rgba(255,255,255,0.06)',
-      color: eq === x ? '#fff' : '#908AA0',
-      border: '1px solid ' + (eq === x ? VIOLET : 'rgba(255,255,255,0.1)')
+      color: eq === x ? '#fff' : '#8A8A93',
+      border: '1px solid ' + (eq === x ? VIOLET : '#2A2A31')
     }
   }, x))), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: '10.5px',
-      color: '#908AA0',
+      color: '#8A8A93',
       marginBottom: '10px'
     }
   }, alts.length, " alternative sullo stesso gruppo primario"), alts.slice(0, 60).map(e => /*#__PURE__*/React.createElement("button", {
@@ -24027,7 +24028,7 @@ function SwapModal(_ref70) {
       width: '100%',
       textAlign: 'left',
       ...glassCard,
-      borderRadius: '13px',
+      borderRadius: '3px',
       padding: '10px',
       marginBottom: '7px',
       cursor: 'pointer',
@@ -24039,7 +24040,7 @@ function SwapModal(_ref70) {
     style: {
       width: '52px',
       height: '42px',
-      borderRadius: '9px',
+      borderRadius: '3px',
       overflow: 'hidden',
       background: '#14120E',
       flexShrink: 0,
@@ -24058,19 +24059,19 @@ function SwapModal(_ref70) {
     style: {
       fontSize: '12.5px',
       fontWeight: '700',
-      color: '#F4F2F8',
+      color: '#F2F1ED',
       lineHeight: 1.25
     }
   }, e.name), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: '9.5px',
-      color: '#908AA0',
+      color: '#8A8A93',
       marginTop: '2px'
     }
   }, e.equip, " \xB7 ", e.sets, "\xD7", e.reps)))), alts.length === 0 && /*#__PURE__*/React.createElement("div", {
     style: {
       textAlign: 'center',
-      color: '#5A5468',
+      color: '#55555E',
       fontSize: '12px',
       padding: '20px 0'
     }
@@ -24194,13 +24195,13 @@ function ConfirmHost() {
       fontFamily: displayFont,
       fontSize: '16px',
       fontWeight: '700',
-      color: '#F4F2F8',
+      color: '#F2F1ED',
       marginBottom: '7px'
     }
   }, req.titolo), req.dettaglio && /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: '12px',
-      color: '#908AA0',
+      color: '#8A8A93',
       lineHeight: 1.55,
       marginBottom: '15px'
     }
@@ -24215,9 +24216,9 @@ function ConfirmHost() {
       flex: 1,
       padding: '12px',
       background: 'rgba(255,255,255,0.07)',
-      border: '1px solid rgba(255,255,255,0.14)',
-      color: '#C7C2D0',
-      borderRadius: '12px',
+      border: '1px solid #2A2A31',
+      color: '#C0BEC6',
+      borderRadius: '3px',
       fontSize: '13px',
       fontWeight: '700',
       cursor: 'pointer'
@@ -24234,7 +24235,7 @@ function ConfirmHost() {
       background: 'linear-gradient(135deg, #E0524A 0%, #b93d36 100%)',
       border: 'none',
       color: 'white',
-      borderRadius: '12px',
+      borderRadius: '3px',
       fontSize: '13px',
       fontWeight: '700',
       cursor: 'pointer'
@@ -24269,7 +24270,7 @@ function StorageBanner() {
       bottom: '86px',
       zIndex: 350,
       background: 'rgba(224,82,74,0.96)',
-      borderRadius: '13px',
+      borderRadius: '3px',
       padding: '12px 14px',
       boxShadow: '0 6px 22px rgba(0,0,0,0.45)'
     }
@@ -24295,7 +24296,7 @@ function StorageBanner() {
       background: 'rgba(255,255,255,0.18)',
       border: 'none',
       color: '#fff',
-      borderRadius: '9px',
+      borderRadius: '3px',
       fontSize: '11.5px',
       fontWeight: '700',
       cursor: 'pointer'
@@ -24501,13 +24502,13 @@ function StoricoScreen(_ref73) {
     style: {
       flexShrink: 0,
       padding: '8px 13px',
-      borderRadius: '20px',
+      borderRadius: '3px',
       fontSize: '11.5px',
       fontWeight: '700',
       cursor: 'pointer',
       background: i === progIdx ? VIOLET : 'rgba(255,255,255,0.06)',
-      color: i === progIdx ? '#fff' : '#908AA0',
-      border: '1px solid ' + (i === progIdx ? VIOLET : 'rgba(255,255,255,0.1)')
+      color: i === progIdx ? '#fff' : '#8A8A93',
+      border: '1px solid ' + (i === progIdx ? VIOLET : '#2A2A31')
     }
   }, p.label))), /*#__PURE__*/React.createElement("div", {
     style: {
@@ -24519,7 +24520,7 @@ function StoricoScreen(_ref73) {
   }, /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: '10.5px',
-      color: '#908AA0',
+      color: '#8A8A93',
       fontWeight: '700',
       letterSpacing: '0.4px',
       marginBottom: '9px'
@@ -24539,15 +24540,15 @@ function StoricoScreen(_ref73) {
       key: l
     }, /*#__PURE__*/React.createElement("div", {
       style: {
-        fontFamily: displayFont,
+        ...numStyle,
         fontSize: '19px',
-        fontWeight: '800',
-        color: '#F4F2F8'
+        fontWeight: '600',
+        color: '#F2F1ED'
       }
     }, v), /*#__PURE__*/React.createElement("div", {
       style: {
         fontSize: '8.5px',
-        color: '#908AA0',
+        color: '#8A8A93',
         fontWeight: '700',
         letterSpacing: '0.3px'
       }
@@ -24555,7 +24556,7 @@ function StoricoScreen(_ref73) {
   })), statsCorrente.primo && /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: '10px',
-      color: '#5A5468',
+      color: '#55555E',
       textAlign: 'center',
       marginBottom: '11px'
     }
@@ -24569,7 +24570,7 @@ function StoricoScreen(_ref73) {
     style: {
       background: msg.ok ? 'rgba(63,182,108,0.14)' : 'rgba(224,82,74,0.14)',
       border: '1px solid ' + (msg.ok ? 'rgba(63,182,108,0.4)' : 'rgba(224,82,74,0.4)'),
-      borderRadius: '12px',
+      borderRadius: '3px',
       padding: '11px 13px',
       marginBottom: '12px',
       fontSize: '12px',
@@ -24595,7 +24596,7 @@ function StoricoScreen(_ref73) {
     style: {
       display: 'flex',
       fontSize: '10px',
-      color: '#908AA0',
+      color: '#8A8A93',
       marginBottom: '8px'
     }
   }, /*#__PURE__*/React.createElement("div", {
@@ -24614,7 +24615,7 @@ function StoricoScreen(_ref73) {
       v2 = _ref77[2],
       u = _ref77[3];
     const d = v2 - v1;
-    const col = d > 0 ? '#3FB66C' : d < 0 ? '#E0524A' : '#908AA0';
+    const col = d > 0 ? '#3FB66C' : d < 0 ? '#E0524A' : '#8A8A93';
     return /*#__PURE__*/React.createElement("div", {
       key: k,
       style: {
@@ -24627,21 +24628,21 @@ function StoricoScreen(_ref73) {
       style: {
         flex: 1,
         fontSize: '12px',
-        color: '#F4F2F8',
+        color: '#F2F1ED',
         fontWeight: '700'
       }
     }, v1, u), /*#__PURE__*/React.createElement("span", {
       style: {
         flex: 1.4,
         fontSize: '10.5px',
-        color: '#908AA0',
+        color: '#8A8A93',
         textAlign: 'center'
       }
     }, k), /*#__PURE__*/React.createElement("span", {
       style: {
         flex: 1,
         fontSize: '12px',
-        color: '#F4F2F8',
+        color: '#F2F1ED',
         fontWeight: '700',
         textAlign: 'right'
       }
@@ -24654,7 +24655,7 @@ function StoricoScreen(_ref73) {
   }), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: '10.5px',
-      color: '#908AA0',
+      color: '#8A8A93',
       fontWeight: '700',
       margin: '12px 0 7px'
     }
@@ -24662,7 +24663,7 @@ function StoricoScreen(_ref73) {
     const v1 = a1.vol[m] || 0,
       v2 = a2.vol[m] || 0,
       d = v2 - v1;
-    const col = TAG_COLORS[m] && TAG_COLORS[m].text || '#908AA0';
+    const col = TAG_COLORS[m] && TAG_COLORS[m].text || '#8A8A93';
     return /*#__PURE__*/React.createElement("div", {
       key: m,
       style: {
@@ -24674,7 +24675,7 @@ function StoricoScreen(_ref73) {
       style: {
         flex: 1,
         fontSize: '11.5px',
-        color: '#C7C2D0'
+        color: '#C0BEC6'
       }
     }, Math.round(v1)), /*#__PURE__*/React.createElement("span", {
       style: {
@@ -24688,12 +24689,12 @@ function StoricoScreen(_ref73) {
       style: {
         flex: 1,
         fontSize: '11.5px',
-        color: '#C7C2D0',
+        color: '#C0BEC6',
         textAlign: 'right'
       }
     }, Math.round(v2), " ", /*#__PURE__*/React.createElement("span", {
       style: {
-        color: d > 0 ? '#3FB66C' : d < 0 ? '#E0524A' : '#5A5468',
+        color: d > 0 ? '#3FB66C' : d < 0 ? '#E0524A' : '#55555E',
         fontSize: '9px'
       }
     }, d > 0 ? '+' : '', Math.round(d))));
@@ -24705,25 +24706,25 @@ function StoricoScreen(_ref73) {
     }
   }, /*#__PURE__*/React.createElement(Layers, {
     size: 30,
-    color: "#5A5468"
+    color: "#55555E"
   }), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: '13px',
-      color: '#C7C2D0',
+      color: '#C0BEC6',
       fontWeight: '600',
       marginTop: '10px'
     }
   }, "Nessun blocco archiviato"), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: '11px',
-      color: '#908AA0',
+      color: '#8A8A93',
       marginTop: '6px',
       lineHeight: 1.55
     }
   }, "Quando finisci un mesociclo, archivialo: i numeri restano consultabili e il programma riparte pulito dalla settimana 1.")) : /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: '10.5px',
-      color: '#908AA0',
+      color: '#8A8A93',
       fontWeight: '700',
       letterSpacing: '0.4px',
       marginBottom: '9px'
@@ -24736,7 +24737,7 @@ function StoricoScreen(_ref73) {
         ...glassCard,
         padding: '13px',
         marginBottom: '10px',
-        borderLeft: '3px solid ' + (sel ? VIOLET : 'rgba(255,255,255,0.1)')
+        borderLeft: '3px solid ' + (sel ? VIOLET : '#2A2A31')
       }
     }, /*#__PURE__*/React.createElement("button", {
       onClick: () => toggleCmp(a.id),
@@ -24759,7 +24760,7 @@ function StoricoScreen(_ref73) {
         fontFamily: displayFont,
         fontSize: '14px',
         fontWeight: '700',
-        color: '#F4F2F8',
+        color: '#F2F1ED',
         flex: 1
       }
     }, a.programma), sel && /*#__PURE__*/React.createElement("span", {
@@ -24771,7 +24772,7 @@ function StoricoScreen(_ref73) {
     }, "SELEZIONATO")), /*#__PURE__*/React.createElement("div", {
       style: {
         fontSize: '10px',
-        color: '#908AA0',
+        color: '#8A8A93',
         marginTop: '3px'
       }
     }, a.dal ? fmtData(a.dal) + ' → ' + fmtData(a.al) : 'archiviato il ' + fmtData(a.creato)), /*#__PURE__*/React.createElement("div", {
@@ -24790,12 +24791,12 @@ function StoricoScreen(_ref73) {
         style: {
           fontSize: '13px',
           fontWeight: '800',
-          color: '#F4F2F8'
+          color: '#F2F1ED'
         }
       }, v), " ", /*#__PURE__*/React.createElement("span", {
         style: {
           fontSize: '9px',
-          color: '#5A5468'
+          color: '#55555E'
         }
       }, l));
     }))), /*#__PURE__*/React.createElement("div", {
@@ -24812,7 +24813,7 @@ function StoricoScreen(_ref73) {
         background: 'rgba(77,130,232,0.13)',
         border: '1px solid rgba(77,130,232,0.35)',
         color: '#4D82E8',
-        borderRadius: '10px',
+        borderRadius: '3px',
         fontSize: '11.5px',
         fontWeight: '700',
         cursor: 'pointer'
@@ -24830,7 +24831,7 @@ function StoricoScreen(_ref73) {
     title: "Perch\xE9 archiviare"
   }, "I log sono indicizzati per numero di settimana: senza archiviazione, ricominciando un blocco sovrascriveresti i dati vecchi. Archiviando conservi ", /*#__PURE__*/React.createElement("b", {
     style: {
-      color: '#F4F2F8'
+      color: '#F2F1ED'
     }
   }, "volume, tonnellaggio e date"), " di ogni mesociclo e puoi confrontarli fra loro.")));
 }
@@ -25802,7 +25803,7 @@ function IntestazioneTecnica(_ref88) {
   }, i + 1), /*#__PURE__*/React.createElement("span", {
     style: {
       fontSize: '11.5px',
-      color: '#C7C2D0',
+      color: '#C0BEC6',
       lineHeight: 1.5
     }
   }, p)))));
@@ -26341,7 +26342,7 @@ class ErrorBoundary extends React.Component {
         style: {
           minHeight: '100vh',
           background: '#0a0e1a',
-          color: '#F4F2F8',
+          color: '#F2F1ED',
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
@@ -26364,7 +26365,7 @@ class ErrorBoundary extends React.Component {
       }, "Qualcosa \xE8 andato storto"), /*#__PURE__*/React.createElement("div", {
         style: {
           fontSize: '12px',
-          color: '#908AA0',
+          color: '#8A8A93',
           marginBottom: '20px',
           lineHeight: 1.5
         }
@@ -26372,10 +26373,10 @@ class ErrorBoundary extends React.Component {
         onClick: () => window.location.reload(),
         style: {
           padding: '13px 28px',
-          borderRadius: '12px',
+          borderRadius: '3px',
           border: 'none',
           background: 'linear-gradient(135deg, #4D82E8, #1e88e5)',
-          color: '#F4F2F8',
+          color: '#F2F1ED',
           fontWeight: 700,
           fontSize: '14px',
           cursor: 'pointer'
