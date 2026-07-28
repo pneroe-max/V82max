@@ -2047,7 +2047,7 @@ document.addEventListener('visibilitychange', () => {
 // ============= TEMA v5 "VETRO & VIOLA" =============
 // Card-vetro semitrasparenti (img2) che lasciano filtrare le sfere viola;
 // accento UI viola elettrico (img1). Colori-disco solo per i giorni.
-const APP_VERSION = 'v15.3';
+const APP_VERSION = 'v16.0';
 const APP_BUILD = '2026-07-27';
 const displayFont = "'Archivo', -apple-system, system-ui, sans-serif";
 const monoFont = "'IBM Plex Mono', ui-monospace, 'SF Mono', monospace";
@@ -2901,6 +2901,24 @@ function HomeScreen(_ref12) {
     color: '#22D3EE',
     desc: 'Archivia e confronta i mesocicli'
   }, {
+    id: 'stalli',
+    label: 'Stalli',
+    IconComp: BarChart3,
+    color: '#E5A82B',
+    desc: 'Quali esercizi non salgono più'
+  }, {
+    id: 'decadimento',
+    label: 'Decadimento serie',
+    IconComp: BarChart3,
+    color: '#4D82E8',
+    desc: 'Calo dalla prima all\'ultima serie'
+  }, {
+    id: 'proiezione',
+    label: 'Proiezione corpo',
+    IconComp: Scale,
+    color: '#2FA055',
+    desc: 'Dove saresti fra 12 settimane'
+  }, {
     id: 'volume',
     label: 'Volume settimanale',
     IconComp: BarChart3,
@@ -3114,8 +3132,8 @@ function HomeScreen(_ref12) {
     }
   }, /*#__PURE__*/React.createElement(TodayCard, {
     navigate: navigate
-  }), [['Allenarsi', ['workout', 'summer', 'library']], ['Registrare', ['peso', 'nutrition', 'diets', 'recovery']], ['Analizzare', ['dashboard', 'volume', 'tdee', 'storico']], ['Riferimento', ['exdb', 'bilanciere', 'guide', 'settings']]].concat((() => {
-    const assegnate = ['workout', 'summer', 'library', 'peso', 'nutrition', 'diets', 'recovery', 'dashboard', 'volume', 'tdee', 'storico', 'exdb', 'bilanciere', 'guide', 'settings'];
+  }), [['Allenarsi', ['workout', 'summer', 'library']], ['Registrare', ['peso', 'nutrition', 'diets', 'recovery']], ['Analizzare', ['dashboard', 'stalli', 'decadimento', 'proiezione', 'volume', 'tdee', 'storico']], ['Riferimento', ['exdb', 'bilanciere', 'guide', 'settings']]].concat((() => {
+    const assegnate = ['workout', 'summer', 'library', 'peso', 'nutrition', 'diets', 'recovery', 'dashboard', 'stalli', 'decadimento', 'proiezione', 'volume', 'tdee', 'storico', 'exdb', 'bilanciere', 'guide', 'settings'];
     const resto = sections.filter(x => assegnate.indexOf(x.id) < 0).map(x => x.id);
     return resto.length ? [['Altro', resto]] : [];
   })()).map(_ref15 => {
@@ -26134,78 +26152,188 @@ function stimaComposizione(_ref93) {
   };
 }
 
-// Figura schematica: le spalle e gli arti crescono col FFMI, la vita col grasso.
+// ============================================================
+// CORPO · FIGURA ANATOMICA
+// Silhouette piena costruita da parametri: la larghezza delle spalle
+// e lo spessore degli arti seguono il FFMI, la vita segue il grasso.
+// I tratti di definizione compaiono solo quando il grasso è basso.
+// ============================================================
 function Figura(_ref94) {
   let bf = _ref94.bf,
     ffmi = _ref94.ffmi,
     _ref94$altezzaPx = _ref94.altezzaPx,
     altezzaPx = _ref94$altezzaPx === void 0 ? 210 : _ref94$altezzaPx;
-  const m = Math.max(0, Math.min(1, (ffmi - 17) / 8)); // 17 → 25
-  const g = Math.max(0, Math.min(1, (bf - 8) / 20)); // 8% → 28%
-  const spalle = 30 + m * 15;
-  const vita = 15 + g * 15 + m * 3;
-  const braccio = 4.5 + m * 3.2 + g * 0.8;
-  const coscia = 8 + m * 4 + g * 2.2;
-  const petto = 24 + m * 9 + g * 3;
+  const m = Math.max(0, Math.min(1, (ffmi - 17) / 8)); // muscolosità: FFMI 17 → 25
+  const g = Math.max(0, Math.min(1, (bf - 7) / 21)); // adiposità: 7% → 28%
   const cx = 60;
-  const col = '#8A8A93',
-    hi = IRON.chalk;
+
+  // ---- semi-larghezze del tronco ----
+  const collo = 5.0 + m * 2.2 + g * 0.8;
+  const trapez = 9.0 + m * 4.0;
+  const spalle = 15.5 + m * 8.5 + g * 1.2;
+  const petto = 14.0 + m * 6.0 + g * 3.2;
+  const costole = 11.5 + m * 3.0 + g * 4.0;
+  const vita = 8.6 + m * 1.6 + g * 8.6;
+  const bacino = 11.5 + m * 2.4 + g * 4.6;
+  // ---- arti ----
+  const delt = 4.6 + m * 3.0 + g * 0.9;
+  const braccio = 3.9 + m * 2.7 + g * 1.0;
+  const avamb = 3.2 + m * 1.7 + g * 0.7;
+  const coscia = 7.4 + m * 3.6 + g * 2.6;
+  const polpa = 4.6 + m * 2.0 + g * 1.1;
+  const pelle = '#E8E6E1';
+  const ombra = 'rgba(0,0,0,0.30)';
+  const luce = 'rgba(255,255,255,0.16)';
+  // i tratti di definizione: pieni quando sei magro e muscoloso, invisibili quando no
+  const nitidezza = Math.max(0, Math.min(1, (1 - g) * 0.75 + m * 0.45 - 0.28));
+
+  // tronco: dal collo alle spalle, giù per il gran dorsale fino alla vita, poi bacino
+  const tronco = `
+    M${cx - collo} 34
+    L${cx - trapez} 40
+    C${cx - spalle} 41 ${cx - spalle} 44 ${cx - spalle} 47
+    C${cx - petto - 1} 55 ${cx - petto} 60 ${cx - costole} 70
+    C${cx - vita - 1} 78 ${cx - vita} 82 ${cx - vita} 88
+    C${cx - vita} 94 ${cx - bacino} 97 ${cx - bacino} 104
+    L${cx + bacino} 104
+    C${cx + bacino} 97 ${cx + vita} 94 ${cx + vita} 88
+    C${cx + vita} 82 ${cx + vita + 1} 78 ${cx + costole} 70
+    C${cx + petto} 60 ${cx + petto + 1} 55 ${cx + spalle} 47
+    C${cx + spalle} 44 ${cx + spalle} 41 ${cx + trapez} 40
+    L${cx + collo} 34 Z`;
+  const braccioLato = s => `
+    M${cx + s * (spalle - 1)} 44
+    C${cx + s * (spalle + delt)} 47 ${cx + s * (spalle + delt)} 55 ${cx + s * (spalle + delt * 0.55)} 62
+    C${cx + s * (spalle + braccio)} 70 ${cx + s * (spalle + braccio * 0.8)} 76 ${cx + s * (spalle - 0.5 + avamb)} 92
+    C${cx + s * (spalle - 1 + avamb * 0.7)} 100 ${cx + s * (spalle - 2 + avamb * 0.5)} 104 ${cx + s * (spalle - 3)} 108
+    L${cx + s * (spalle - 6)} 106
+    C${cx + s * (spalle - 5)} 98 ${cx + s * (spalle - 5)} 90 ${cx + s * (spalle - 5.5)} 80
+    C${cx + s * (spalle - 6)} 68 ${cx + s * (spalle - 6)} 54 ${cx + s * (spalle - 4)} 45 Z`;
+  const gambaLato = s => `
+    M${cx + s * 1.5} 104
+    L${cx + s * bacino} 104
+    C${cx + s * (bacino + 0.5)} 118 ${cx + s * coscia * 1.05} 132 ${cx + s * (coscia * 0.72)} 148
+    C${cx + s * (polpa + 1.6)} 158 ${cx + s * (polpa + 1.9)} 170 ${cx + s * (polpa * 0.72)} 190
+    L${cx + s * (polpa * 0.34)} 190
+    C${cx + s * (polpa * 0.44)} 170 ${cx + s * 1.5} 156 ${cx + s * 1.5} 140 Z`;
   return /*#__PURE__*/React.createElement("svg", {
-    viewBox: "0 0 120 200",
+    viewBox: "0 0 120 205",
     style: {
       height: altezzaPx + 'px',
       display: 'block',
-      margin: '0 auto'
+      margin: '0 auto',
+      overflow: 'visible'
     }
-  }, /*#__PURE__*/React.createElement("g", {
-    fill: "none",
-    stroke: hi,
-    strokeWidth: "1.6",
-    strokeLinejoin: "round",
-    strokeLinecap: "round"
-  }, /*#__PURE__*/React.createElement("circle", {
+  }, /*#__PURE__*/React.createElement("defs", null, /*#__PURE__*/React.createElement("linearGradient", {
+    id: "volTronco",
+    x1: "0",
+    y1: "0",
+    x2: "1",
+    y2: "0"
+  }, /*#__PURE__*/React.createElement("stop", {
+    offset: "0%",
+    stopColor: ombra
+  }), /*#__PURE__*/React.createElement("stop", {
+    offset: "26%",
+    stopColor: "rgba(0,0,0,0)"
+  }), /*#__PURE__*/React.createElement("stop", {
+    offset: "50%",
+    stopColor: luce
+  }), /*#__PURE__*/React.createElement("stop", {
+    offset: "74%",
+    stopColor: "rgba(0,0,0,0)"
+  }), /*#__PURE__*/React.createElement("stop", {
+    offset: "100%",
+    stopColor: ombra
+  }))), /*#__PURE__*/React.createElement("g", {
+    fill: pelle
+  }, /*#__PURE__*/React.createElement("path", {
+    d: gambaLato(-1)
+  }), /*#__PURE__*/React.createElement("path", {
+    d: gambaLato(1)
+  }), /*#__PURE__*/React.createElement("path", {
+    d: braccioLato(-1)
+  }), /*#__PURE__*/React.createElement("path", {
+    d: braccioLato(1)
+  }), /*#__PURE__*/React.createElement("path", {
+    d: tronco
+  }), /*#__PURE__*/React.createElement("ellipse", {
     cx: cx,
-    cy: "20",
-    r: "10"
+    cy: "21",
+    rx: "8.6",
+    ry: "10.6"
+  }), /*#__PURE__*/React.createElement("rect", {
+    x: cx - collo,
+    y: "30",
+    width: collo * 2,
+    height: "7"
+  })), /*#__PURE__*/React.createElement("g", {
+    fill: "url(#volTronco)",
+    style: {
+      mixBlendMode: 'multiply'
+    }
+  }, /*#__PURE__*/React.createElement("path", {
+    d: tronco
   }), /*#__PURE__*/React.createElement("path", {
-    d: `M${cx - 4} 30 L${cx + 4} 30`
+    d: gambaLato(-1)
   }), /*#__PURE__*/React.createElement("path", {
-    d: `M${cx - spalle / 2} 40
-                  C${cx - petto / 2} 52 ${cx - petto / 2} 62 ${cx - vita / 2} 82
-                  L${cx - vita / 2 - 1} 100
-                  L${cx + vita / 2 + 1} 100
-                  L${cx + vita / 2} 82
-                  C${cx + petto / 2} 62 ${cx + petto / 2} 52 ${cx + spalle / 2} 40 Z`,
-    fill: hi,
-    fillOpacity: "0.07"
+    d: gambaLato(1)
   }), /*#__PURE__*/React.createElement("path", {
-    d: `M${cx - spalle / 2} 42 C${cx - spalle / 2 - braccio} 60 ${cx - spalle / 2 - braccio * 0.7} 76 ${cx - spalle / 2 - 2} 96`,
-    strokeWidth: braccio * 0.9,
-    stroke: hi,
-    strokeOpacity: "0.5"
+    d: braccioLato(-1)
   }), /*#__PURE__*/React.createElement("path", {
-    d: `M${cx + spalle / 2} 42 C${cx + spalle / 2 + braccio} 60 ${cx + spalle / 2 + braccio * 0.7} 76 ${cx + spalle / 2 + 2} 96`,
-    strokeWidth: braccio * 0.9,
-    stroke: hi,
-    strokeOpacity: "0.5"
+    d: braccioLato(1)
+  })), /*#__PURE__*/React.createElement("g", {
+    stroke: "rgba(0,0,0,0.34)",
+    fill: "none",
+    strokeLinecap: "round",
+    opacity: nitidezza
+  }, /*#__PURE__*/React.createElement("path", {
+    d: `M${cx} 52 L${cx} 68`,
+    strokeWidth: "0.9"
   }), /*#__PURE__*/React.createElement("path", {
-    d: `M${cx - vita / 2} 100 L${cx - vita / 2 - 1} 150 L${cx - vita / 2 - 2} 186`,
-    strokeWidth: coscia * 0.75,
-    stroke: hi,
-    strokeOpacity: "0.5"
+    d: `M${cx - petto * 0.72} 52 C${cx - petto * 0.5} 62 ${cx - petto * 0.28} 65 ${cx - 1.5} 66`,
+    strokeWidth: "0.8"
   }), /*#__PURE__*/React.createElement("path", {
-    d: `M${cx + vita / 2} 100 L${cx + vita / 2 + 1} 150 L${cx + vita / 2 + 2} 186`,
-    strokeWidth: coscia * 0.75,
-    stroke: hi,
-    strokeOpacity: "0.5"
+    d: `M${cx + petto * 0.72} 52 C${cx + petto * 0.5} 62 ${cx + petto * 0.28} 65 ${cx + 1.5} 66`,
+    strokeWidth: "0.8"
+  }), /*#__PURE__*/React.createElement("path", {
+    d: `M${cx} 70 L${cx} 88`,
+    strokeWidth: "0.75"
+  }), /*#__PURE__*/React.createElement("path", {
+    d: `M${cx - costole * 0.44} 74 L${cx + costole * 0.44} 74`,
+    strokeWidth: "0.65"
+  }), /*#__PURE__*/React.createElement("path", {
+    d: `M${cx - vita * 0.5} 80 L${cx + vita * 0.5} 80`,
+    strokeWidth: "0.65"
+  }), /*#__PURE__*/React.createElement("path", {
+    d: `M${cx - vita * 0.46} 86 L${cx + vita * 0.46} 86`,
+    strokeWidth: "0.6"
+  }), /*#__PURE__*/React.createElement("path", {
+    d: `M${cx - costole - 0.5} 76 C${cx - vita - 2} 84 ${cx - vita - 1} 90 ${cx - vita + 1} 96`,
+    strokeWidth: "0.7"
+  }), /*#__PURE__*/React.createElement("path", {
+    d: `M${cx + costole + 0.5} 76 C${cx + vita + 2} 84 ${cx + vita + 1} 90 ${cx + vita - 1} 96`,
+    strokeWidth: "0.7"
+  }), /*#__PURE__*/React.createElement("path", {
+    d: `M${cx - spalle - delt * 0.3} 50 C${cx - spalle - delt * 0.1} 55 ${cx - spalle + 0.5} 57 ${cx - spalle + 1.5} 58`,
+    strokeWidth: "0.7"
+  }), /*#__PURE__*/React.createElement("path", {
+    d: `M${cx + spalle + delt * 0.3} 50 C${cx + spalle + delt * 0.1} 55 ${cx + spalle - 0.5} 57 ${cx + spalle - 1.5} 58`,
+    strokeWidth: "0.7"
+  }), /*#__PURE__*/React.createElement("path", {
+    d: `M${cx - coscia * 0.55} 116 L${cx - coscia * 0.3} 142`,
+    strokeWidth: "0.7"
+  }), /*#__PURE__*/React.createElement("path", {
+    d: `M${cx + coscia * 0.55} 116 L${cx + coscia * 0.3} 142`,
+    strokeWidth: "0.7"
   })), /*#__PURE__*/React.createElement("line", {
-    x1: "8",
-    y1: "192",
-    x2: "112",
-    y2: "192",
-    stroke: col,
-    strokeWidth: "0.6",
-    strokeOpacity: "0.4"
+    x1: "6",
+    y1: "197",
+    x2: "114",
+    y2: "197",
+    stroke: "#55555E",
+    strokeWidth: "0.5",
+    strokeOpacity: "0.45"
   }));
 }
 function giudizioBF(bf) {
@@ -26263,13 +26391,836 @@ function giudizioFFMI(ffmi) {
   };
 }
 
+// ============================================================
+// ANALISI · funzioni comuni
+// ============================================================
+const e1RM = (kg, rep) => kg > 0 && rep > 0 ? kg * (1 + rep / 30) : 0; // Epley
+
+// Estrae, per ogni esercizio del programma, la serie storica delle sedute.
+function serieEsercizi(cfg) {
+  const log = storage.get(cfg.storageKey) || {};
+  const out = [];
+  (cfg.days || []).forEach(d => {
+    (cfg.exercises[d.id] || []).forEach((ex, idx) => {
+      const sedute = [];
+      (cfg.weeks || []).forEach(w => {
+        const rec = ((log[w] || {})[d.id] || {}).esercizi;
+        const r = rec && rec[idx];
+        if (!r || !r.kg) return;
+        const kg = parseFloat(r.kg) || 0;
+        const reps = (r.reps || []).map(x => parseInt(x, 10)).filter(x => x > 0);
+        if (!kg || !reps.length) return;
+        sedute.push({
+          w,
+          kg,
+          reps,
+          max1rm: Math.max(...reps.map(rp => e1RM(kg, rp))),
+          prima: reps[0],
+          ultima: reps[reps.length - 1],
+          calo: reps[0] > 0 ? (reps[0] - reps[reps.length - 1]) / reps[0] * 100 : 0
+        });
+      });
+      if (sedute.length) out.push({
+        ex,
+        idx,
+        giorno: d,
+        sedute
+      });
+    });
+  });
+  return out;
+}
+
+// ============================================================
+// ANALISI · RILEVATORE DI STALLI
+// Uno stallo è: nelle ultime 3 sedute nessun 1RM stimato ha superato
+// il migliore delle sedute precedenti.
+// ============================================================
+function stalli(cfg) {
+  return serieEsercizi(cfg).map(e => {
+    const s = e.sedute;
+    if (s.length < 4) return {
+      ...e,
+      stato: 'pochi dati',
+      n: s.length
+    };
+    const recenti = s.slice(-3),
+      prima = s.slice(0, -3);
+    const megPrima = Math.max(...prima.map(x => x.max1rm));
+    const megRecenti = Math.max(...recenti.map(x => x.max1rm));
+    const guadagno = megPrima > 0 ? (megRecenti - megPrima) / megPrima * 100 : 0;
+    let stato = 'in progressione';
+    if (guadagno <= 0) stato = 'fermo';else if (guadagno < 1.5) stato = 'rallentato';
+    return {
+      ...e,
+      stato,
+      guadagno,
+      megRecenti,
+      megPrima,
+      n: s.length
+    };
+  }).filter(x => x.stato !== 'pochi dati' || x.n > 0);
+}
+
+// Alternative dello stesso gruppo primario, con la tua attrezzatura
+function alternativePer(ex) {
+  const twin = BUILTIN_TWIN[ex.id] ? EXERCISE_DB[BUILTIN_TWIN[ex.id]] : null;
+  const primo = (ex.tags || [])[0];
+  const eq = ex.equip || twin && twin.equip;
+  return Object.values(EXERCISE_DB).filter(e => e.id !== ex.id && !BUILTIN_TWIN[e.id] && (e.tags || [])[0] === primo && ['Manubri', 'Bilanciere', 'Bilanciere EZ', 'Cavi', 'Corpo libero'].indexOf(e.equip) >= 0 && !!e.isCompound === !!ex.isCompound).sort((a, b) => (a.equip === eq ? -1 : 0) - (b.equip === eq ? -1 : 0)).slice(0, 3);
+}
+function StalliScreen(_ref95) {
+  let goBack = _ref95.goBack;
+  const schede = tutteLeSchede();
+  const _useState167 = useState(() => Math.max(0, schede.findIndex(s => s.id === schedaAttivaId()))),
+    _useState168 = _slicedToArray(_useState167, 2),
+    i = _useState168[0],
+    setI = _useState168[1];
+  const prog = schede[i] || schede[0];
+  const dati = stalli(prog.config);
+  const fermi = dati.filter(x => x.stato === 'fermo');
+  const lenti = dati.filter(x => x.stato === 'rallentato');
+  const ok = dati.filter(x => x.stato === 'in progressione');
+  const pochi = dati.filter(x => x.stato === 'pochi dati');
+  const _useState169 = useState(null),
+    _useState170 = _slicedToArray(_useState169, 2),
+    aperto = _useState170[0],
+    setAperto = _useState170[1];
+  const Riga = _ref96 => {
+    let x = _ref96.x,
+      colore = _ref96.colore;
+    const isOpen = aperto === x.giorno.id + x.idx;
+    const alt = isOpen ? alternativePer(x.ex) : [];
+    return /*#__PURE__*/React.createElement("div", {
+      style: {
+        ...glassCard,
+        padding: '12px',
+        marginBottom: '8px',
+        borderLeft: '3px solid ' + colore
+      }
+    }, /*#__PURE__*/React.createElement("button", {
+      onClick: () => setAperto(isOpen ? null : x.giorno.id + x.idx),
+      style: {
+        width: '100%',
+        background: 'none',
+        border: 'none',
+        padding: 0,
+        cursor: 'pointer',
+        textAlign: 'left'
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        display: 'flex',
+        alignItems: 'baseline',
+        gap: '8px'
+      }
+    }, /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontSize: '12.5px',
+        fontWeight: '700',
+        color: IRON.chalk,
+        flex: 1
+      }
+    }, x.ex.name), /*#__PURE__*/React.createElement("span", {
+      style: {
+        ...numStyle,
+        fontSize: '12px',
+        color: colore
+      }
+    }, x.guadagno > 0 ? '+' : '', x.guadagno.toFixed(1), "%")), /*#__PURE__*/React.createElement("div", {
+      style: {
+        ...lblStyle,
+        fontSize: '8.5px',
+        marginTop: '3px'
+      }
+    }, x.giorno.label, " \xB7 ", x.n, " sedute \xB7 1RM stimato ", x.megRecenti.toFixed(1), " kg")), isOpen && /*#__PURE__*/React.createElement("div", {
+      style: {
+        marginTop: '11px',
+        paddingTop: '10px',
+        borderTop: '1px solid ' + IRON.edge
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        ...lblStyle,
+        marginBottom: '7px'
+      }
+    }, "Cosa puoi fare"), /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: '11.5px',
+        color: '#C0BEC6',
+        lineHeight: 1.55,
+        marginBottom: '10px'
+      }
+    }, x.stato === 'fermo' ? /*#__PURE__*/React.createElement(React.Fragment, null, "Tre sedute senza superare il massimo precedente. Prima di cambiare esercizio verifica il contesto: ", /*#__PURE__*/React.createElement("b", {
+      style: {
+        color: IRON.chalk
+      }
+    }, "in deficit calorico la forza che non sale \xE8 normale"), " e non \xE8 un problema di programmazione. Se invece sei a pareggio o in surplus, allora cambia qualcosa.") : /*#__PURE__*/React.createElement(React.Fragment, null, "Progressi molto piccoli. Pu\xF2 bastare una settimana di scarico, oppure sei arrivato al punto in cui serve cambiare stimolo.")), alt.length > 0 && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+      style: {
+        ...lblStyle,
+        marginBottom: '6px'
+      }
+    }, "Alternative sullo stesso gruppo"), alt.map(a => /*#__PURE__*/React.createElement("div", {
+      key: a.id,
+      style: {
+        display: 'flex',
+        alignItems: 'center',
+        gap: '9px',
+        padding: '5px 0'
+      }
+    }, /*#__PURE__*/React.createElement("span", {
+      style: {
+        width: '3px',
+        height: '16px',
+        background: colore,
+        display: 'block',
+        flexShrink: 0
+      }
+    }), /*#__PURE__*/React.createElement("span", {
+      style: {
+        flex: 1,
+        fontSize: '11.5px',
+        color: '#C0BEC6'
+      }
+    }, a.name), /*#__PURE__*/React.createElement("span", {
+      style: {
+        ...lblStyle,
+        fontSize: '8px'
+      }
+    }, a.equip))), /*#__PURE__*/React.createElement("div", {
+      style: {
+        ...lblStyle,
+        fontSize: '8px',
+        marginTop: '8px',
+        lineHeight: 1.6
+      }
+    }, "Per sostituirlo davvero usa \"cambia\" dentro l'allenamento: i parametri restano quelli del programma."))));
+  };
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      minHeight: '100vh',
+      paddingBottom: '120px'
+    }
+  }, /*#__PURE__*/React.createElement(Header, {
+    title: "Stalli",
+    subtitle: "Quali esercizi non salgono pi\xF9",
+    onBack: goBack
+  }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: '0 14px'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      gap: '5px',
+      overflowX: 'auto',
+      paddingBottom: '12px'
+    }
+  }, schede.map((p, k) => /*#__PURE__*/React.createElement("button", {
+    key: p.id,
+    onClick: () => setI(k),
+    style: {
+      flexShrink: 0,
+      padding: '8px 13px',
+      borderRadius: '3px',
+      fontFamily: monoFont,
+      fontSize: '11px',
+      fontWeight: '600',
+      cursor: 'pointer',
+      background: k === i ? IRON.chalk : IRON.surface,
+      color: k === i ? IRON.bg : IRON.dust,
+      border: '1px solid ' + (k === i ? IRON.chalk : IRON.edge)
+    }
+  }, p.label))), dati.length === 0 && /*#__PURE__*/React.createElement("div", {
+    style: {
+      ...glassCard,
+      padding: '22px 16px',
+      textAlign: 'center'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      ...lblStyle,
+      marginBottom: '7px'
+    }
+  }, "Nessun dato"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: '11.5px',
+      color: IRON.dust,
+      lineHeight: 1.5
+    }
+  }, "Servono almeno 4 sedute registrate dello stesso esercizio, con carico e ripetizioni.")), fermi.length > 0 && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+    style: {
+      ...lblStyle,
+      color: '#E5A82B',
+      padding: '0 2px 8px'
+    }
+  }, "Fermi \xB7 ", fermi.length), fermi.map(x => /*#__PURE__*/React.createElement(Riga, {
+    key: x.giorno.id + x.idx,
+    x: x,
+    colore: "#E5A82B"
+  }))), lenti.length > 0 && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+    style: {
+      ...lblStyle,
+      padding: '14px 2px 8px'
+    }
+  }, "Rallentati \xB7 ", lenti.length), lenti.map(x => /*#__PURE__*/React.createElement(Riga, {
+    key: x.giorno.id + x.idx,
+    x: x,
+    colore: "#8A8A93"
+  }))), ok.length > 0 && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+    style: {
+      ...lblStyle,
+      color: '#2FA055',
+      padding: '14px 2px 8px'
+    }
+  }, "In progressione \xB7 ", ok.length), ok.map(x => /*#__PURE__*/React.createElement(Riga, {
+    key: x.giorno.id + x.idx,
+    x: x,
+    colore: "#2FA055"
+  }))), pochi.length > 0 && /*#__PURE__*/React.createElement("div", {
+    style: {
+      ...lblStyle,
+      padding: '14px 2px 0',
+      lineHeight: 1.7
+    }
+  }, pochi.length, " esercizi con meno di 4 sedute: servono pi\xF9 dati per giudicare."), /*#__PURE__*/React.createElement(InfoBox, {
+    color: "#8A8A93",
+    title: "Come leggerlo"
+  }, "L'1RM stimato usa la formula di Epley sulla serie migliore di ogni seduta. \xC8 attendibile fino a circa 10 ripetizioni; oltre, sovrastima. ", /*#__PURE__*/React.createElement("b", {
+    style: {
+      color: IRON.chalk
+    }
+  }, "Uno stallo in deficit calorico non \xE8 un difetto del programma"), ": mantenere la forza mentre cali di peso \xE8 gi\xE0 un risultato.")));
+}
+
+// ============================================================
+// ANALISI · CURVA DI DECADIMENTO DELLE SERIE
+// Quanto perdi dalla prima all'ultima serie dello stesso esercizio.
+// ============================================================
+function DecadimentoScreen(_ref97) {
+  let goBack = _ref97.goBack;
+  const schede = tutteLeSchede();
+  const _useState171 = useState(() => Math.max(0, schede.findIndex(s => s.id === schedaAttivaId()))),
+    _useState172 = _slicedToArray(_useState171, 2),
+    i = _useState172[0],
+    setI = _useState172[1];
+  const prog = schede[i] || schede[0];
+  const dati = serieEsercizi(prog.config).map(e => {
+    const cali = e.sedute.filter(s => s.reps.length >= 3).map(s => s.calo);
+    if (!cali.length) return null;
+    const medio = cali.reduce((a, b) => a + b, 0) / cali.length;
+    return {
+      ...e,
+      medio,
+      n: cali.length,
+      ultimo: e.sedute[e.sedute.length - 1]
+    };
+  }).filter(Boolean).sort((a, b) => b.medio - a.medio);
+  const banda = v => v > 30 ? {
+    c: '#E5A82B',
+    t: 'crollo',
+    n: 'Perdi più del 30%: o parti troppo vicino al cedimento, o il recupero fra le serie è corto.'
+  } : v < 10 ? {
+    c: '#4D82E8',
+    t: 'piatto',
+    n: 'Perdi meno del 10%: probabilmente stai lasciando ripetizioni in canna. Puoi avvicinarti di più.'
+  } : {
+    c: '#2FA055',
+    t: 'calibrato',
+    n: 'Calo fra il 10 e il 30%: sforzo e recupero sono nella misura giusta.'
+  };
+  const medioGen = dati.length ? dati.reduce((a, x) => a + x.medio, 0) / dati.length : 0;
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      minHeight: '100vh',
+      paddingBottom: '120px'
+    }
+  }, /*#__PURE__*/React.createElement(Header, {
+    title: "Decadimento",
+    subtitle: "Quanto cali dalla prima all'ultima serie",
+    onBack: goBack
+  }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: '0 14px'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      gap: '5px',
+      overflowX: 'auto',
+      paddingBottom: '12px'
+    }
+  }, schede.map((p, k) => /*#__PURE__*/React.createElement("button", {
+    key: p.id,
+    onClick: () => setI(k),
+    style: {
+      flexShrink: 0,
+      padding: '8px 13px',
+      borderRadius: '3px',
+      fontFamily: monoFont,
+      fontSize: '11px',
+      fontWeight: '600',
+      cursor: 'pointer',
+      background: k === i ? IRON.chalk : IRON.surface,
+      color: k === i ? IRON.bg : IRON.dust,
+      border: '1px solid ' + (k === i ? IRON.chalk : IRON.edge)
+    }
+  }, p.label))), dati.length === 0 ? /*#__PURE__*/React.createElement("div", {
+    style: {
+      ...glassCard,
+      padding: '22px 16px',
+      textAlign: 'center'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      ...lblStyle,
+      marginBottom: '7px'
+    }
+  }, "Nessun dato"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: '11.5px',
+      color: IRON.dust,
+      lineHeight: 1.5
+    }
+  }, "Servono sedute con almeno 3 serie registrate con le ripetizioni.")) : /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+    style: {
+      ...glassCard,
+      padding: '14px',
+      marginBottom: '13px',
+      textAlign: 'center'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      ...numStyle,
+      fontSize: '30px',
+      fontWeight: '600',
+      color: banda(medioGen).c
+    }
+  }, medioGen.toFixed(0), "%"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      ...lblStyle,
+      marginTop: '2px'
+    }
+  }, "calo medio \xB7 ", banda(medioGen).t)), dati.map(x => {
+    const b = banda(x.medio);
+    const larg = Math.min(100, Math.max(2, x.medio * 2));
+    return /*#__PURE__*/React.createElement("div", {
+      key: x.giorno.id + x.idx,
+      style: {
+        marginBottom: '13px'
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        display: 'flex',
+        alignItems: 'baseline',
+        gap: '8px',
+        marginBottom: '4px'
+      }
+    }, /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontSize: '12px',
+        color: '#C0BEC6',
+        flex: 1
+      }
+    }, x.ex.name), /*#__PURE__*/React.createElement("span", {
+      style: {
+        ...numStyle,
+        fontSize: '12.5px',
+        fontWeight: '600',
+        color: b.c
+      }
+    }, x.medio.toFixed(0), "%")), /*#__PURE__*/React.createElement("div", {
+      style: {
+        height: '6px',
+        background: IRON.knurl,
+        position: 'relative'
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        position: 'absolute',
+        left: '20%',
+        width: '40%',
+        top: 0,
+        bottom: 0,
+        background: 'rgba(47,160,85,0.14)'
+      }
+    }), /*#__PURE__*/React.createElement("div", {
+      style: {
+        width: larg + '%',
+        height: '100%',
+        background: b.c
+      }
+    })), /*#__PURE__*/React.createElement("div", {
+      style: {
+        ...lblStyle,
+        fontSize: '8px',
+        marginTop: '4px'
+      }
+    }, x.giorno.label, " \xB7 ultima seduta ", x.ultimo.reps.join(' · '), " @ ", x.ultimo.kg, " kg"));
+  }), /*#__PURE__*/React.createElement(InfoBox, {
+    color: "#2FA055",
+    title: "La fascia verde \xE8 10-30%"
+  }, "Sotto il 10% quasi certamente ti fermi troppo lontano dal cedimento. Sopra il 30% arrivi all'ultima serie troppo affaticato: allunga il recupero o parti con un RIR pi\xF9 alto."), /*#__PURE__*/React.createElement(InfoBox, {
+    color: "#8A8A93",
+    title: "Onest\xE0 sulle soglie"
+  }, "Il 10 e il 30% sono ", /*#__PURE__*/React.createElement("b", {
+    style: {
+      color: IRON.chalk
+    }
+  }, "soglie ragionate, non prese da uno studio"), ". La logica sotto \u2014 se non cali non stai spingendo, se crolli hai gestito male fatica o recupero \u2014 \xE8 solida; i numeri esatti sono un punto di partenza da tarare su di te."))));
+}
+
+// ============================================================
+// ANALISI · PROIEZIONE DELLA COMPOSIZIONE
+// ============================================================
+function proietta(_ref98) {
+  let peso = _ref98.peso,
+    bf = _ref98.bf,
+    altezza = _ref98.altezza,
+    tdee = _ref98.tdee,
+    intake = _ref98.intake,
+    settimane = _ref98.settimane;
+  const h = altezza / 100;
+  let p = peso,
+    grasso = peso * bf / 100,
+    magra = peso - grasso;
+  const kcalPerKg = tdee / peso;
+  const tappe = [];
+  for (let w = 1; w <= settimane; w++) {
+    // il mantenimento scende col peso, più una quota di adattamento in deficit
+    const adatt = intake < tdee ? Math.min(0.06, 0.006 * w) : 0;
+    const tdeeOra = kcalPerKg * p * (1 - adatt);
+    const dKg = (intake - tdeeOra) * 7 / 7700;
+    // ripartizione: in deficit con proteine alte e pesi si perde soprattutto grasso;
+    // in surplus, in un avanzato, quasi metà dell'aumento è grasso
+    const qGrasso = dKg < 0 ? 0.85 : 0.55;
+    grasso += dKg * qGrasso;
+    magra += dKg * (1 - qGrasso);
+    // ricomposizione: vicino al pareggio un allenato con proteine alte sposta
+    // lentamente grasso in magra. ~0,7 kg in 12 settimane, non di più.
+    const vicinoPareggio = Math.abs(intake - tdeeOra) / tdeeOra < 0.04;
+    if (vicinoPareggio) {
+      grasso -= 0.058;
+      magra += 0.058;
+    }
+    p = grasso + magra;
+    if (w % 4 === 0 || w === settimane) {
+      const bfOra = grasso / p * 100;
+      tappe.push({
+        w,
+        peso: p,
+        bf: bfOra,
+        magra,
+        ffmi: magra / (h * h) + 6.1 * (1.8 - h)
+      });
+    }
+  }
+  return tappe;
+}
+function ProiezioneScreen(_ref99) {
+  let goBack = _ref99.goBack;
+  const pesoLog = storage.get('peso') || {};
+  const misure = storage.get('misure') || {};
+  const h = storage.get('altezza') || '';
+  const blocchi = Object.keys(misure);
+  const ultimo = blocchi.length ? misure[blocchi[blocchi.length - 1]] : {};
+  const serie = Object.keys(pesoLog).map(Number).sort((a, b) => a - b).map(w => mediaSett(pesoLog[w])).filter(x => x > 0);
+  const peso = serie.length ? serie[serie.length - 1] : null;
+  const comp = stimaComposizione({
+    peso,
+    vita: ultimo['Vita ombelicale'],
+    collo: ultimo['Collo'],
+    altezza: h
+  });
+  const tdee = parseFloat(storage.get('tdee_manuale')) || 2638;
+  const _useState173 = useState(1),
+    _useState174 = _slicedToArray(_useState173, 2),
+    scelta = _useState174[0],
+    setScelta = _useState174[1];
+  const opzioni = [{
+    l: 'Deficit',
+    k: Math.round(tdee * 0.85),
+    c: '#4D82E8'
+  }, {
+    l: 'Pareggio',
+    k: Math.round(tdee),
+    c: '#2FA055'
+  }, {
+    l: 'Lean gain',
+    k: Math.round(tdee * 1.08),
+    c: '#E5A82B'
+  }];
+  if (!comp) {
+    return /*#__PURE__*/React.createElement("div", {
+      style: {
+        minHeight: '100vh',
+        paddingBottom: '120px'
+      }
+    }, /*#__PURE__*/React.createElement(Header, {
+      title: "Proiezione",
+      subtitle: "Dove saresti fra 12 settimane",
+      onBack: goBack
+    }), /*#__PURE__*/React.createElement("div", {
+      style: {
+        padding: '0 14px'
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        ...glassCard,
+        padding: '20px 16px',
+        textAlign: 'center'
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        ...lblStyle,
+        marginBottom: '8px',
+        color: '#E5A82B'
+      }
+    }, "Dati insufficienti"), /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: '11.5px',
+        color: IRON.dust,
+        lineHeight: 1.55
+      }
+    }, "Servono peso, altezza, vita e collo. Li inserisci nella schermata ", /*#__PURE__*/React.createElement("b", {
+      style: {
+        color: IRON.chalk
+      }
+    }, "Corpo"), "."))));
+  }
+  const tappe = proietta({
+    peso,
+    bf: comp.bf,
+    altezza: parseFloat(h),
+    tdee,
+    intake: opzioni[scelta].k,
+    settimane: 12
+  });
+  const fine = tappe[tappe.length - 1];
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      minHeight: '100vh',
+      paddingBottom: '120px'
+    }
+  }, /*#__PURE__*/React.createElement(Header, {
+    title: "Proiezione",
+    subtitle: "Dove saresti fra 12 settimane",
+    onBack: goBack
+  }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: '0 14px'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      gap: '6px',
+      marginBottom: '14px'
+    }
+  }, opzioni.map((o, k) => /*#__PURE__*/React.createElement("button", {
+    key: o.l,
+    onClick: () => setScelta(k),
+    style: {
+      flex: 1,
+      minHeight: '52px',
+      borderRadius: '3px',
+      cursor: 'pointer',
+      background: k === scelta ? o.c : IRON.surface,
+      color: k === scelta ? IRON.bg : IRON.dust,
+      border: '1px solid ' + (k === scelta ? o.c : IRON.edge),
+      fontFamily: monoFont,
+      fontSize: '11px',
+      fontWeight: '600',
+      lineHeight: 1.4
+    }
+  }, o.l, /*#__PURE__*/React.createElement("br", null), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: '9.5px',
+      opacity: 0.85
+    }
+  }, o.k, " kcal")))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      gap: '10px',
+      alignItems: 'stretch',
+      marginBottom: '14px'
+    }
+  }, [{
+    t: 'OGGI',
+    d: {
+      peso,
+      bf: comp.bf,
+      ffmi: comp.ffmi
+    }
+  }, {
+    t: 'SETT. 12',
+    d: fine
+  }].map(x => /*#__PURE__*/React.createElement("div", {
+    key: x.t,
+    style: {
+      flex: 1,
+      ...glassCard,
+      padding: '12px 8px'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      ...lblStyle,
+      textAlign: 'center',
+      marginBottom: '6px'
+    }
+  }, x.t), /*#__PURE__*/React.createElement(Figura, {
+    bf: x.d.bf,
+    ffmi: x.d.ffmi,
+    altezzaPx: 148
+  }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      textAlign: 'center',
+      marginTop: '9px'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      ...numStyle,
+      fontSize: '19px',
+      fontWeight: '600',
+      color: IRON.chalk
+    }
+  }, x.d.peso.toFixed(1).replace('.', ',')), /*#__PURE__*/React.createElement("div", {
+    style: {
+      ...lblStyle,
+      fontSize: '8px'
+    }
+  }, "KG"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      ...numStyle,
+      fontSize: '13px',
+      color: '#E5A82B',
+      marginTop: '6px'
+    }
+  }, x.d.bf.toFixed(1).replace('.', ','), "%"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      ...lblStyle,
+      fontSize: '8px'
+    }
+  }, "GRASSO"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      ...numStyle,
+      fontSize: '13px',
+      color: '#2FA055',
+      marginTop: '6px'
+    }
+  }, x.d.ffmi.toFixed(1).replace('.', ',')), /*#__PURE__*/React.createElement("div", {
+    style: {
+      ...lblStyle,
+      fontSize: '8px'
+    }
+  }, "FFMI"))))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      ...glassCard,
+      padding: '13px',
+      marginBottom: '13px'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      ...lblStyle,
+      marginBottom: '9px'
+    }
+  }, "Tappe"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      ...lblStyle,
+      fontSize: '8px',
+      paddingBottom: '5px',
+      borderBottom: '1px solid ' + IRON.edge
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      width: '46px'
+    }
+  }, "Sett."), /*#__PURE__*/React.createElement("span", {
+    style: {
+      flex: 1,
+      textAlign: 'right'
+    }
+  }, "Peso"), /*#__PURE__*/React.createElement("span", {
+    style: {
+      flex: 1,
+      textAlign: 'right'
+    }
+  }, "Grasso"), /*#__PURE__*/React.createElement("span", {
+    style: {
+      flex: 1,
+      textAlign: 'right'
+    }
+  }, "Magra")), tappe.map(t => /*#__PURE__*/React.createElement("div", {
+    key: t.w,
+    style: {
+      display: 'flex',
+      padding: '7px 0',
+      borderBottom: '1px solid ' + IRON.edge,
+      ...numStyle,
+      fontSize: '12px',
+      color: '#C0BEC6'
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      width: '46px',
+      color: IRON.ash
+    }
+  }, "S", t.w), /*#__PURE__*/React.createElement("span", {
+    style: {
+      flex: 1,
+      textAlign: 'right',
+      color: IRON.chalk
+    }
+  }, t.peso.toFixed(1)), /*#__PURE__*/React.createElement("span", {
+    style: {
+      flex: 1,
+      textAlign: 'right'
+    }
+  }, t.bf.toFixed(1), "%"), /*#__PURE__*/React.createElement("span", {
+    style: {
+      flex: 1,
+      textAlign: 'right'
+    }
+  }, t.magra.toFixed(1))))), (() => {
+    const dGrasso = fine.peso * fine.bf / 100 - peso * comp.bf / 100;
+    const dMagra = fine.magra - comp.ffm;
+    return /*#__PURE__*/React.createElement(InfoBox, {
+      color: opzioni[scelta].c,
+      title: 'In 12 settimane · ' + opzioni[scelta].l
+    }, "Grasso ", /*#__PURE__*/React.createElement("b", {
+      style: {
+        color: IRON.chalk
+      }
+    }, dGrasso > 0 ? '+' : '', dGrasso.toFixed(1), " kg"), ", massa magra ", /*#__PURE__*/React.createElement("b", {
+      style: {
+        color: IRON.chalk
+      }
+    }, dMagra > 0 ? '+' : '', dMagra.toFixed(1), " kg"), ", peso ", /*#__PURE__*/React.createElement("b", {
+      style: {
+        color: IRON.chalk
+      }
+    }, fine.peso - peso > 0 ? '+' : '', (fine.peso - peso).toFixed(1), " kg"), ".");
+  })(), /*#__PURE__*/React.createElement(InfoBox, {
+    color: "#8A8A93",
+    title: "Cosa assume il modello"
+  }, "Che tu segua le calorie scelte, che il mantenimento scenda col peso pi\xF9 una quota di adattamento fino al 6%, e che in deficit l'", /*#__PURE__*/React.createElement("b", {
+    style: {
+      color: IRON.chalk
+    }
+  }, "85% del calo sia grasso"), " (realistico con proteine alte e pesi), mentre in surplus lo sia il 55%. Sono valori medi di letteratura: la tua ripartizione reale pu\xF2 discostarsi.", /*#__PURE__*/React.createElement("b", {
+    style: {
+      color: IRON.chalk
+    }
+  }, " \xC8 una proiezione, non una previsione"), " \u2014 serve a confrontare le tre strade, non a promettere un numero.")));
+}
+
 // ============= MAIN =============
 
 function App() {
-  const _useState167 = useState('home'),
-    _useState168 = _slicedToArray(_useState167, 2),
-    screen = _useState168[0],
-    setScreen = _useState168[1];
+  const _useState175 = useState('home'),
+    _useState176 = _slicedToArray(_useState175, 2),
+    screen = _useState176[0],
+    setScreen = _useState176[1];
   const goHome = useCallback(() => setScreen('home'), []);
   // Quando siamo fuori da home, intercetta il tasto indietro per tornare alla home
   useAndroidBack(goHome, screen !== 'home');
@@ -26293,6 +27244,12 @@ function App() {
   }), screen === 'exdb' && /*#__PURE__*/React.createElement(ExerciseDBScreen, {
     goBack: goHome
   }), screen === 'volume' && /*#__PURE__*/React.createElement(VolumeScreen, {
+    goBack: goHome
+  }), screen === 'stalli' && /*#__PURE__*/React.createElement(StalliScreen, {
+    goBack: goHome
+  }), screen === 'decadimento' && /*#__PURE__*/React.createElement(DecadimentoScreen, {
+    goBack: goHome
+  }), screen === 'proiezione' && /*#__PURE__*/React.createElement(ProiezioneScreen, {
     goBack: goHome
   }), screen === 'storico' && /*#__PURE__*/React.createElement(StoricoScreen, {
     goBack: goHome
