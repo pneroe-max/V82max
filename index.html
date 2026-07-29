@@ -2047,7 +2047,7 @@ document.addEventListener('visibilitychange', () => {
 // ============= TEMA v5 "VETRO & VIOLA" =============
 // Card-vetro semitrasparenti (img2) che lasciano filtrare le sfere viola;
 // accento UI viola elettrico (img1). Colori-disco solo per i giorni.
-const APP_VERSION = 'v18.2';
+const APP_VERSION = 'v19.0';
 const APP_BUILD = '2026-07-27';
 const displayFont = "'Archivo', -apple-system, system-ui, sans-serif";
 const monoFont = "'IBM Plex Mono', ui-monospace, 'SF Mono', monospace";
@@ -3132,13 +3132,13 @@ function HomeScreen(_ref12) {
       color: IRON.chalk,
       fontSize: '10.5px'
     }
-  }, "CUT")))), /*#__PURE__*/React.createElement("div", {
+  }, "CUT")))), /*#__PURE__*/React.createElement(AzioneOggi, {
+    apriSeduta: () => navigate('seduta')
+  }), /*#__PURE__*/React.createElement("div", {
     style: {
-      padding: '0 14px'
+      padding: '14px 14px 0'
     }
-  }, /*#__PURE__*/React.createElement(TodayCard, {
-    navigate: navigate
-  }), /*#__PURE__*/React.createElement(GrigliaHome, {
+  }, /*#__PURE__*/React.createElement(PesoRapido, null), /*#__PURE__*/React.createElement(GrigliaHome, {
     apri: navigate
   }), /*#__PURE__*/React.createElement("div", {
     style: {
@@ -3365,7 +3365,11 @@ function WorkoutScreen(_ref16) {
   var _data$selectedWeek2;
   let goBack = _ref16.goBack,
     _ref16$config = _ref16.config,
-    config = _ref16$config === void 0 ? MAIN_CONFIG : _ref16$config;
+    config = _ref16$config === void 0 ? MAIN_CONFIG : _ref16$config,
+    _ref16$giornoIniziale = _ref16.giornoIniziale,
+    giornoIniziale = _ref16$giornoIniziale === void 0 ? null : _ref16$giornoIniziale,
+    _ref16$settimanaInizi = _ref16.settimanaIniziale,
+    settimanaIniziale = _ref16$settimanaInizi === void 0 ? null : _ref16$settimanaInizi;
   const EXS = config.exercises,
     DYS = config.days,
     BLKS = config.blocks,
@@ -3377,15 +3381,15 @@ function WorkoutScreen(_ref16) {
     rotation = config.rotation;
   const _useTimer3 = useTimer(),
     startTimer = _useTimer3.startTimer;
-  const _useState17 = useState('select'),
+  const _useState17 = useState(giornoIniziale ? 'day' : 'select'),
     _useState18 = _slicedToArray(_useState17, 2),
     view = _useState18[0],
     setView = _useState18[1];
-  const _useState19 = useState(WEEKS[0]),
+  const _useState19 = useState(settimanaIniziale || WEEKS[0]),
     _useState20 = _slicedToArray(_useState19, 2),
     selectedWeek = _useState20[0],
     setSelectedWeek = _useState20[1];
-  const _useState21 = useState(null),
+  const _useState21 = useState(giornoIniziale || null),
     _useState22 = _slicedToArray(_useState21, 2),
     selectedDay = _useState22[0],
     setSelectedDay = _useState22[1];
@@ -28437,13 +28441,302 @@ function GrigliaHome(_ref103) {
   }));
 }
 
+// ============================================================
+// ACCESSO RAPIDO · la seduta di oggi in un tocco
+// Prima il pulsante portava alla libreria quando era attiva una
+// scheda personale: tre tocchi, e per giunta apriva il programma
+// sbagliato. Ora apre direttamente la seduta di oggi.
+// ============================================================
+
+// Cosa c'è da fare oggi, sulla scheda attiva
+function sedutaDiOggi() {
+  try {
+    const att = schedaAttiva();
+    const cfg = att.config;
+    const log = storage.get(cfg.storageKey) || {};
+    let week = cfg.weeks[0];
+    for (const w of cfg.weeks) {
+      const fatti = cfg.days.filter(d => (log[w] || {})[d.id] && log[w][d.id].completato).length;
+      if (fatti < cfg.days.length) {
+        week = w;
+        break;
+      }
+      week = w;
+    }
+    const oggi = GIORNI_SETT[new Date().getDay()];
+    const giorno = cfg.days.find(d => (d.dayName || '').toUpperCase() === NOMI_GIORNI[oggi]);
+    if (!giorno) return {
+      att,
+      cfg,
+      week,
+      giorno: null
+    };
+    const dl = (log[week] || {})[giorno.id] || {};
+    const lista = cfg.exercises[giorno.id] || [];
+    const finiti = lista.filter((ex, i) => {
+      const r = (dl.esercizi || {})[i] || {};
+      return (r.sets_done || []).filter(Boolean).length >= (ex.sets || 4);
+    }).length;
+    return {
+      att,
+      cfg,
+      week,
+      giorno,
+      lista,
+      finiti,
+      completata: !!dl.completato,
+      iniziata: finiti > 0 || Object.keys(dl.esercizi || {}).length > 0,
+      serie: lista.reduce((a, e) => a + (e.sets || 0), 0)
+    };
+  } catch (e) {
+    return null;
+  }
+}
+function AzioneOggi(_ref104) {
+  let apriSeduta = _ref104.apriSeduta;
+  const s = sedutaDiOggi();
+  if (!s) return null;
+  const att = s.att,
+    week = s.week,
+    giorno = s.giorno;
+  if (!giorno) {
+    return /*#__PURE__*/React.createElement("div", {
+      style: {
+        background: IRON.surface,
+        borderTop: '1px solid ' + IRON.edge,
+        borderBottom: '1px solid ' + IRON.edge,
+        padding: '16px 14px'
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: lblStyle
+    }, att.label, " \xB7 settimana ", week, " \xB7 oggi"), /*#__PURE__*/React.createElement("div", {
+      style: {
+        ...dispStyle,
+        fontSize: '34px',
+        margin: '8px 0 0',
+        color: IRON.dust
+      }
+    }, "Riposo"), /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontFamily: monoFont,
+        fontSize: '10.5px',
+        color: IRON.dust,
+        marginTop: '6px'
+      }
+    }, "Nessuna seduta in programma \xB7 NEAT alto e proteine"));
+  }
+  const restanti = s.lista.length - s.finiti;
+  const pct = s.lista.length ? Math.round(s.finiti / s.lista.length * 100) : 0;
+  const stato = s.completata ? 'completata' : s.iniziata ? 'in corso' : 'da fare';
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: IRON.surface,
+      borderTop: '1px solid ' + IRON.edge,
+      borderBottom: '1px solid ' + IRON.edge,
+      padding: '15px 14px 16px'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'baseline'
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: lblStyle
+  }, att.label, " \xB7 settimana ", week), /*#__PURE__*/React.createElement("span", {
+    style: {
+      ...lblStyle,
+      color: s.completata ? '#2FA055' : s.iniziata ? '#E5A82B' : IRON.ash
+    }
+  }, stato)), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      alignItems: 'flex-end',
+      gap: '11px',
+      marginTop: '7px'
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      ...dispStyle,
+      fontSize: '38px',
+      color: IRON.chalk
+    }
+  }, giorno.label), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontFamily: monoFont,
+      fontSize: '10.5px',
+      color: IRON.dust,
+      paddingBottom: '5px'
+    }
+  }, s.lista.length, " es \xB7 ", s.serie, " serie", giorno.dur ? ' · ' + giorno.dur : '')), s.iniziata && !s.completata && /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginTop: '10px'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      height: '5px',
+      background: IRON.knurl
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      width: pct + '%',
+      height: '100%',
+      background: '#E5A82B'
+    }
+  })), /*#__PURE__*/React.createElement("div", {
+    style: {
+      ...lblStyle,
+      fontSize: '8px',
+      marginTop: '4px'
+    }
+  }, s.finiti, " di ", s.lista.length, " esercizi \xB7 ne restano ", restanti)), /*#__PURE__*/React.createElement("button", {
+    onClick: apriSeduta,
+    style: {
+      marginTop: '13px',
+      width: '100%',
+      minHeight: '58px',
+      border: 'none',
+      borderRadius: '3px',
+      cursor: 'pointer',
+      background: s.completata ? IRON.knurl : s.iniziata ? '#E5A82B' : IRON.chalk,
+      color: s.completata ? IRON.dust : IRON.bg,
+      fontFamily: displayFont,
+      fontVariationSettings: "'wdth' 112",
+      fontSize: '15px',
+      fontWeight: '800',
+      letterSpacing: '0.08em',
+      textTransform: 'uppercase'
+    }
+  }, s.completata ? 'Rivedi la seduta' : s.iniziata ? 'Riprendi · ' + restanti + ' da fare' : 'Inizia'));
+}
+
+// Peso di oggi direttamente in home: un campo, un tocco
+function PesoRapido() {
+  const _useState181 = useState(''),
+    _useState182 = _slicedToArray(_useState181, 2),
+    v = _useState182[0],
+    setV = _useState182[1];
+  const _useState183 = useState(null),
+    _useState184 = _slicedToArray(_useState183, 2),
+    fatto = _useState184[0],
+    setFatto = _useState184[1];
+  const oggi = GIORNI_SETT[new Date().getDay()];
+  const sett = settimanaCorrente();
+  const gia = ((storage.get('peso') || {})[sett] || {})[oggi] || '';
+  const salva = () => {
+    const n = parseFloat(String(v).replace(',', '.'));
+    if (isNaN(n) || n <= 0) return;
+    const d = storage.get('peso') || {};
+    if (!d[sett]) d[sett] = {
+      media: 0,
+      note: ''
+    };
+    d[sett][oggi] = String(Math.round(n * 10) / 10);
+    d[sett].media = mediaSett(d[sett]);
+    storage.set('peso', d);
+    setFatto(d[sett][oggi]);
+    setV('');
+  };
+  const mostrato = fatto || gia;
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      gap: '8px',
+      alignItems: 'stretch',
+      marginBottom: '14px'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      flex: 1,
+      display: 'flex',
+      alignItems: 'center',
+      gap: '10px',
+      border: '1px solid ' + IRON.edge,
+      background: IRON.surface,
+      borderRadius: '3px',
+      padding: '0 12px',
+      minHeight: '52px'
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      ...lblStyle,
+      fontSize: '8px'
+    }
+  }, "Peso oggi"), /*#__PURE__*/React.createElement("input", {
+    type: "number",
+    inputMode: "decimal",
+    step: "0.1",
+    value: v,
+    onChange: e => setV(e.target.value),
+    onKeyDown: e => {
+      if (e.key === 'Enter') salva();
+    },
+    placeholder: mostrato ? String(mostrato) : '—',
+    style: {
+      flex: 1,
+      minWidth: 0,
+      background: 'none',
+      border: 'none',
+      outline: 'none',
+      textAlign: 'right',
+      ...numStyle,
+      fontSize: '19px',
+      fontWeight: '600',
+      color: mostrato && !v ? '#2FA055' : IRON.chalk
+    }
+  }), /*#__PURE__*/React.createElement("span", {
+    style: {
+      ...lblStyle,
+      fontSize: '8px'
+    }
+  }, "kg")), /*#__PURE__*/React.createElement("button", {
+    onClick: salva,
+    disabled: !String(v).trim(),
+    style: {
+      width: '92px',
+      minHeight: '52px',
+      borderRadius: '3px',
+      border: 'none',
+      cursor: String(v).trim() ? 'pointer' : 'default',
+      background: String(v).trim() ? IRON.chalk : IRON.surface,
+      color: String(v).trim() ? IRON.bg : IRON.ash,
+      fontFamily: monoFont,
+      fontSize: '11px',
+      fontWeight: '600',
+      letterSpacing: '0.06em',
+      textTransform: 'uppercase'
+    }
+  }, mostrato ? 'correggi' : 'segna'));
+}
+
+// La seduta aperta direttamente dalla home, sulla scheda attiva
+function SedutaRapida(_ref105) {
+  let goBack = _ref105.goBack;
+  const s = sedutaDiOggi();
+  if (!s || !s.giorno) return /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: '20px'
+    }
+  }, /*#__PURE__*/React.createElement(Header, {
+    title: "Oggi",
+    subtitle: "Nessuna seduta",
+    onBack: goBack
+  }));
+  return /*#__PURE__*/React.createElement(WorkoutScreen, {
+    goBack: goBack,
+    config: s.cfg,
+    giornoIniziale: s.giorno.id,
+    settimanaIniziale: s.week
+  });
+}
+
 // ============= MAIN =============
 
 function App() {
-  const _useState181 = useState('home'),
-    _useState182 = _slicedToArray(_useState181, 2),
-    screen = _useState182[0],
-    setScreen = _useState182[1];
+  const _useState185 = useState('home'),
+    _useState186 = _slicedToArray(_useState185, 2),
+    screen = _useState186[0],
+    setScreen = _useState186[1];
   const goHome = useCallback(() => setScreen('home'), []);
   // Quando siamo fuori da home, intercetta il tasto indietro per tornare alla home
   useAndroidBack(goHome, screen !== 'home');
@@ -28472,7 +28765,9 @@ function App() {
     key: g.id,
     gruppo: g,
     goBack: goHome
-  }) : null), screen === 'profilo' && /*#__PURE__*/React.createElement(ProfiloScreen, {
+  }) : null), screen === 'seduta' && /*#__PURE__*/React.createElement(SedutaRapida, {
+    goBack: goHome
+  }), screen === 'profilo' && /*#__PURE__*/React.createElement(ProfiloScreen, {
     goBack: goHome
   }), screen === 'stalli' && /*#__PURE__*/React.createElement(StalliScreen, {
     goBack: goHome
