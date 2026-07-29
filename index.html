@@ -2047,7 +2047,7 @@ document.addEventListener('visibilitychange', () => {
 // ============= TEMA v5 "VETRO & VIOLA" =============
 // Card-vetro semitrasparenti (img2) che lasciano filtrare le sfere viola;
 // accento UI viola elettrico (img1). Colori-disco solo per i giorni.
-const APP_VERSION = 'v18.1';
+const APP_VERSION = 'v18.2';
 const APP_BUILD = '2026-07-27';
 const displayFont = "'Archivo', -apple-system, system-ui, sans-serif";
 const monoFont = "'IBM Plex Mono', ui-monospace, 'SF Mono', monospace";
@@ -7460,7 +7460,7 @@ const EXERCISE_PACK = {
       "img": "exercises/Barbell_Seated_Calf_Raise/0.webp",
       "lang": "it",
       "img2": "exercises/Barbell_Seated_Calf_Raise/1.webp",
-      "prof": "ALLUNGATO"
+      "prof": "ACCORCIATO"
     },
     "Barbell_Shoulder_Press": {
       "id": "Barbell_Shoulder_Press",
@@ -10295,7 +10295,7 @@ const EXERCISE_PACK = {
       "img": "exercises/Dumbbell_Seated_One-Leg_Calf_Raise/0.webp",
       "lang": "it",
       "img2": "exercises/Dumbbell_Seated_One-Leg_Calf_Raise/1.webp",
-      "prof": "ALLUNGATO"
+      "prof": "ACCORCIATO"
     },
     "Dumbbell_Shoulder_Press": {
       "id": "Dumbbell_Shoulder_Press",
@@ -14999,7 +14999,7 @@ const EXERCISE_PACK = {
       "img": "exercises/Seated_Calf_Raise/0.webp",
       "lang": "en",
       "img2": "exercises/Seated_Calf_Raise/1.webp",
-      "prof": "ALLUNGATO"
+      "prof": "ACCORCIATO"
     },
     "Seated_Close-Grip_Concentration_Barbell_Curl": {
       "id": "Seated_Close-Grip_Concentration_Barbell_Curl",
@@ -28124,14 +28124,30 @@ function ProfiloScreen(_ref99) {
     style: {
       color: IRON.chalk
     }
-  }, "distale e centrale"), " del muscolo. Non \xE8 una differenza enorme, ma \xE8 gratis: basta scegliere l'esercizio giusto."), /*#__PURE__*/React.createElement(InfoBox, {
+  }, "distale e centrale"), " del muscolo. Tre confronti diretti lo mostrano bene: ", /*#__PURE__*/React.createElement("b", {
+    style: {
+      color: IRON.chalk
+    }
+  }, "leg curl seduto contro prono"), " (+14,1% contro +9,3% sui femorali),", /*#__PURE__*/React.createElement("b", {
+    style: {
+      color: IRON.chalk
+    }
+  }, "estensioni sopra la testa contro push-down"), " per i tricipiti, e", /*#__PURE__*/React.createElement("b", {
+    style: {
+      color: IRON.chalk
+    }
+  }, "calf in piedi contro seduto"), ". In tutti e tre il vantaggio va alla versione in cui l'articolazione non bersaglio allunga il muscolo."), /*#__PURE__*/React.createElement(InfoBox, {
     color: "#8A8A93",
     title: "Come ho classificato, e i limiti"
   }, "La classificazione \xE8 dedotta dal ", /*#__PURE__*/React.createElement("b", {
     style: {
       color: IRON.chalk
     }
-  }, "gesto"), " \u2014 inclinazione, posizione dell'articolazione, tipo di attrezzo \u2014 non da una misura di coppia articolare. \xC8 una prima approssimazione: su alcuni esercizi il profilo reale dipende dalla tua leva e da come li esegui. Una revisione del 2026 avverte che lunghezza muscolare, escursione e scelta dell'esercizio sono intrecciate, e non \xE8 ancora chiaro quale pesi di pi\xF9.")));
+  }, "gesto"), " \u2014 inclinazione, posizione dell'articolazione, tipo di attrezzo \u2014 non da una misura di coppia articolare. Per i muscoli ", /*#__PURE__*/React.createElement("b", {
+    style: {
+      color: IRON.chalk
+    }
+  }, "biarticolari"), " (femorali, capo lungo del tricipite, gastrocnemio) \xE8 l'angolo dell'altra articolazione a decidere la lunghezza, ed \xE8 l\xEC che la regola \xE8 pi\xF9 affidabile. \xC8 una prima approssimazione: su alcuni esercizi il profilo reale dipende dalla tua leva e da come li esegui. Una revisione del 2026 avverte che lunghezza muscolare, escursione e scelta dell'esercizio sono intrecciate, e non \xE8 ancora chiaro quale pesi di pi\xF9.")));
 }
 
 // ============================================================
