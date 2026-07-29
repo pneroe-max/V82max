@@ -2047,7 +2047,7 @@ document.addEventListener('visibilitychange', () => {
 // ============= TEMA v5 "VETRO & VIOLA" =============
 // Card-vetro semitrasparenti (img2) che lasciano filtrare le sfere viola;
 // accento UI viola elettrico (img1). Colori-disco solo per i giorni.
-const APP_VERSION = 'v18.0';
+const APP_VERSION = 'v18.1';
 const APP_BUILD = '2026-07-27';
 const displayFont = "'Archivo', -apple-system, system-ui, sans-serif";
 const monoFont = "'IBM Plex Mono', ui-monospace, 'SF Mono', monospace";
@@ -4731,7 +4731,23 @@ function PesoScreen(_ref17) {
     style: {
       color: IRON.chalk
     }
-  }, "collo"), " nella scheda Misure.")), comp && /*#__PURE__*/React.createElement(React.Fragment, null, (comp.bf < 6 || comp.bf > 40) && /*#__PURE__*/React.createElement(InfoBox, {
+  }, "collo"), " nella scheda Misure.")), comp && /*#__PURE__*/React.createElement(React.Fragment, null, (() => {
+    const hm = parseFloat(h) / 100;
+    const bmi = hm > 0 ? peso / (hm * hm) : 0;
+    if (bmi <= 27) return null;
+    return /*#__PURE__*/React.createElement(InfoBox, {
+      color: "#E5A82B",
+      title: 'BMI ' + bmi.toFixed(1) + ' · la stima è probabilmente bassa'
+    }, "Sopra un BMI di 27 il metodo Navy ", /*#__PURE__*/React.createElement("b", {
+      style: {
+        color: IRON.chalk
+      }
+    }, "sottostima il grasso di 2,5-4,5 punti"), " nei soggetti muscolosi, perch\xE9 legge il collo largo come massa magra. Il tuo valore reale \xE8 verosimilmente fra ", /*#__PURE__*/React.createElement("b", {
+      style: {
+        color: IRON.chalk
+      }
+    }, (comp.bf + 2.5).toFixed(1), "% e ", (comp.bf + 4.5).toFixed(1), "%"), ", e di conseguenza la FFMI \xE8 pi\xF9 bassa di quella mostrata.");
+  })(), (comp.bf < 6 || comp.bf > 40) && /*#__PURE__*/React.createElement(InfoBox, {
     color: "#D8342C",
     title: "Valore fuori scala"
   }, comp.bf, "% \xE8 fuori dall'intervallo attendibile. Ricontrolla vita e collo: a digiuno, metro aderente ma non stretto, vita all'ombelico e collo sotto il pomo d'Adamo."), /*#__PURE__*/React.createElement(InfoBox, {
@@ -24240,8 +24256,9 @@ function VolumeScreen(_ref64) {
 // ============================================================
 // V11.2 · TDEE ADATTIVO
 // ============================================================
-const KCAL_PER_KG = 7700; // ~7700 kcal per kg di massa persa/guadagnata
-
+// Densità energetica del peso perso/guadagnato, calcolata dai tessuti anziché
+// dal forfait di 7700, che sovrastima nei soggetti magri (Hall 2008).
+const KCAL_PER_KG = 8200;
 function TdeeScreen(_ref65) {
   let goBack = _ref65.goBack;
   const pesoLog = storage.get('peso') || {};
@@ -26940,12 +26957,12 @@ function giudizioFFMI(ffmi) {
   if (ffmi < 25) return {
     t: 'molto avanzato',
     c: '#A855F7',
-    n: 'Vicino al limite naturale stimato (~25). Ogni chilo di magra costa un blocco intero.'
+    n: 'Vicino al limite tipico dei natural (~25). Ogni chilo di magra costa un blocco intero.'
   };
   return {
-    t: 'oltre il limite stimato',
+    t: 'sopra il limite tipico',
     c: '#E5A82B',
-    n: 'Sopra 25 la letteratura sui natural è scarsa. Più probabile un errore di misura sulla vita o sul collo.'
+    n: 'Il 25 di Kouri è il limite tipico, non un muro: circa il 5% dei natural verificati lo supera, con casi documentati a 26-27. Ma l\'errore sulla stima del grasso vale da solo 1-2 punti di FFMI, quindi prima di stupirti ricontrolla vita e collo.'
   };
 }
 
@@ -27448,10 +27465,12 @@ function proietta(_ref96) {
     // il mantenimento scende col peso, più una quota di adattamento in deficit
     const adatt = intake < tdee ? Math.min(0.06, 0.006 * w) : 0;
     const tdeeOra = kcalPerKg * p * (1 - adatt);
-    const dKg = (intake - tdeeOra) * 7 / 7700;
-    // ripartizione: in deficit con proteine alte e pesi si perde soprattutto grasso;
-    // in surplus, in un avanzato, quasi metà dell'aumento è grasso
-    const qGrasso = dKg < 0 ? 0.85 : 0.55;
+    // Densità energetica dei tessuti (Hall): grasso ~9450 kcal/kg, magra ~1130.
+    // Il forfait di 7700 vale per soggetti grassi e sovrastima nei magri.
+    const dKcal = (intake - tdeeOra) * 7;
+    const qGrasso = dKcal < 0 ? 0.85 : 0.55;
+    const densita = qGrasso * 9450 + (1 - qGrasso) * 1130;
+    const dKg = dKcal / densita;
     grasso += dKg * qGrasso;
     magra += dKg * (1 - qGrasso);
     // ricomposizione: vicino al pareggio un allenato con proteine alte sposta
