@@ -2047,7 +2047,7 @@ document.addEventListener('visibilitychange', () => {
 // ============= TEMA v5 "VETRO & VIOLA" =============
 // Card-vetro semitrasparenti (img2) che lasciano filtrare le sfere viola;
 // accento UI viola elettrico (img1). Colori-disco solo per i giorni.
-const APP_VERSION = 'v17.1';
+const APP_VERSION = 'v18.0';
 const APP_BUILD = '2026-07-27';
 const displayFont = "'Archivo', -apple-system, system-ui, sans-serif";
 const monoFont = "'IBM Plex Mono', ui-monospace, 'SF Mono', monospace";
@@ -3138,70 +3138,8 @@ function HomeScreen(_ref12) {
     }
   }, /*#__PURE__*/React.createElement(TodayCard, {
     navigate: navigate
-  }), [['Allenarsi', ['workout', 'summer', 'library']], ['Registrare', ['peso', 'nutrition', 'diets', 'recovery']], ['Analizzare', ['dashboard', 'profilo', 'stalli', 'decadimento', 'proiezione', 'volume', 'tdee', 'storico']], ['Riferimento', ['exdb', 'bilanciere', 'guide', 'settings']]].concat((() => {
-    const assegnate = ['workout', 'summer', 'library', 'peso', 'nutrition', 'diets', 'recovery', 'dashboard', 'profilo', 'stalli', 'decadimento', 'proiezione', 'volume', 'tdee', 'storico', 'exdb', 'bilanciere', 'guide', 'settings'];
-    const resto = sections.filter(x => assegnate.indexOf(x.id) < 0).map(x => x.id);
-    return resto.length ? [['Altro', resto]] : [];
-  })()).map(_ref15 => {
-    let _ref16 = _slicedToArray(_ref15, 2),
-      titolo = _ref16[0],
-      ids = _ref16[1];
-    const voci = ids.map(id => sections.find(x => x.id === id)).filter(Boolean);
-    if (!voci.length) return null;
-    return /*#__PURE__*/React.createElement("div", {
-      key: titolo,
-      style: {
-        marginBottom: '20px'
-      }
-    }, /*#__PURE__*/React.createElement("div", {
-      style: {
-        ...lblStyle,
-        padding: '0 2px 8px'
-      }
-    }, titolo), /*#__PURE__*/React.createElement("div", {
-      style: {
-        border: '1px solid ' + IRON.edge,
-        borderRadius: '4px',
-        overflow: 'hidden',
-        background: IRON.surface
-      }
-    }, voci.map((s, i) => /*#__PURE__*/React.createElement("button", {
-      key: s.id,
-      onClick: () => navigate(s.id),
-      style: {
-        width: '100%',
-        display: 'flex',
-        alignItems: 'center',
-        gap: '13px',
-        minHeight: '56px',
-        padding: '0 14px',
-        background: 'none',
-        cursor: 'pointer',
-        border: 'none',
-        borderTop: i ? '1px solid ' + IRON.edge : 'none',
-        textAlign: 'left'
-      }
-    }, /*#__PURE__*/React.createElement("span", {
-      style: {
-        width: '3px',
-        height: '22px',
-        borderRadius: '2px',
-        background: s.color,
-        flexShrink: 0,
-        display: 'block'
-      }
-    }), /*#__PURE__*/React.createElement("span", {
-      style: {
-        flex: 1,
-        fontFamily: displayFont,
-        fontSize: '14px',
-        fontWeight: '600',
-        color: IRON.chalk
-      }
-    }, s.label), /*#__PURE__*/React.createElement(ChevronRight, {
-      size: 16,
-      color: IRON.ash
-    })))));
+  }), /*#__PURE__*/React.createElement(GrigliaHome, {
+    apri: navigate
   }), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: '10px',
@@ -3217,15 +3155,15 @@ function HomeScreen(_ref12) {
 
 // ============= EXERCISE DETAIL =============
 
-function ExerciseDetailScreen(_ref17) {
-  let exercise = _ref17.exercise,
-    week = _ref17.week,
-    dayId = _ref17.dayId,
-    goBack = _ref17.goBack,
-    _ref17$applyLogic = _ref17.applyLogic,
-    applyLogic = _ref17$applyLogic === void 0 ? applyBlockLogic : _ref17$applyLogic,
-    _ref17$days = _ref17.days,
-    days = _ref17$days === void 0 ? DAYS : _ref17$days;
+function ExerciseDetailScreen(_ref15) {
+  let exercise = _ref15.exercise,
+    week = _ref15.week,
+    dayId = _ref15.dayId,
+    goBack = _ref15.goBack,
+    _ref15$applyLogic = _ref15.applyLogic,
+    applyLogic = _ref15$applyLogic === void 0 ? applyBlockLogic : _ref15$applyLogic,
+    _ref15$days = _ref15.days,
+    days = _ref15$days === void 0 ? DAYS : _ref15$days;
   const _useTimer2 = useTimer(),
     startTimer = _useTimer2.startTimer;
   const logic = applyLogic(exercise, week);
@@ -3423,11 +3361,11 @@ const MAIN_CONFIG = {
   weeks: [1, 2, 3, 4, 5, 6, 7, 8],
   rotation: true
 };
-function WorkoutScreen(_ref18) {
+function WorkoutScreen(_ref16) {
   var _data$selectedWeek2;
-  let goBack = _ref18.goBack,
-    _ref18$config = _ref18.config,
-    config = _ref18$config === void 0 ? MAIN_CONFIG : _ref18$config;
+  let goBack = _ref16.goBack,
+    _ref16$config = _ref16.config,
+    config = _ref16$config === void 0 ? MAIN_CONFIG : _ref16$config;
   const EXS = config.exercises,
     DYS = config.days,
     BLKS = config.blocks,
@@ -4442,8 +4380,8 @@ function WorkoutScreen(_ref18) {
 }
 // ============= PESO =============
 
-function PesoScreen(_ref19) {
-  let goBack = _ref19.goBack;
+function PesoScreen(_ref17) {
+  let goBack = _ref17.goBack;
   const _useState33 = useState({}),
     _useState34 = _slicedToArray(_useState33, 2),
     data = _useState34[0],
@@ -4616,11 +4554,11 @@ function PesoScreen(_ref19) {
       borderTop: '1px solid ' + IRON.edge,
       paddingTop: '11px'
     }
-  }, comp ? [['GRASSO', comp.bf.toFixed(1).replace('.', ',') + '%', giudizioBF(comp.bf)], ['FFMI', String(comp.ffmi).replace('.', ','), giudizioFFMI(comp.ffmi)], ['MASSA MAGRA', comp.ffm.toFixed(1).replace('.', ',') + ' kg', null]].map(_ref20 => {
-    let _ref21 = _slicedToArray(_ref20, 3),
-      l = _ref21[0],
-      v = _ref21[1],
-      gj = _ref21[2];
+  }, comp ? [['GRASSO', comp.bf.toFixed(1).replace('.', ',') + '%', giudizioBF(comp.bf)], ['FFMI', String(comp.ffmi).replace('.', ','), giudizioFFMI(comp.ffmi)], ['MASSA MAGRA', comp.ffm.toFixed(1).replace('.', ',') + ' kg', null]].map(_ref18 => {
+    let _ref19 = _slicedToArray(_ref18, 3),
+      l = _ref19[0],
+      v = _ref19[1],
+      gj = _ref19[2];
     return /*#__PURE__*/React.createElement("div", {
       key: l,
       style: {
@@ -4739,10 +4677,10 @@ function PesoScreen(_ref19) {
       gap: '5px',
       marginBottom: '13px'
     }
-  }, [['ora', 'Composizione'], ['misure', 'Misure'], ['storico', 'Storico']].map(_ref22 => {
-    let _ref23 = _slicedToArray(_ref22, 2),
-      id = _ref23[0],
-      l = _ref23[1];
+  }, [['ora', 'Composizione'], ['misure', 'Misure'], ['storico', 'Storico']].map(_ref20 => {
+    let _ref21 = _slicedToArray(_ref20, 2),
+      id = _ref21[0],
+      l = _ref21[1];
     return /*#__PURE__*/React.createElement("button", {
       key: id,
       onClick: () => setVista(id),
@@ -5081,8 +5019,8 @@ function PesoScreen(_ref19) {
 
 // ============= DASHBOARD =============
 
-function DashboardScreen(_ref24) {
-  let goBack = _ref24.goBack;
+function DashboardScreen(_ref22) {
+  let goBack = _ref22.goBack;
   const schede = tutteLeSchede();
   const _useState45 = useState(() => Math.max(0, schede.findIndex(s => s.id === schedaAttivaId()))),
     _useState46 = _slicedToArray(_useState45, 2),
@@ -5130,10 +5068,10 @@ function DashboardScreen(_ref24) {
     });
     return result;
   };
-  const ultimaSett = Object.entries(pesoData).filter(_ref25 => {
-    let _ref26 = _slicedToArray(_ref25, 2),
-      _ = _ref26[0],
-      v = _ref26[1];
+  const ultimaSett = Object.entries(pesoData).filter(_ref23 => {
+    let _ref24 = _slicedToArray(_ref23, 2),
+      _ = _ref24[0],
+      v = _ref24[1];
     return v.media > 0;
   }).sort((a, b) => parseInt(a[0]) - parseInt(b[0])).slice(-1)[0];
   const pesoAttuale = ultimaSett ? ultimaSett[1].media : pesoIniziale;
@@ -5481,8 +5419,8 @@ function DashboardScreen(_ref24) {
 
 // ============= RECOVERY =============
 
-function RecoveryScreen(_ref27) {
-  let goBack = _ref27.goBack;
+function RecoveryScreen(_ref25) {
+  let goBack = _ref25.goBack;
   const _useState53 = useState({}),
     _useState54 = _slicedToArray(_useState53, 2),
     data = _useState54[0],
@@ -5635,8 +5573,8 @@ function RecoveryScreen(_ref27) {
 
 // ============= GUIDE =============
 
-function GuideScreen(_ref28) {
-  let goBack = _ref28.goBack;
+function GuideScreen(_ref26) {
+  let goBack = _ref26.goBack;
   const techniques = [{
     badge: 'C',
     name: 'Compound principale',
@@ -5922,8 +5860,8 @@ function GuideScreen(_ref28) {
 
 // ============= SETTINGS =============
 
-function SettingsScreen(_ref29) {
-  let goBack = _ref29.goBack;
+function SettingsScreen(_ref27) {
+  let goBack = _ref27.goBack;
   const _useState55 = useState(null),
     _useState56 = _slicedToArray(_useState55, 2),
     msg = _useState56[0],
@@ -18558,10 +18496,10 @@ const validateV8w = obj => {
 // "Gonfia" una scheda leggera .v8w in un config completo per WorkoutScreen.
 const rehydrateSchedule = v8w => {
   const localDb = {};
-  if (v8w.newExercises) Object.entries(v8w.newExercises).forEach(_ref30 => {
-    let _ref31 = _slicedToArray(_ref30, 2),
-      id = _ref31[0],
-      def = _ref31[1];
+  if (v8w.newExercises) Object.entries(v8w.newExercises).forEach(_ref28 => {
+    let _ref29 = _slicedToArray(_ref28, 2),
+      id = _ref29[0],
+      def = _ref29[1];
     localDb[id] = {
       id,
       ...def
@@ -18615,10 +18553,10 @@ const rehydrateSchedule = v8w => {
     rotation: !!v8w.rotation
   };
 };
-function InfoBox(_ref32) {
-  let color = _ref32.color,
-    title = _ref32.title,
-    children = _ref32.children;
+function InfoBox(_ref30) {
+  let color = _ref30.color,
+    title = _ref30.title,
+    children = _ref30.children;
   return /*#__PURE__*/React.createElement("div", {
     style: {
       background: `${color}14`,
@@ -18642,8 +18580,8 @@ function InfoBox(_ref32) {
     }
   }, children));
 }
-function SummerScreen(_ref33) {
-  let goBack = _ref33.goBack;
+function SummerScreen(_ref31) {
+  let goBack = _ref31.goBack;
   const _useState57 = useState('info'),
     _useState58 = _slicedToArray(_useState57, 2),
     mode = _useState58[0],
@@ -18976,8 +18914,8 @@ const SUPP_STACK = [{
   e: 'Micronutrienti',
   t: '#8A8A93'
 }];
-function NutritionScreen(_ref34) {
-  let goBack = _ref34.goBack;
+function NutritionScreen(_ref32) {
+  let goBack = _ref32.goBack;
   const _useState59 = useState('dieta'),
     _useState60 = _slicedToArray(_useState59, 2),
     tab = _useState60[0],
@@ -19033,11 +18971,11 @@ function NutritionScreen(_ref34) {
       gap: '6px',
       marginBottom: '12px'
     }
-  }, [['KCAL', '~2.000', '#E0524A'], ['PROT', '200g', '#3FB66C'], ['CHO', '170g', '#E8B43C'], ['GRASSI', '55g', '#4D82E8']].map(_ref35 => {
-    let _ref36 = _slicedToArray(_ref35, 3),
-      l = _ref36[0],
-      v = _ref36[1],
-      c = _ref36[2];
+  }, [['KCAL', '~2.000', '#E0524A'], ['PROT', '200g', '#3FB66C'], ['CHO', '170g', '#E8B43C'], ['GRASSI', '55g', '#4D82E8']].map(_ref33 => {
+    let _ref34 = _slicedToArray(_ref33, 3),
+      l = _ref34[0],
+      v = _ref34[1],
+      c = _ref34[2];
     return /*#__PURE__*/React.createElement("div", {
       key: l,
       style: {
@@ -19261,11 +19199,11 @@ function NutritionScreen(_ref34) {
       gap: '6px',
       marginBottom: '12px'
     }
-  }, [['KCAL', '~2.800', '#E0524A'], ['PROT', '200g', '#3FB66C'], ['CHO', '460-550', '#E8B43C'], ['GRASSI', '30-40', '#4D82E8']].map(_ref37 => {
-    let _ref38 = _slicedToArray(_ref37, 3),
-      l = _ref38[0],
-      v = _ref38[1],
-      c = _ref38[2];
+  }, [['KCAL', '~2.800', '#E0524A'], ['PROT', '200g', '#3FB66C'], ['CHO', '460-550', '#E8B43C'], ['GRASSI', '30-40', '#4D82E8']].map(_ref35 => {
+    let _ref36 = _slicedToArray(_ref35, 3),
+      l = _ref36[0],
+      v = _ref36[1],
+      c = _ref36[2];
     return /*#__PURE__*/React.createElement("div", {
       key: l,
       style: {
@@ -19406,8 +19344,8 @@ const XIcon = p => /*#__PURE__*/React.createElement(Icon, _extends({
 }, p));
 
 // ============= ESTATE V2 · 4 GIORNI =============
-function Summer2Screen(_ref39) {
-  let goBack = _ref39.goBack;
+function Summer2Screen(_ref37) {
+  let goBack = _ref37.goBack;
   const _useState61 = useState('info'),
     _useState62 = _slicedToArray(_useState61, 2),
     mode = _useState62[0],
@@ -19458,11 +19396,11 @@ function Summer2Screen(_ref39) {
       gap: '4px',
       marginBottom: '14px'
     }
-  }, cols.map(_ref40 => {
-    let _ref41 = _slicedToArray(_ref40, 3),
-      d = _ref41[0],
-      n = _ref41[1],
-      c = _ref41[2];
+  }, cols.map(_ref38 => {
+    let _ref39 = _slicedToArray(_ref38, 3),
+      d = _ref39[0],
+      n = _ref39[1],
+      c = _ref39[2];
     return /*#__PURE__*/React.createElement("div", {
       key: d,
       style: {
@@ -19531,8 +19469,8 @@ function Summer2Screen(_ref39) {
 }
 
 // ============= LIBRERIA SCHEDE (import .v8w) =============
-function LibraryScreenLegacy(_ref42) {
-  let goBack = _ref42.goBack;
+function LibraryScreenLegacy(_ref40) {
+  let goBack = _ref40.goBack;
   const _useState63 = useState(() => storage.get('custom_schedules') || []),
     _useState64 = _slicedToArray(_useState63, 2),
     schedules = _useState64[0],
@@ -20596,17 +20534,17 @@ const copyText = t => {
 // ============================================================
 // V10 · COMPONENTI UI CONDIVISI
 // ============================================================
-function Fld(_ref43) {
-  let label = _ref43.label,
-    value = _ref43.value,
-    onChange = _ref43.onChange,
-    _ref43$type = _ref43.type,
-    type = _ref43$type === void 0 ? 'text' : _ref43$type,
-    ph = _ref43.ph,
-    _ref43$align = _ref43.align,
-    align = _ref43$align === void 0 ? 'center' : _ref43$align,
-    _ref43$flex = _ref43.flex,
-    flex = _ref43$flex === void 0 ? 1 : _ref43$flex;
+function Fld(_ref41) {
+  let label = _ref41.label,
+    value = _ref41.value,
+    onChange = _ref41.onChange,
+    _ref41$type = _ref41.type,
+    type = _ref41$type === void 0 ? 'text' : _ref41$type,
+    ph = _ref41.ph,
+    _ref41$align = _ref41.align,
+    align = _ref41$align === void 0 ? 'center' : _ref41$align,
+    _ref41$flex = _ref41.flex,
+    flex = _ref41$flex === void 0 ? 1 : _ref41$flex;
   return /*#__PURE__*/React.createElement("div", {
     style: {
       flex: flex,
@@ -20637,8 +20575,8 @@ function Fld(_ref43) {
     }
   }));
 }
-function BtnRow(_ref44) {
-  let children = _ref44.children;
+function BtnRow(_ref42) {
+  let children = _ref42.children;
   return /*#__PURE__*/React.createElement("div", {
     style: {
       display: 'flex',
@@ -20647,12 +20585,12 @@ function BtnRow(_ref44) {
     }
   }, children);
 }
-function MiniBtn(_ref45) {
-  let onClick = _ref45.onClick,
-    _ref45$color = _ref45.color,
-    color = _ref45$color === void 0 ? '#8A8A93' : _ref45$color,
-    children = _ref45.children,
-    title = _ref45.title;
+function MiniBtn(_ref43) {
+  let onClick = _ref43.onClick,
+    _ref43$color = _ref43.color,
+    color = _ref43$color === void 0 ? '#8A8A93' : _ref43$color,
+    children = _ref43.children,
+    title = _ref43.title;
   return /*#__PURE__*/React.createElement("button", {
     onClick: onClick,
     title: title,
@@ -20671,14 +20609,14 @@ function MiniBtn(_ref45) {
     }
   }, children);
 }
-function BigBtn(_ref46) {
-  let onClick = _ref46.onClick,
-    _ref46$color = _ref46.color,
-    color = _ref46$color === void 0 ? '#A855F7' : _ref46$color,
-    icon = _ref46.icon,
-    children = _ref46.children,
-    disabled = _ref46.disabled,
-    ghost = _ref46.ghost;
+function BigBtn(_ref44) {
+  let onClick = _ref44.onClick,
+    _ref44$color = _ref44.color,
+    color = _ref44$color === void 0 ? '#A855F7' : _ref44$color,
+    icon = _ref44.icon,
+    children = _ref44.children,
+    disabled = _ref44.disabled,
+    ghost = _ref44.ghost;
   return /*#__PURE__*/React.createElement("button", {
     onClick: onClick,
     disabled: disabled,
@@ -20699,11 +20637,11 @@ function BigBtn(_ref46) {
     }
   }, icon, children);
 }
-function Modal(_ref47) {
-  let title = _ref47.title,
-    subtitle = _ref47.subtitle,
-    onClose = _ref47.onClose,
-    children = _ref47.children;
+function Modal(_ref45) {
+  let title = _ref45.title,
+    subtitle = _ref45.subtitle,
+    onClose = _ref45.onClose,
+    children = _ref45.children;
   useAndroidBack(onClose, true);
   return /*#__PURE__*/React.createElement("div", {
     style: {
@@ -20772,11 +20710,11 @@ function Modal(_ref47) {
 }
 
 // Barra macro con confronto sul target
-function MacroBar(_ref48) {
-  let label = _ref48.label,
-    value = _ref48.value,
-    target = _ref48.target,
-    color = _ref48.color;
+function MacroBar(_ref46) {
+  let label = _ref46.label,
+    value = _ref46.value,
+    target = _ref46.target,
+    color = _ref46.color;
   const t = parseFloat(target) || 0;
   const pct = t > 0 ? Math.min(100, value / t * 100) : 0;
   const delta = t > 0 ? value - t : null;
@@ -20837,9 +20775,9 @@ function MacroBar(_ref48) {
 // ============================================================
 // V10 · SELETTORE ESERCIZI (dal database interno)
 // ============================================================
-function ExercisePicker(_ref49) {
-  let onPick = _ref49.onPick,
-    onClose = _ref49.onClose;
+function ExercisePicker(_ref47) {
+  let onPick = _ref47.onPick,
+    onClose = _ref47.onClose;
   const _useState73 = useState(''),
     _useState74 = _slicedToArray(_useState73, 2),
     q = _useState74[0],
@@ -21008,9 +20946,9 @@ function ExercisePicker(_ref49) {
 // ============================================================
 // V10 · SELETTORE ALIMENTI
 // ============================================================
-function FoodPicker(_ref50) {
-  let onPick = _ref50.onPick,
-    onClose = _ref50.onClose;
+function FoodPicker(_ref48) {
+  let onPick = _ref48.onPick,
+    onClose = _ref48.onClose;
   const _useState77 = useState(''),
     _useState78 = _slicedToArray(_useState77, 2),
     q = _useState78[0],
@@ -21311,10 +21249,10 @@ const DAY_COLORS = ['#4D82E8', '#3b82f6', '#8b5cf6', '#A855F7', '#f59e0b', '#14b
 // ============================================================
 // V10 · EDITOR SCHEDA ALLENAMENTO
 // ============================================================
-function ScheduleEditorScreen(_ref51) {
-  let initial = _ref51.initial,
-    onSave = _ref51.onSave,
-    goBack = _ref51.goBack;
+function ScheduleEditorScreen(_ref49) {
+  let initial = _ref49.initial,
+    onSave = _ref49.onSave,
+    goBack = _ref49.goBack;
   const _useState81 = useState(() => toEditableSched(initial)),
     _useState82 = _slicedToArray(_useState81, 2),
     ed = _useState82[0],
@@ -21789,8 +21727,8 @@ function ScheduleEditorScreen(_ref51) {
 // ============================================================
 // V10 · LIBRERIA SCHEDE ALLENAMENTO
 // ============================================================
-function LibraryScreen(_ref52) {
-  let goBack = _ref52.goBack;
+function LibraryScreen(_ref50) {
+  let goBack = _ref50.goBack;
   const _useState89 = useState(() => storage.get('custom_schedules') || []),
     _useState90 = _slicedToArray(_useState89, 2),
     schedules = _useState90[0],
@@ -22443,10 +22381,10 @@ const validateV8d = o => {
 // ============================================================
 // V10 · EDITOR DIETA
 // ============================================================
-function DietEditorScreen(_ref53) {
-  let initial = _ref53.initial,
-    onSave = _ref53.onSave,
-    goBack = _ref53.goBack;
+function DietEditorScreen(_ref51) {
+  let initial = _ref51.initial,
+    onSave = _ref51.onSave,
+    goBack = _ref51.goBack;
   const _useState103 = useState(() => JSON.parse(JSON.stringify(initial))),
     _useState104 = _slicedToArray(_useState103, 2),
     d = _useState104[0],
@@ -22996,8 +22934,8 @@ function DietEditorScreen(_ref53) {
 // ============================================================
 // V10 · LIBRERIA DIETE + LISTA DELLA SPESA
 // ============================================================
-function DietScreen(_ref54) {
-  let goBack = _ref54.goBack;
+function DietScreen(_ref52) {
+  let goBack = _ref52.goBack;
   const _useState111 = useState(() => storage.get('custom_diets') || []),
     _useState112 = _slicedToArray(_useState111, 2),
     diets = _useState112[0],
@@ -23115,19 +23053,19 @@ function DietScreen(_ref54) {
       agg[key].g += (parseFloat(it.g) || 0) * n;
     }));
     const byCat = {};
-    Object.entries(agg).forEach(_ref55 => {
-      let _ref56 = _slicedToArray(_ref55, 2),
-        k = _ref56[0],
-        v = _ref56[1];
+    Object.entries(agg).forEach(_ref53 => {
+      let _ref54 = _slicedToArray(_ref53, 2),
+        k = _ref54[0],
+        v = _ref54[1];
       (byCat[v.cat] = byCat[v.cat] || []).push([k, v.g]);
     });
     let out = 'LISTA SPESA — ' + d.name + ' × ' + n + ' giorni\n';
     Object.keys(byCat).sort().forEach(cat => {
       out += '\n' + cat.toUpperCase() + '\n';
-      byCat[cat].sort((a, b) => b[1] - a[1]).forEach(_ref57 => {
-        let _ref58 = _slicedToArray(_ref57, 2),
-          k = _ref58[0],
-          g = _ref58[1];
+      byCat[cat].sort((a, b) => b[1] - a[1]).forEach(_ref55 => {
+        let _ref56 = _slicedToArray(_ref55, 2),
+          k = _ref56[0],
+          g = _ref56[1];
         out += '  • ' + k + ' — ' + (g >= 1000 ? Math.round(g / 100) / 10 + ' kg' : Math.round(g) + ' g') + '\n';
       });
     });
@@ -23521,10 +23459,10 @@ function DietScreen(_ref54) {
 // ============================================================
 const EQUIP_LIST = ['Manubri', 'Bilanciere', 'Cavi', 'Macchina', 'Corpo libero', 'Bilanciere EZ', 'Elastici', 'Varie'];
 const TAG_LIST = ['PETTO', 'DORSO', 'D.ANT', 'D.MED', 'D.POST', 'BI', 'TRI', 'AVB', 'QUAD', 'HAM', 'GLUTE', 'POLP', 'CORE'];
-function Thumb(_ref59) {
-  let id = _ref59.id,
-    _ref59$size = _ref59.size,
-    size = _ref59$size === void 0 ? 58 : _ref59$size;
+function Thumb(_ref57) {
+  let id = _ref57.id,
+    _ref57$size = _ref57.size,
+    size = _ref57$size === void 0 ? 58 : _ref57$size;
   const urls = EXERCISE_IMAGES[id] || [];
   const _useState127 = useState(0),
     _useState128 = _slicedToArray(_useState127, 2),
@@ -23548,9 +23486,9 @@ function Thumb(_ref59) {
     }
   });
 }
-function ExDetailModal(_ref60) {
-  let ex = _ref60.ex,
-    onClose = _ref60.onClose;
+function ExDetailModal(_ref58) {
+  let ex = _ref58.ex,
+    onClose = _ref58.onClose;
   const imgs = EXERCISE_IMAGES[ex.id] || [];
   return /*#__PURE__*/React.createElement(Modal, {
     title: ex.name,
@@ -23671,10 +23609,10 @@ function ExDetailModal(_ref60) {
       justifyContent: 'space-around',
       textAlign: 'center'
     }
-  }, [['SERIE', ex.sets], ['REP', ex.reps], ['RIR', ex.rir], ['REC.', ex.rest]].map(_ref61 => {
-    let _ref62 = _slicedToArray(_ref61, 2),
-      l = _ref62[0],
-      v = _ref62[1];
+  }, [['SERIE', ex.sets], ['REP', ex.reps], ['RIR', ex.rir], ['REC.', ex.rest]].map(_ref59 => {
+    let _ref60 = _slicedToArray(_ref59, 2),
+      l = _ref60[0],
+      v = _ref60[1];
     return /*#__PURE__*/React.createElement("div", {
       key: l
     }, /*#__PURE__*/React.createElement("div", {
@@ -23781,8 +23719,8 @@ function ExDetailModal(_ref60) {
     }
   }, "Nome originale: ", ex.nameEn));
 }
-function ExerciseDBScreen(_ref63) {
-  let goBack = _ref63.goBack;
+function ExerciseDBScreen(_ref61) {
+  let goBack = _ref61.goBack;
   const _useState129 = useState(''),
     _useState130 = _slicedToArray(_useState129, 2),
     q = _useState130[0],
@@ -24043,10 +23981,10 @@ function computeVolume(config, weekLog) {
     const dayLog = weekLog[day.id];
     if (!dayLog || !dayLog.esercizi) return;
     const list = config.exercises[day.id] || [];
-    Object.entries(dayLog.esercizi).forEach(_ref64 => {
-      let _ref65 = _slicedToArray(_ref64, 2),
-        idx = _ref65[0],
-        rec = _ref65[1];
+    Object.entries(dayLog.esercizi).forEach(_ref62 => {
+      let _ref63 = _slicedToArray(_ref62, 2),
+        idx = _ref63[0],
+        rec = _ref63[1];
       const ex = list[parseInt(idx, 10)];
       if (!ex) return;
       const done = (rec.sets_done || []).filter(Boolean).length;
@@ -24059,8 +23997,8 @@ function computeVolume(config, weekLog) {
   });
   return out;
 }
-function VolumeScreen(_ref66) {
-  let goBack = _ref66.goBack;
+function VolumeScreen(_ref64) {
+  let goBack = _ref64.goBack;
   const programs = [{
     id: 'main',
     label: 'V8.3.4',
@@ -24304,8 +24242,8 @@ function VolumeScreen(_ref66) {
 // ============================================================
 const KCAL_PER_KG = 7700; // ~7700 kcal per kg di massa persa/guadagnata
 
-function TdeeScreen(_ref67) {
-  let goBack = _ref67.goBack;
+function TdeeScreen(_ref65) {
+  let goBack = _ref65.goBack;
   const pesoLog = storage.get('peso') || {};
   const diets = storage.get('custom_diets') || [];
   const _useState143 = useState(() => storage.get('tdee_giorni') || {}),
@@ -24514,10 +24452,10 @@ function TdeeScreen(_ref67) {
       padding: '13px',
       marginBottom: '12px'
     }
-  }, [['Intake medio', Math.round(intakeMedio) + ' kcal/g'], ['Finestra analizzata', settimane + ' settimane (S' + primo.w + '→S' + ultimo.w + ')'], ['Variazione peso', (deltaKg > 0 ? '+' : '') + deltaKg.toFixed(2) + ' kg'], ['Ritmo settimanale', (kgSett > 0 ? '+' : '') + kgSett.toFixed(2) + ' kg/sett (' + (pctSett > 0 ? '+' : '') + pctSett.toFixed(2) + '%)'], ['Scarto calorico', (scartoGiorno > 0 ? '+' : '') + Math.round(scartoGiorno) + ' kcal/g']].map(_ref68 => {
-    let _ref69 = _slicedToArray(_ref68, 2),
-      k = _ref69[0],
-      v = _ref69[1];
+  }, [['Intake medio', Math.round(intakeMedio) + ' kcal/g'], ['Finestra analizzata', settimane + ' settimane (S' + primo.w + '→S' + ultimo.w + ')'], ['Variazione peso', (deltaKg > 0 ? '+' : '') + deltaKg.toFixed(2) + ' kg'], ['Ritmo settimanale', (kgSett > 0 ? '+' : '') + kgSett.toFixed(2) + ' kg/sett (' + (pctSett > 0 ? '+' : '') + pctSett.toFixed(2) + '%)'], ['Scarto calorico', (scartoGiorno > 0 ? '+' : '') + Math.round(scartoGiorno) + ' kcal/g']].map(_ref66 => {
+    let _ref67 = _slicedToArray(_ref66, 2),
+      k = _ref67[0],
+      v = _ref67[1];
     return /*#__PURE__*/React.createElement("div", {
       key: k,
       style: {
@@ -24569,12 +24507,12 @@ function TdeeScreen(_ref67) {
 // V11.2 · SOSTITUZIONE ESERCIZIO AL VOLO
 // ============================================================
 const SWAP_EQUIP = ['Manubri', 'Bilanciere', 'Bilanciere EZ', 'Cavi', 'Corpo libero'];
-function SwapModal(_ref70) {
-  let exercise = _ref70.exercise,
-    onPick = _ref70.onPick,
-    onClose = _ref70.onClose,
-    onReset = _ref70.onReset,
-    hasSwap = _ref70.hasSwap;
+function SwapModal(_ref68) {
+  let exercise = _ref68.exercise,
+    onPick = _ref68.onPick,
+    onClose = _ref68.onClose,
+    onReset = _ref68.onReset,
+    hasSwap = _ref68.hasSwap;
   const _useState147 = useState(null),
     _useState148 = _slicedToArray(_useState147, 2),
     eq = _useState148[0],
@@ -24987,10 +24925,10 @@ function statsBlocco(config, log) {
       if (!dl || !dl.esercizi) return;
       let serieGiorno = 0;
       const list = config.exercises[day.id] || [];
-      Object.entries(dl.esercizi).forEach(_ref71 => {
-        let _ref72 = _slicedToArray(_ref71, 2),
-          idx = _ref72[0],
-          rec = _ref72[1];
+      Object.entries(dl.esercizi).forEach(_ref69 => {
+        let _ref70 = _slicedToArray(_ref69, 2),
+          idx = _ref70[0],
+          rec = _ref70[1];
         const ex = list[parseInt(idx, 10)];
         const fatte = (rec.sets_done || []).filter(Boolean).length;
         if (!fatte) return;
@@ -25042,8 +24980,8 @@ const PROGRAMMI = () => [{
     return null;
   }
 }).filter(Boolean));
-function StoricoScreen(_ref73) {
-  let goBack = _ref73.goBack;
+function StoricoScreen(_ref71) {
+  let goBack = _ref71.goBack;
   const _useState153 = useState(() => storage.get('archivio') || []),
     _useState154 = _slicedToArray(_useState153, 2),
     archivio = _useState154[0],
@@ -25170,10 +25108,10 @@ function StoricoScreen(_ref73) {
       textAlign: 'center',
       marginBottom: '12px'
     }
-  }, [['SESSIONI', statsCorrente.sessioni], ['SERIE', Math.round(statsCorrente.serie)], ['TONNELLAGGIO', (statsCorrente.tonnellaggio / 1000).toFixed(1) + ' t']].map(_ref74 => {
-    let _ref75 = _slicedToArray(_ref74, 2),
-      l = _ref75[0],
-      v = _ref75[1];
+  }, [['SESSIONI', statsCorrente.sessioni], ['SERIE', Math.round(statsCorrente.serie)], ['TONNELLAGGIO', (statsCorrente.tonnellaggio / 1000).toFixed(1) + ' t']].map(_ref72 => {
+    let _ref73 = _slicedToArray(_ref72, 2),
+      l = _ref73[0],
+      v = _ref73[1];
     return /*#__PURE__*/React.createElement("div", {
       key: l
     }, /*#__PURE__*/React.createElement("div", {
@@ -25246,12 +25184,12 @@ function StoricoScreen(_ref73) {
       flex: 1,
       textAlign: 'right'
     }
-  }, a2.programma, " \xB7 ", fmtData(a2.dal))), [['Sessioni', a1.sessioni, a2.sessioni, ''], ['Serie totali', Math.round(a1.serie), Math.round(a2.serie), ''], ['Tonnellaggio', (a1.tonnellaggio / 1000).toFixed(1), (a2.tonnellaggio / 1000).toFixed(1), ' t']].map(_ref76 => {
-    let _ref77 = _slicedToArray(_ref76, 4),
-      k = _ref77[0],
-      v1 = _ref77[1],
-      v2 = _ref77[2],
-      u = _ref77[3];
+  }, a2.programma, " \xB7 ", fmtData(a2.dal))), [['Sessioni', a1.sessioni, a2.sessioni, ''], ['Serie totali', Math.round(a1.serie), Math.round(a2.serie), ''], ['Tonnellaggio', (a1.tonnellaggio / 1000).toFixed(1), (a2.tonnellaggio / 1000).toFixed(1), ' t']].map(_ref74 => {
+    let _ref75 = _slicedToArray(_ref74, 4),
+      k = _ref75[0],
+      v1 = _ref75[1],
+      v2 = _ref75[2],
+      u = _ref75[3];
     const d = v2 - v1;
     const col = d > 0 ? '#3FB66C' : d < 0 ? '#E0524A' : '#8A8A93';
     return /*#__PURE__*/React.createElement("div", {
@@ -25419,10 +25357,10 @@ function StoricoScreen(_ref73) {
         gap: '14px',
         marginTop: '8px'
       }
-    }, [['sessioni', a.sessioni], ['serie', Math.round(a.serie)], ['tonn.', (a.tonnellaggio / 1000).toFixed(1) + ' t']].map(_ref78 => {
-      let _ref79 = _slicedToArray(_ref78, 2),
-        l = _ref79[0],
-        v = _ref79[1];
+    }, [['sessioni', a.sessioni], ['serie', Math.round(a.serie)], ['tonn.', (a.tonnellaggio / 1000).toFixed(1) + ' t']].map(_ref76 => {
+      let _ref77 = _slicedToArray(_ref76, 2),
+        l = _ref77[0],
+        v = _ref77[1];
       return /*#__PURE__*/React.createElement("div", {
         key: l
       }, /*#__PURE__*/React.createElement("span", {
@@ -25515,9 +25453,9 @@ function scomponi(totale, cfg) {
 }
 
 // Il manicotto: la firma visiva del registro.
-function Sleeve(_ref80) {
-  let peso = _ref80.peso,
-    compatta = _ref80.compatta;
+function Sleeve(_ref78) {
+  let peso = _ref78.peso,
+    compatta = _ref78.compatta;
   const r = scomponi(parseFloat(peso) || 0);
   const H = compatta ? 0.52 : 1;
   if (r.err) {
@@ -25650,12 +25588,12 @@ function ultimaVolta(log, week, dayId, exIdx) {
   }
   return null;
 }
-function UltimaVolta(_ref81) {
-  let log = _ref81.log,
-    week = _ref81.week,
-    dayId = _ref81.dayId,
-    exIdx = _ref81.exIdx,
-    kgAttuale = _ref81.kgAttuale;
+function UltimaVolta(_ref79) {
+  let log = _ref79.log,
+    week = _ref79.week,
+    dayId = _ref79.dayId,
+    exIdx = _ref79.exIdx,
+    kgAttuale = _ref79.kgAttuale;
   const p = ultimaVolta(log, week, dayId, exIdx);
   if (!p) return null;
   const kg = parseFloat(kgAttuale) || 0;
@@ -25726,8 +25664,8 @@ function UltimaVolta(_ref81) {
 // ============================================================
 // REGISTRO · IMPOSTAZIONI BILANCIERE E DISCHI
 // ============================================================
-function BilanciereScreen(_ref82) {
-  let goBack = _ref82.goBack;
+function BilanciereScreen(_ref80) {
+  let goBack = _ref80.goBack;
   const _useState161 = useState(plateCfg),
     _useState162 = _slicedToArray(_useState161, 2),
     cfg = _useState162[0],
@@ -25877,8 +25815,8 @@ const usaBilanciere = ex => {
 // ============================================================
 // REGISTRO · LA SEDUTA DI OGGI
 // ============================================================
-function TodayCard(_ref83) {
-  let navigate = _ref83.navigate;
+function TodayCard(_ref81) {
+  let navigate = _ref81.navigate;
   const att = schedaAttiva();
   const CFG = att.config;
   const log = storage.get(CFG.storageKey) || {};
@@ -25932,10 +25870,10 @@ function TodayCard(_ref83) {
       overflow: 'hidden',
       marginTop: '15px'
     }
-  }, [[String(nEs).padStart(2, '0'), 'ESERCIZI'], [String(nSerie), 'SERIE'], [giorno.dur || '—', 'DURATA']].map((_ref84, i) => {
-    let _ref85 = _slicedToArray(_ref84, 2),
-      v = _ref85[0],
-      l = _ref85[1];
+  }, [[String(nEs).padStart(2, '0'), 'ESERCIZI'], [String(nSerie), 'SERIE'], [giorno.dur || '—', 'DURATA']].map((_ref82, i) => {
+    let _ref83 = _slicedToArray(_ref82, 2),
+      v = _ref83[0],
+      l = _ref83[1];
     return /*#__PURE__*/React.createElement("div", {
       key: l,
       style: {
@@ -26026,14 +25964,14 @@ function PesoSpark() {
 // Una tacca per esercizio: piena se finito, a metà se iniziato.
 // ============================================================
 let _barraGiu = false; // vero quando la barra della seduta occupa il fondo schermo
-function ProgressoSeduta(_ref86) {
-  let esercizi = _ref86.esercizi,
-    blocchi = _ref86.blocchi,
-    data = _ref86.data,
-    week = _ref86.week,
-    dayId = _ref86.dayId,
-    cur = _ref86.cur,
-    vai = _ref86.vai;
+function ProgressoSeduta(_ref84) {
+  let esercizi = _ref84.esercizi,
+    blocchi = _ref84.blocchi,
+    data = _ref84.data,
+    week = _ref84.week,
+    dayId = _ref84.dayId,
+    cur = _ref84.cur,
+    vai = _ref84.vai;
   const log = (data[week] || {})[dayId] || {};
   const gruppi = blocchi || esercizi.map((_, i) => [i]);
   const stato = gruppi.map(g => {
@@ -26094,17 +26032,17 @@ function ProgressoSeduta(_ref86) {
 // L'azione più frequente (spuntare la serie) sta nella zona del
 // pollice e non si sposta mai. Durante il recupero diventa timer.
 // ============================================================
-function BarraSeduta(_ref87) {
-  let esercizi = _ref87.esercizi,
-    idx = _ref87.idx,
-    vai = _ref87.vai,
-    exData = _ref87.exData,
-    logic = _ref87.logic,
-    onSpunta = _ref87.onSpunta,
-    completa = _ref87.completa,
-    completato = _ref87.completato,
-    nomeProssimo = _ref87.nomeProssimo,
-    superset = _ref87.superset;
+function BarraSeduta(_ref85) {
+  let esercizi = _ref85.esercizi,
+    idx = _ref85.idx,
+    vai = _ref85.vai,
+    exData = _ref85.exData,
+    logic = _ref85.logic,
+    onSpunta = _ref85.onSpunta,
+    completa = _ref85.completa,
+    completato = _ref85.completato,
+    nomeProssimo = _ref85.nomeProssimo,
+    superset = _ref85.superset;
   const _useTimer4 = useTimer(),
     active = _useTimer4.active,
     remaining = _useTimer4.remaining,
@@ -26370,11 +26308,11 @@ const recuperoSerie = (tec, i, standard) => {
 };
 
 // Intestazione della tecnica sopra la tabella delle serie
-function IntestazioneTecnica(_ref88) {
-  let tec = _ref88.tec;
+function IntestazioneTecnica(_ref86) {
+  let tec = _ref86.tec;
   const t = TECNICHE[tec];
-  const _ref89 = useContext(TechModalContext) || {},
-    showTech = _ref89.showTech;
+  const _ref87 = useContext(TechModalContext) || {},
+    showTech = _ref87.showTech;
   const _useState163 = useState(false),
     _useState164 = _slicedToArray(_useState163, 2),
     aperto = _useState164[0],
@@ -26448,10 +26386,10 @@ function IntestazioneTecnica(_ref88) {
 }
 
 // Fascia del superset: mostra la coppia e come alternarla
-function FasciaSuperset(_ref90) {
-  let lettera = _ref90.lettera,
-    esercizi = _ref90.esercizi,
-    correnteIdx = _ref90.correnteIdx;
+function FasciaSuperset(_ref88) {
+  let lettera = _ref88.lettera,
+    esercizi = _ref88.esercizi,
+    correnteIdx = _ref88.correnteIdx;
   if (!esercizi || esercizi.length < 2) return null;
   return /*#__PURE__*/React.createElement("div", {
     style: {
@@ -26546,9 +26484,9 @@ const mediaSett = r => {
   const v = GIORNI_SETT.map(g => parseFloat((r || {})[g])).filter(x => !isNaN(x) && x > 0);
   return v.length ? v.reduce((a, b) => a + b, 0) / v.length : 0;
 };
-function InserimentoRapido(_ref91) {
-  let data = _ref91.data,
-    onSalva = _ref91.onSalva;
+function InserimentoRapido(_ref89) {
+  let data = _ref89.data,
+    onSalva = _ref89.onSalva;
   const _useState165 = useState(''),
     _useState166 = _slicedToArray(_useState165, 2),
     v = _useState166[0],
@@ -26639,10 +26577,10 @@ function InserimentoRapido(_ref91) {
 // ============================================================
 // PESO · GRAFICO DELL'ANDAMENTO
 // ============================================================
-function GraficoPeso(_ref92) {
-  let data = _ref92.data,
-    _ref92$altezza = _ref92.altezza,
-    altezza = _ref92$altezza === void 0 ? 130 : _ref92$altezza;
+function GraficoPeso(_ref90) {
+  let data = _ref90.data,
+    _ref90$altezza = _ref90.altezza,
+    altezza = _ref90$altezza === void 0 ? 130 : _ref90$altezza;
   const serie = Object.keys(data).map(Number).sort((a, b) => a - b).map(w => ({
     w,
     m: mediaSett(data[w])
@@ -26749,11 +26687,11 @@ function GraficoPeso(_ref92) {
 // Grasso: formula Navy (vita, collo, altezza). Errore dichiarato ±3-4%.
 // Massa magra: FFMI normalizzato.
 // ============================================================
-function stimaComposizione(_ref93) {
-  let peso = _ref93.peso,
-    vita = _ref93.vita,
-    collo = _ref93.collo,
-    altezza = _ref93.altezza;
+function stimaComposizione(_ref91) {
+  let peso = _ref91.peso,
+    vita = _ref91.vita,
+    collo = _ref91.collo,
+    altezza = _ref91.altezza;
   const p = parseFloat(peso),
     v = parseFloat(vita),
     c = parseFloat(collo),
@@ -26778,11 +26716,11 @@ function stimaComposizione(_ref93) {
 // e lo spessore degli arti seguono il FFMI, la vita segue il grasso.
 // I tratti di definizione compaiono solo quando il grasso è basso.
 // ============================================================
-function Figura(_ref94) {
-  let bf = _ref94.bf,
-    ffmi = _ref94.ffmi,
-    _ref94$altezzaPx = _ref94.altezzaPx,
-    altezzaPx = _ref94$altezzaPx === void 0 ? 210 : _ref94$altezzaPx;
+function Figura(_ref92) {
+  let bf = _ref92.bf,
+    ffmi = _ref92.ffmi,
+    _ref92$altezzaPx = _ref92.altezzaPx,
+    altezzaPx = _ref92$altezzaPx === void 0 ? 210 : _ref92$altezzaPx;
   const m = Math.max(0, Math.min(1, (ffmi - 17) / 8)); // muscolosità: FFMI 17 → 25
   const g = Math.max(0, Math.min(1, (bf - 7) / 21)); // adiposità: 7% → 28%
   const cx = 60;
@@ -27089,8 +27027,8 @@ function alternativePer(ex) {
   const eq = ex.equip || twin && twin.equip;
   return Object.values(EXERCISE_DB).filter(e => e.id !== ex.id && !BUILTIN_TWIN[e.id] && (e.tags || [])[0] === primo && ['Manubri', 'Bilanciere', 'Bilanciere EZ', 'Cavi', 'Corpo libero'].indexOf(e.equip) >= 0 && !!e.isCompound === !!ex.isCompound).sort((a, b) => (a.equip === eq ? -1 : 0) - (b.equip === eq ? -1 : 0)).slice(0, 3);
 }
-function StalliScreen(_ref95) {
-  let goBack = _ref95.goBack;
+function StalliScreen(_ref93) {
+  let goBack = _ref93.goBack;
   const schede = tutteLeSchede();
   const _useState167 = useState(() => Math.max(0, schede.findIndex(s => s.id === schedaAttivaId()))),
     _useState168 = _slicedToArray(_useState167, 2),
@@ -27106,9 +27044,9 @@ function StalliScreen(_ref95) {
     _useState170 = _slicedToArray(_useState169, 2),
     aperto = _useState170[0],
     setAperto = _useState170[1];
-  const Riga = _ref96 => {
-    let x = _ref96.x,
-      colore = _ref96.colore;
+  const Riga = _ref94 => {
+    let x = _ref94.x,
+      colore = _ref94.colore;
     const isOpen = aperto === x.giorno.id + x.idx;
     const alt = isOpen ? alternativePer(x.ex) : [];
     return /*#__PURE__*/React.createElement("div", {
@@ -27317,8 +27255,8 @@ function StalliScreen(_ref95) {
 // ANALISI · CURVA DI DECADIMENTO DELLE SERIE
 // Quanto perdi dalla prima all'ultima serie dello stesso esercizio.
 // ============================================================
-function DecadimentoScreen(_ref97) {
-  let goBack = _ref97.goBack;
+function DecadimentoScreen(_ref95) {
+  let goBack = _ref95.goBack;
   const schede = tutteLeSchede();
   const _useState171 = useState(() => Math.max(0, schede.findIndex(s => s.id === schedaAttivaId()))),
     _useState172 = _slicedToArray(_useState171, 2),
@@ -27493,13 +27431,13 @@ function DecadimentoScreen(_ref97) {
 // ============================================================
 // ANALISI · PROIEZIONE DELLA COMPOSIZIONE
 // ============================================================
-function proietta(_ref98) {
-  let peso = _ref98.peso,
-    bf = _ref98.bf,
-    altezza = _ref98.altezza,
-    tdee = _ref98.tdee,
-    intake = _ref98.intake,
-    settimane = _ref98.settimane;
+function proietta(_ref96) {
+  let peso = _ref96.peso,
+    bf = _ref96.bf,
+    altezza = _ref96.altezza,
+    tdee = _ref96.tdee,
+    intake = _ref96.intake,
+    settimane = _ref96.settimane;
   const h = altezza / 100;
   let p = peso,
     grasso = peso * bf / 100,
@@ -27537,8 +27475,8 @@ function proietta(_ref98) {
   }
   return tappe;
 }
-function ProiezioneScreen(_ref99) {
-  let goBack = _ref99.goBack;
+function ProiezioneScreen(_ref97) {
+  let goBack = _ref97.goBack;
   const pesoLog = storage.get('peso') || {};
   const misure = storage.get('misure') || {};
   const h = storage.get('altezza') || '';
@@ -27860,12 +27798,12 @@ const PROFILI = {
 };
 
 // Curva schematica del carico lungo l'escursione
-function CurvaProfilo(_ref100) {
-  let prof = _ref100.prof,
-    _ref100$w = _ref100.w,
-    w = _ref100$w === void 0 ? 76 : _ref100$w,
-    _ref100$h = _ref100.h,
-    h = _ref100$h === void 0 ? 26 : _ref100$h;
+function CurvaProfilo(_ref98) {
+  let prof = _ref98.prof,
+    _ref98$w = _ref98.w,
+    w = _ref98$w === void 0 ? 76 : _ref98$w,
+    _ref98$h = _ref98.h,
+    h = _ref98$h === void 0 ? 26 : _ref98$h;
   const c = (PROFILI[prof] || PROFILI.MEDIO).c;
   const d = prof === 'ALLUNGATO' ? `M2 ${h - 3} C${w * 0.2} 3 ${w * 0.45} 4 ${w - 2} ${h - 6}` : prof === 'ACCORCIATO' ? `M2 ${h - 6} C${w * 0.5} ${h - 4} ${w * 0.75} 4 ${w - 2} ${h - 3}` : `M2 ${h - 4} C${w * 0.3} 3 ${w * 0.7} 3 ${w - 2} ${h - 4}`;
   return /*#__PURE__*/React.createElement("svg", {
@@ -27901,8 +27839,8 @@ function CurvaProfilo(_ref100) {
     fontFamily: "monospace"
   }, "corto"));
 }
-function ProfiloScreen(_ref101) {
-  let goBack = _ref101.goBack;
+function ProfiloScreen(_ref99) {
+  let goBack = _ref99.goBack;
   const schede = tutteLeSchede();
   const _useState175 = useState(() => Math.max(0, schede.findIndex(s => s.id === schedaAttivaId()))),
     _useState176 = _slicedToArray(_useState175, 2),
@@ -28177,13 +28115,300 @@ function ProfiloScreen(_ref101) {
   }, "gesto"), " \u2014 inclinazione, posizione dell'articolazione, tipo di attrezzo \u2014 non da una misura di coppia articolare. \xC8 una prima approssimazione: su alcuni esercizi il profilo reale dipende dalla tua leva e da come li esegui. Una revisione del 2026 avverte che lunghezza muscolare, escursione e scelta dell'esercizio sono intrecciate, e non \xE8 ancora chiaro quale pesi di pi\xF9.")));
 }
 
+// ============================================================
+// HOME · SEI RIQUADRI INVECE DI DICIANNOVE RIGHE
+// Le voci che facevano la stessa cosa stanno ora dentro un unico
+// riquadro. Ogni riquadro porta un dato vivo, non solo un'etichetta.
+// ============================================================
+const SCHERMATE = {
+  library: LibraryScreen,
+  peso: PesoScreen,
+  proiezione: ProiezioneScreen,
+  recovery: RecoveryScreen,
+  nutrition: NutritionScreen,
+  diets: DietScreen,
+  tdee: TdeeScreen,
+  dashboard: DashboardScreen,
+  volume: VolumeScreen,
+  profilo: ProfiloScreen,
+  stalli: StalliScreen,
+  decadimento: DecadimentoScreen,
+  storico: StoricoScreen,
+  exdb: ExerciseDBScreen,
+  guide: GuideScreen,
+  settings: SettingsScreen,
+  bilanciere: BilanciereScreen
+};
+const GRUPPI_HOME = [{
+  id: 'schede',
+  label: 'Schede',
+  icona: Dumbbell,
+  colore: '#F2F1ED',
+  figli: [['library', 'Tutte le schede', 'Integrate e personali, importa .v8w']]
+}, {
+  id: 'corpo',
+  label: 'Corpo',
+  icona: Scale,
+  colore: '#4D82E8',
+  figli: [['peso', 'Peso e misure', 'Registra, composizione, figura'], ['proiezione', 'Proiezione', 'Dove saresti fra 12 settimane'], ['recovery', 'Recupero', 'Sonno, energia, stress']]
+}, {
+  id: 'cibo',
+  label: 'Nutrizione',
+  icona: Utensils,
+  colore: '#D8342C',
+  figli: [['diets', 'Le mie diete', 'Piani, macro, lista spesa'], ['tdee', 'TDEE adattivo', 'Mantenimento reale dai tuoi dati'], ['nutrition', 'Protocollo', 'Dieta di riferimento e stack']]
+}, {
+  id: 'analisi',
+  label: 'Analisi',
+  icona: BarChart3,
+  colore: '#2FA055',
+  figli: [['dashboard', 'Dashboard', '1RM stimato e andamento'], ['volume', 'Volume', 'Serie per gruppo muscolare'], ['profilo', 'Profilo di resistenza', 'In che punto della curva carichi'], ['stalli', 'Stalli', 'Quali esercizi non salgono più'], ['decadimento', 'Decadimento', 'Calo dalla prima all\u2019ultima serie'], ['storico', 'Storico blocchi', 'Archivia e confronta i mesocicli']]
+}, {
+  id: 'esercizi',
+  label: 'Esercizi',
+  icona: Search,
+  colore: '#22D3EE',
+  figli: [['exdb', 'Database', '556 esercizi con foto e tecnica'], ['bilanciere', 'Bilanciere e dischi', 'Carico per lato']]
+}, {
+  id: 'guida',
+  label: 'Guida',
+  icona: BookOpen,
+  colore: '#A855F7',
+  figli: [['guide', 'Tecniche', 'Come si eseguono'], ['settings', 'Impostazioni', 'Backup, versione, spazio']]
+}];
+
+// Il dato vivo che compare su ogni riquadro
+function statoRiquadro(id) {
+  try {
+    if (id === 'schede') {
+      const a = schedaAttiva();
+      return {
+        v: a.label.length > 13 ? a.label.slice(0, 12) + '…' : a.label,
+        l: 'attiva'
+      };
+    }
+    if (id === 'corpo') {
+      const p = storage.get('peso') || {};
+      const s = Object.keys(p).map(Number).sort((a, b) => a - b).map(w => mediaSett(p[w])).filter(x => x > 0);
+      return s.length ? {
+        v: s[s.length - 1].toFixed(1).replace('.', ','),
+        l: 'kg'
+      } : {
+        v: '—',
+        l: 'kg'
+      };
+    }
+    if (id === 'cibo') {
+      const d = storage.get('custom_diets') || [];
+      if (!d.length) return {
+        v: '—',
+        l: 'kcal'
+      };
+      return {
+        v: String(r0(dietTotals(d[0]).kcal)),
+        l: 'kcal'
+      };
+    }
+    if (id === 'analisi') {
+      const cfg = schedaAttiva().config;
+      const log = storage.get(cfg.storageKey) || {};
+      let n = 0;
+      Object.keys(log).forEach(w => (cfg.days || []).forEach(d => {
+        if ((log[w][d.id] || {}).completato) n++;
+      }));
+      return {
+        v: String(n),
+        l: 'sedute'
+      };
+    }
+    if (id === 'esercizi') return {
+      v: String(Object.keys(EXERCISE_PACK.exercises).length),
+      l: 'esercizi'
+    };
+    if (id === 'guida') return {
+      v: String(Object.keys(TECNICHE).length),
+      l: 'tecniche'
+    };
+  } catch (e) {}
+  return {
+    v: '',
+    l: ''
+  };
+}
+function HubScreen(_ref100) {
+  let gruppo = _ref100.gruppo,
+    goBack = _ref100.goBack;
+  const _useState179 = useState(null),
+    _useState180 = _slicedToArray(_useState179, 2),
+    figlio = _useState180[0],
+    setFiglio = _useState180[1];
+  useAndroidBack(() => setFiglio(null), !!figlio);
+  if (figlio) {
+    const C = SCHERMATE[figlio];
+    if (C) return /*#__PURE__*/React.createElement(C, {
+      goBack: () => setFiglio(null)
+    });
+  }
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      minHeight: '100vh',
+      paddingBottom: '120px'
+    }
+  }, /*#__PURE__*/React.createElement(Header, {
+    title: gruppo.label,
+    subtitle: gruppo.figli.length + ' sezioni',
+    onBack: goBack
+  }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: '0 14px'
+    }
+  }, gruppo.figli.map((_ref101, i) => {
+    let _ref102 = _slicedToArray(_ref101, 3),
+      id = _ref102[0],
+      l = _ref102[1],
+      d = _ref102[2];
+    return /*#__PURE__*/React.createElement("button", {
+      key: id,
+      onClick: () => setFiglio(id),
+      style: {
+        width: '100%',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '13px',
+        minHeight: '64px',
+        padding: '0 14px',
+        background: IRON.surface,
+        cursor: 'pointer',
+        textAlign: 'left',
+        border: '1px solid ' + IRON.edge,
+        borderRadius: '3px',
+        marginBottom: '8px'
+      }
+    }, /*#__PURE__*/React.createElement("span", {
+      style: {
+        ...numStyle,
+        fontSize: '11px',
+        color: IRON.ash,
+        width: '18px'
+      }
+    }, String(i + 1).padStart(2, '0')), /*#__PURE__*/React.createElement("span", {
+      style: {
+        width: '3px',
+        height: '26px',
+        background: gruppo.colore,
+        flexShrink: 0,
+        display: 'block'
+      }
+    }), /*#__PURE__*/React.createElement("span", {
+      style: {
+        flex: 1,
+        minWidth: 0
+      }
+    }, /*#__PURE__*/React.createElement("span", {
+      style: {
+        display: 'block',
+        fontFamily: displayFont,
+        fontSize: '14px',
+        fontWeight: '700',
+        color: IRON.chalk
+      }
+    }, l), /*#__PURE__*/React.createElement("span", {
+      style: {
+        display: 'block',
+        fontSize: '10.5px',
+        color: IRON.dust,
+        marginTop: '2px'
+      }
+    }, d)), /*#__PURE__*/React.createElement(ChevronRight, {
+      size: 16,
+      color: IRON.ash
+    }));
+  })));
+}
+
+// Griglia della home: due colonne, ogni riquadro con la sua cifra
+function GrigliaHome(_ref103) {
+  let apri = _ref103.apri;
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'grid',
+      gridTemplateColumns: '1fr 1fr',
+      gap: '9px'
+    }
+  }, GRUPPI_HOME.map(g => {
+    const st = statoRiquadro(g.id);
+    const I = g.icona;
+    return /*#__PURE__*/React.createElement("button", {
+      key: g.id,
+      onClick: () => apri(g.id),
+      style: {
+        minHeight: '112px',
+        padding: '13px 12px',
+        cursor: 'pointer',
+        textAlign: 'left',
+        background: IRON.surface,
+        border: '1px solid ' + IRON.edge,
+        borderRadius: '3px',
+        borderTop: '2px solid ' + g.colore,
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'space-between'
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'flex-start'
+      }
+    }, /*#__PURE__*/React.createElement(I, {
+      size: 17,
+      color: g.colore
+    }), /*#__PURE__*/React.createElement("span", {
+      style: {
+        ...lblStyle,
+        fontSize: '7.5px'
+      }
+    }, g.figli.length > 1 ? g.figli.length + ' sez.' : '')), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+      style: {
+        display: 'flex',
+        alignItems: 'baseline',
+        gap: '5px'
+      }
+    }, /*#__PURE__*/React.createElement("span", {
+      style: {
+        ...numStyle,
+        fontSize: st.v.length > 6 ? '13px' : '21px',
+        fontWeight: '600',
+        color: IRON.chalk,
+        lineHeight: 1
+      }
+    }, st.v), /*#__PURE__*/React.createElement("span", {
+      style: {
+        ...lblStyle,
+        fontSize: '7.5px'
+      }
+    }, st.l)), /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontFamily: displayFont,
+        fontVariationSettings: "'wdth' 108",
+        fontSize: '15px',
+        fontWeight: '800',
+        letterSpacing: '-0.01em',
+        textTransform: 'uppercase',
+        color: IRON.chalk,
+        marginTop: '5px'
+      }
+    }, g.label)));
+  }));
+}
+
 // ============= MAIN =============
 
 function App() {
-  const _useState179 = useState('home'),
-    _useState180 = _slicedToArray(_useState179, 2),
-    screen = _useState180[0],
-    setScreen = _useState180[1];
+  const _useState181 = useState('home'),
+    _useState182 = _slicedToArray(_useState181, 2),
+    screen = _useState182[0],
+    setScreen = _useState182[1];
   const goHome = useCallback(() => setScreen('home'), []);
   // Quando siamo fuori da home, intercetta il tasto indietro per tornare alla home
   useAndroidBack(goHome, screen !== 'home');
@@ -28208,7 +28433,11 @@ function App() {
     goBack: goHome
   }), screen === 'volume' && /*#__PURE__*/React.createElement(VolumeScreen, {
     goBack: goHome
-  }), screen === 'profilo' && /*#__PURE__*/React.createElement(ProfiloScreen, {
+  }), GRUPPI_HOME.map(g => screen === g.id ? /*#__PURE__*/React.createElement(HubScreen, {
+    key: g.id,
+    gruppo: g,
+    goBack: goHome
+  }) : null), screen === 'profilo' && /*#__PURE__*/React.createElement(ProfiloScreen, {
     goBack: goHome
   }), screen === 'stalli' && /*#__PURE__*/React.createElement(StalliScreen, {
     goBack: goHome
