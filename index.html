@@ -2047,7 +2047,7 @@ document.addEventListener('visibilitychange', () => {
 // ============= TEMA v5 "VETRO & VIOLA" =============
 // Card-vetro semitrasparenti (img2) che lasciano filtrare le sfere viola;
 // accento UI viola elettrico (img1). Colori-disco solo per i giorni.
-const APP_VERSION = 'v19.0';
+const APP_VERSION = 'v20.0';
 const APP_BUILD = '2026-07-27';
 const displayFont = "'Archivo', -apple-system, system-ui, sans-serif";
 const monoFont = "'IBM Plex Mono', ui-monospace, 'SF Mono', monospace";
@@ -2578,6 +2578,7 @@ function Header(_ref0) {
   let title = _ref0.title,
     subtitle = _ref0.subtitle,
     onBack = _ref0.onBack;
+  if (useContext(DentroSezione)) return null;
   return /*#__PURE__*/React.createElement("div", {
     style: {
       margin: '0',
@@ -3138,7 +3139,7 @@ function HomeScreen(_ref12) {
     style: {
       padding: '14px 14px 0'
     }
-  }, /*#__PURE__*/React.createElement(PesoRapido, null), /*#__PURE__*/React.createElement(GrigliaHome, {
+  }, /*#__PURE__*/React.createElement(PesoRapido, null), /*#__PURE__*/React.createElement(VociHome, {
     apri: navigate
   }), /*#__PURE__*/React.createElement("div", {
     style: {
@@ -28730,13 +28731,314 @@ function SedutaRapida(_ref105) {
   });
 }
 
+// ============================================================
+// UNIONE DELLE SCHERMATE
+// Le schermate che rispondono alla stessa domanda diventano
+// sezioni di un'unica destinazione. Il contenuto non cambia:
+// cambia il numero di porte da cui ci si passa.
+// ============================================================
+const DentroSezione = createContext(false);
+function SezioniScreen(_ref106) {
+  let titolo = _ref106.titolo,
+    sezioni = _ref106.sezioni,
+    goBack = _ref106.goBack,
+    _ref106$iniziale = _ref106.iniziale,
+    iniziale = _ref106$iniziale === void 0 ? 0 : _ref106$iniziale;
+  const _useState185 = useState(iniziale),
+    _useState186 = _slicedToArray(_useState185, 2),
+    i = _useState186[0],
+    setI = _useState186[1];
+  const sez = sezioni[i] || sezioni[0];
+  const C = sez.C;
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      minHeight: '100vh'
+    }
+  }, /*#__PURE__*/React.createElement(Header, {
+    title: titolo,
+    subtitle: sez.desc || sez.label,
+    onBack: goBack
+  }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: '0 14px 12px',
+      overflowX: 'auto'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      gap: '5px'
+    }
+  }, sezioni.map((s, k) => /*#__PURE__*/React.createElement("button", {
+    key: s.id,
+    onClick: () => setI(k),
+    style: {
+      flexShrink: 0,
+      minHeight: '42px',
+      padding: '0 13px',
+      borderRadius: '3px',
+      cursor: 'pointer',
+      fontFamily: monoFont,
+      fontSize: '11px',
+      fontWeight: '600',
+      letterSpacing: '0.03em',
+      background: k === i ? IRON.chalk : 'transparent',
+      color: k === i ? IRON.bg : IRON.dust,
+      border: '1px solid ' + (k === i ? IRON.chalk : IRON.edge)
+    }
+  }, s.label)))), /*#__PURE__*/React.createElement(DentroSezione.Provider, {
+    value: true
+  }, /*#__PURE__*/React.createElement(C, {
+    goBack: goBack
+  })));
+}
+
+// Le quattro destinazioni: cosa mangio oggi · come sto · come va l'allenamento · come è configurato
+const DESTINAZIONI = [{
+  id: 'oggi',
+  label: 'Oggi',
+  desc: 'Dieta e grammature del giorno',
+  icona: Utensils,
+  colore: '#D8342C',
+  sezioni: [{
+    id: 'diets',
+    desc: 'Piani, macro e lista spesa',
+    label: 'Diete',
+    C: DietScreen
+  }]
+}, {
+  id: 'corpo',
+  label: 'Corpo',
+  desc: 'Peso, composizione, proiezione',
+  icona: Scale,
+  colore: '#4D82E8',
+  sezioni: [{
+    id: 'peso',
+    desc: 'Registra, composizione, figura',
+    label: 'Peso e misure',
+    C: PesoScreen
+  }, {
+    id: 'proiezione',
+    desc: 'Dove saresti fra 12 settimane',
+    label: 'Proiezione',
+    C: ProiezioneScreen
+  }, {
+    id: 'tdee',
+    desc: 'Mantenimento reale dai tuoi dati',
+    label: 'TDEE',
+    C: TdeeScreen
+  }, {
+    id: 'recovery',
+    desc: 'Sonno, energia, stress',
+    label: 'Recupero',
+    C: RecoveryScreen
+  }]
+}, {
+  id: 'progressi',
+  label: 'Progressi',
+  desc: 'Volume, stalli, 1RM, storico',
+  icona: BarChart3,
+  colore: '#2FA055',
+  sezioni: [{
+    id: 'volume',
+    desc: 'Serie per gruppo muscolare',
+    label: 'Volume',
+    C: VolumeScreen
+  }, {
+    id: 'profilo',
+    desc: 'In che punto della curva carichi',
+    label: 'Profilo',
+    C: ProfiloScreen
+  }, {
+    id: 'stalli',
+    desc: 'Quali esercizi non salgono più',
+    label: 'Stalli',
+    C: StalliScreen
+  }, {
+    id: 'decadimento',
+    desc: "Calo dalla prima all'ultima serie",
+    label: 'Decadimento',
+    C: DecadimentoScreen
+  }, {
+    id: 'dashboard',
+    desc: '1RM stimato e andamento',
+    label: '1RM',
+    C: DashboardScreen
+  }, {
+    id: 'storico',
+    desc: 'Archivia e confronta i blocchi',
+    label: 'Storico',
+    C: StoricoScreen
+  }]
+}, {
+  id: 'setup',
+  label: 'Impostazioni',
+  desc: 'Schede, database, guida, backup',
+  icona: Settings,
+  colore: '#8A8A93',
+  sezioni: [{
+    id: 'library',
+    desc: 'Integrate e personali, importa .v8w',
+    label: 'Schede',
+    C: LibraryScreen
+  }, {
+    id: 'exdb',
+    desc: '556 esercizi con foto e tecnica',
+    label: 'Esercizi',
+    C: ExerciseDBScreen
+  }, {
+    id: 'bilanciere',
+    desc: 'Carico per lato',
+    label: 'Bilanciere',
+    C: BilanciereScreen
+  }, {
+    id: 'guide',
+    desc: 'Come si eseguono le tecniche',
+    label: 'Tecniche',
+    C: GuideScreen
+  }, {
+    id: 'nutrition',
+    desc: 'Dieta di riferimento e stack',
+    label: 'Protocollo',
+    C: NutritionScreen
+  }, {
+    id: 'settings',
+    desc: 'Backup, versione, spazio',
+    label: 'Backup',
+    C: SettingsScreen
+  }]
+}];
+
+// Le quattro voci in home, con il dato vivo
+function VociHome(_ref107) {
+  let apri = _ref107.apri;
+  const dato = id => {
+    try {
+      if (id === 'oggi') {
+        const d = storage.get('custom_diets') || [];
+        return d.length ? {
+          v: String(r0(dietTotals(d[0]).kcal)),
+          u: 'kcal'
+        } : {
+          v: '—',
+          u: 'kcal'
+        };
+      }
+      if (id === 'corpo') {
+        const p = storage.get('peso') || {};
+        const s = Object.keys(p).map(Number).sort((a, b) => a - b).map(w => mediaSett(p[w])).filter(x => x > 0);
+        return s.length ? {
+          v: s[s.length - 1].toFixed(1).replace('.', ','),
+          u: 'kg'
+        } : {
+          v: '—',
+          u: 'kg'
+        };
+      }
+      if (id === 'progressi') {
+        const cfg = schedaAttiva().config;
+        const log = storage.get(cfg.storageKey) || {};
+        let n = 0;
+        Object.keys(log).forEach(w => (cfg.days || []).forEach(d => {
+          if ((log[w][d.id] || {}).completato) n++;
+        }));
+        return {
+          v: String(n),
+          u: 'sedute'
+        };
+      }
+      if (id === 'setup') return {
+        v: schedaAttiva().label.slice(0, 11),
+        u: 'attiva'
+      };
+    } catch (e) {}
+    return {
+      v: '',
+      u: ''
+    };
+  };
+  return /*#__PURE__*/React.createElement("div", null, DESTINAZIONI.map(d => {
+    const s = dato(d.id);
+    const I = d.icona;
+    return /*#__PURE__*/React.createElement("button", {
+      key: d.id,
+      onClick: () => apri(d.id),
+      style: {
+        width: '100%',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '14px',
+        minHeight: '68px',
+        padding: '0 2px',
+        background: 'none',
+        border: 'none',
+        borderBottom: '1px solid ' + IRON.edge,
+        cursor: 'pointer',
+        textAlign: 'left'
+      }
+    }, /*#__PURE__*/React.createElement("span", {
+      style: {
+        width: '3px',
+        height: '30px',
+        background: d.colore,
+        flexShrink: 0,
+        display: 'block'
+      }
+    }), /*#__PURE__*/React.createElement("span", {
+      style: {
+        flex: 1,
+        minWidth: 0
+      }
+    }, /*#__PURE__*/React.createElement("span", {
+      style: {
+        display: 'block',
+        fontFamily: displayFont,
+        fontVariationSettings: "'wdth' 108",
+        fontSize: '21px',
+        fontWeight: '800',
+        letterSpacing: '-0.02em',
+        textTransform: 'uppercase',
+        color: IRON.chalk
+      }
+    }, d.label), /*#__PURE__*/React.createElement("span", {
+      style: {
+        display: 'block',
+        fontSize: '10.5px',
+        color: IRON.dust,
+        marginTop: '2px'
+      }
+    }, d.desc)), /*#__PURE__*/React.createElement("span", {
+      style: {
+        textAlign: 'right',
+        flexShrink: 0
+      }
+    }, /*#__PURE__*/React.createElement("span", {
+      style: {
+        display: 'block',
+        ...numStyle,
+        fontSize: s.v.length > 6 ? '12px' : '17px',
+        fontWeight: '600',
+        color: IRON.chalk
+      }
+    }, s.v), /*#__PURE__*/React.createElement("span", {
+      style: {
+        display: 'block',
+        ...lblStyle,
+        fontSize: '7.5px'
+      }
+    }, s.u)), /*#__PURE__*/React.createElement(ChevronRight, {
+      size: 16,
+      color: IRON.ash
+    }));
+  }));
+}
+
 // ============= MAIN =============
 
 function App() {
-  const _useState185 = useState('home'),
-    _useState186 = _slicedToArray(_useState185, 2),
-    screen = _useState186[0],
-    setScreen = _useState186[1];
+  const _useState187 = useState('home'),
+    _useState188 = _slicedToArray(_useState187, 2),
+    screen = _useState188[0],
+    setScreen = _useState188[1];
   const goHome = useCallback(() => setScreen('home'), []);
   // Quando siamo fuori da home, intercetta il tasto indietro per tornare alla home
   useAndroidBack(goHome, screen !== 'home');
@@ -28761,9 +29063,10 @@ function App() {
     goBack: goHome
   }), screen === 'volume' && /*#__PURE__*/React.createElement(VolumeScreen, {
     goBack: goHome
-  }), GRUPPI_HOME.map(g => screen === g.id ? /*#__PURE__*/React.createElement(HubScreen, {
-    key: g.id,
-    gruppo: g,
+  }), DESTINAZIONI.map(d => screen === d.id ? /*#__PURE__*/React.createElement(SezioniScreen, {
+    key: d.id,
+    titolo: d.label,
+    sezioni: d.sezioni,
     goBack: goHome
   }) : null), screen === 'seduta' && /*#__PURE__*/React.createElement(SedutaRapida, {
     goBack: goHome
