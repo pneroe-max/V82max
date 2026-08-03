@@ -2047,7 +2047,7 @@ document.addEventListener('visibilitychange', () => {
 // ============= TEMA v5 "VETRO & VIOLA" =============
 // Card-vetro semitrasparenti (img2) che lasciano filtrare le sfere viola;
 // accento UI viola elettrico (img1). Colori-disco solo per i giorni.
-const APP_VERSION = 'v20.0';
+const APP_VERSION = 'v21.0';
 const APP_BUILD = '2026-07-27';
 const displayFont = "'Archivo', -apple-system, system-ui, sans-serif";
 const monoFont = "'IBM Plex Mono', ui-monospace, 'SF Mono', monospace";
@@ -4374,7 +4374,15 @@ function WorkoutScreen(_ref16) {
       });
       const primo = exercises[gruppo[0]] || {};
       const lg = applyLogic(primo, selectedWeek);
-      startTimer(recuperoSerie(primo.tec, setIdx, parseRestSeconds(lg.rest)), (gruppo.length > 1 ? 'Superset ' + primo.sup : primo.name) + ' · ' + rigaSerie(primo.tec, setIdx, lg.sets));
+      // Se questa era l'ultima serie, il recupero che serve è quello del
+      // prossimo esercizio: stai per cambiare, non ripetere.
+      const ultimaSerie = setIdx >= lg.sets - 1;
+      const prossimo = ultimaSerie ? exercises[(blocchi[curEx + 1] || [])[0]] : null;
+      const rif = prossimo || primo;
+      const lgRif = prossimo ? applyLogic(prossimo, selectedWeek) : lg;
+      const secondi = ultimaSerie && prossimo ? parseRestSeconds(lgRif.rest) : recuperoSerie(primo.tec, setIdx, parseRestSeconds(lg.rest));
+      const etichetta = ultimaSerie && prossimo ? 'Poi: ' + prossimo.name : (gruppo.length > 1 ? 'Superset ' + primo.sup : primo.name) + ' · ' + rigaSerie(primo.tec, setIdx, lg.sets);
+      startTimer(secondi, etichetta);
       try {
         if (navigator.vibrate) navigator.vibrate(40);
       } catch (e) {}
@@ -6226,6 +6234,7 @@ const summerApplyLogic = (exercise, week) => {
     sets,
     reps: outReps,
     rir,
+    rest: exercise.rest,
     blockName: phase.name,
     variable: phase.variable,
     loadCue: phase.load
@@ -6268,6 +6277,7 @@ const makeApplyLogic = phaseMap => (exercise, week) => {
     sets,
     reps: outReps,
     rir,
+    rest: exercise.rest,
     blockName: phase.name,
     variable: phase.variable,
     loadCue: phase.load
@@ -28732,22 +28742,389 @@ function SedutaRapida(_ref105) {
 }
 
 // ============================================================
+// OGGI · la dieta attiva, aperta direttamente
+// ============================================================
+const dietaAttivaId = () => storage.get('dieta_attiva') || null;
+function dietaAttiva() {
+  const tutte = storage.get('custom_diets') || [];
+  if (!tutte.length) return null;
+  const id = dietaAttivaId();
+  return tutte.find(d => d.id === id) || tutte[0];
+}
+function DietaAttiva(_ref106) {
+  let goBack = _ref106.goBack;
+  const _useState185 = useState(dietaAttiva),
+    _useState186 = _slicedToArray(_useState185, 2),
+    d = _useState186[0],
+    setD = _useState186[1];
+  const _useState187 = useState(false),
+    _useState188 = _slicedToArray(_useState187, 2),
+    lista = _useState188[0],
+    setLista = _useState188[1];
+  const tutte = storage.get('custom_diets') || [];
+  if (!d) {
+    return /*#__PURE__*/React.createElement("div", {
+      style: {
+        minHeight: '100vh',
+        paddingBottom: '120px'
+      }
+    }, /*#__PURE__*/React.createElement(Header, {
+      title: "Oggi",
+      subtitle: "Nessuna dieta impostata",
+      onBack: goBack
+    }), /*#__PURE__*/React.createElement("div", {
+      style: {
+        padding: '0 14px'
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        ...glassCard,
+        padding: '22px 16px',
+        textAlign: 'center'
+      }
+    }, /*#__PURE__*/React.createElement(Utensils, {
+      size: 28,
+      color: IRON.ash
+    }), /*#__PURE__*/React.createElement("div", {
+      style: {
+        ...lblStyle,
+        marginTop: '10px'
+      }
+    }, "Nessuna dieta"), /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: '11.5px',
+        color: IRON.dust,
+        marginTop: '7px',
+        lineHeight: 1.55
+      }
+    }, "Creane una da Impostazioni \xB7 Attive, oppure importa un file .v8d."))));
+  }
+  const salva = nuova => {
+    setD(nuova);
+    const l = (storage.get('custom_diets') || []).map(x => x.id === nuova.id ? nuova : x);
+    storage.set('custom_diets', l);
+  };
+  if (lista) return /*#__PURE__*/React.createElement(DietScreen, {
+    goBack: () => setLista(false)
+  });
+  const tot = dietTotals(d);
+  const tgt = d.target || {};
+  const tgtKcal = kcalOf(parseFloat(tgt.p) || 0, parseFloat(tgt.c) || 0, parseFloat(tgt.f) || 0);
+  const ora = new Date().getHours() * 60 + new Date().getMinutes();
+  const minuti = t => {
+    const m = String(t || '').match(/(\d+)[:.](\d+)/);
+    return m ? +m[1] * 60 + +m[2] : 9999;
+  };
+  const prossimo = (d.meals || []).find(m => minuti(m.time) >= ora) || (d.meals || [])[0];
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      minHeight: '100vh',
+      paddingBottom: '120px'
+    }
+  }, /*#__PURE__*/React.createElement(Header, {
+    title: "Oggi",
+    subtitle: d.name,
+    onBack: goBack
+  }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: '0 14px'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      ...glassCard,
+      padding: '14px',
+      marginBottom: '13px'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'baseline',
+      marginBottom: '11px'
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: lblStyle
+  }, "Totale giornata"), /*#__PURE__*/React.createElement("span", {
+    style: {
+      ...numStyle,
+      fontSize: '20px',
+      fontWeight: '600',
+      color: IRON.chalk
+    }
+  }, r0(tot.kcal), /*#__PURE__*/React.createElement("span", {
+    style: {
+      ...lblStyle,
+      fontSize: '8px'
+    }
+  }, " KCAL"))), /*#__PURE__*/React.createElement(MacroBar, {
+    label: "PROTEINE",
+    value: tot.p,
+    target: tgt.p,
+    color: "#2FA055"
+  }), /*#__PURE__*/React.createElement(MacroBar, {
+    label: "CARBOIDRATI",
+    value: tot.c,
+    target: tgt.c,
+    color: "#E5A82B"
+  }), /*#__PURE__*/React.createElement(MacroBar, {
+    label: "GRASSI",
+    value: tot.f,
+    target: tgt.f,
+    color: "#4D82E8"
+  })), (d.meals || []).map((m, mi) => {
+    const ms = sumMacros(m.items || []);
+    const adesso = prossimo && prossimo.id === m.id;
+    return /*#__PURE__*/React.createElement("div", {
+      key: m.id,
+      style: {
+        ...glassCard,
+        padding: '13px',
+        marginBottom: '9px',
+        borderLeft: '3px solid ' + (adesso ? '#D8342C' : IRON.edge)
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        display: 'flex',
+        alignItems: 'baseline',
+        gap: '9px',
+        marginBottom: '9px'
+      }
+    }, /*#__PURE__*/React.createElement("span", {
+      style: {
+        ...numStyle,
+        fontSize: '12px',
+        color: adesso ? '#D8342C' : IRON.ash
+      }
+    }, m.time), /*#__PURE__*/React.createElement("span", {
+      style: {
+        flex: 1,
+        fontFamily: displayFont,
+        fontSize: '14px',
+        fontWeight: '700',
+        color: IRON.chalk
+      }
+    }, m.name), /*#__PURE__*/React.createElement("span", {
+      style: {
+        ...numStyle,
+        fontSize: '11px',
+        color: IRON.dust
+      }
+    }, r0(ms.kcal), " kcal")), (m.items || []).map((it, ii) => /*#__PURE__*/React.createElement("div", {
+      key: ii,
+      style: {
+        display: 'flex',
+        alignItems: 'center',
+        gap: '10px',
+        padding: '5px 0',
+        borderTop: ii ? '1px solid ' + IRON.edge : 'none'
+      }
+    }, /*#__PURE__*/React.createElement("span", {
+      style: {
+        flex: 1,
+        fontSize: '12px',
+        color: '#C0BEC6'
+      }
+    }, nameOf(it)), /*#__PURE__*/React.createElement("input", {
+      type: "number",
+      inputMode: "decimal",
+      value: it.g,
+      onChange: e => {
+        const n = JSON.parse(JSON.stringify(d));
+        n.meals[mi].items[ii].g = e.target.value;
+        salva(n);
+      },
+      style: {
+        width: '68px',
+        minHeight: '40px',
+        background: '#0E0E11',
+        border: '1px solid ' + IRON.edge,
+        borderRadius: '3px',
+        textAlign: 'center',
+        ...numStyle,
+        fontSize: '14px',
+        fontWeight: '600',
+        color: IRON.chalk,
+        outline: 'none'
+      }
+    }), /*#__PURE__*/React.createElement("span", {
+      style: {
+        ...lblStyle,
+        fontSize: '8px',
+        width: '12px'
+      }
+    }, "g"))));
+  }), /*#__PURE__*/React.createElement(BigBtn, {
+    onClick: () => setLista(true),
+    color: "#8A8A93",
+    ghost: true,
+    icon: /*#__PURE__*/React.createElement(Layers, {
+      size: 15
+    })
+  }, "Tutte le diete", tutte.length > 1 ? ' · ' + tutte.length : '')));
+}
+
+// ============================================================
+// IMPOSTAZIONI · scheda e dieta attive
+// ============================================================
+function AttiveScreen(_ref107) {
+  let goBack = _ref107.goBack;
+  const _useState189 = useState(schedaAttivaId),
+    _useState190 = _slicedToArray(_useState189, 2),
+    sc = _useState190[0],
+    setSc = _useState190[1];
+  const _useState191 = useState(() => {
+      const d = dietaAttiva();
+      return d ? d.id : null;
+    }),
+    _useState192 = _slicedToArray(_useState191, 2),
+    di = _useState192[0],
+    setDi = _useState192[1];
+  const schede = tutteLeSchede();
+  const diete = storage.get('custom_diets') || [];
+  const Riga = _ref108 => {
+    let on = _ref108.on,
+      titolo = _ref108.titolo,
+      sotto = _ref108.sotto,
+      onClick = _ref108.onClick;
+    return /*#__PURE__*/React.createElement("button", {
+      onClick: onClick,
+      style: {
+        width: '100%',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '12px',
+        minHeight: '60px',
+        padding: '0 13px',
+        background: on ? 'rgba(47,160,85,0.07)' : IRON.surface,
+        border: '1px solid ' + (on ? '#2FA05566' : IRON.edge),
+        borderRadius: '3px',
+        marginBottom: '8px',
+        cursor: 'pointer',
+        textAlign: 'left'
+      }
+    }, /*#__PURE__*/React.createElement("span", {
+      style: {
+        width: '3px',
+        height: '26px',
+        background: on ? '#2FA055' : IRON.edge,
+        flexShrink: 0,
+        display: 'block'
+      }
+    }), /*#__PURE__*/React.createElement("span", {
+      style: {
+        flex: 1,
+        minWidth: 0
+      }
+    }, /*#__PURE__*/React.createElement("span", {
+      style: {
+        display: 'block',
+        fontSize: '13.5px',
+        fontWeight: '700',
+        color: IRON.chalk
+      }
+    }, titolo), /*#__PURE__*/React.createElement("span", {
+      style: {
+        display: 'block',
+        fontSize: '10px',
+        color: IRON.dust,
+        marginTop: '2px'
+      }
+    }, sotto)), /*#__PURE__*/React.createElement("span", {
+      style: {
+        ...lblStyle,
+        fontSize: '8px',
+        color: on ? '#2FA055' : IRON.ash
+      }
+    }, on ? 'attiva' : 'usa'));
+  };
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      minHeight: '100vh',
+      paddingBottom: '120px'
+    }
+  }, /*#__PURE__*/React.createElement(Header, {
+    title: "Attive",
+    subtitle: "Cosa usa la home",
+    onBack: goBack
+  }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: '0 14px'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      ...lblStyle,
+      padding: '0 2px 9px'
+    }
+  }, "Scheda di allenamento"), schede.map(p => /*#__PURE__*/React.createElement(Riga, {
+    key: p.id,
+    on: sc === p.id,
+    titolo: p.label,
+    sotto: (p.config.days || []).length + ' giorni · ' + (p.config.weeks || []).length + ' settimane',
+    onClick: () => {
+      storage.set('scheda_attiva', p.id);
+      setSc(p.id);
+    }
+  })), /*#__PURE__*/React.createElement("div", {
+    style: {
+      ...lblStyle,
+      padding: '18px 2px 9px'
+    }
+  }, "Dieta"), diete.length === 0 && /*#__PURE__*/React.createElement("div", {
+    style: {
+      ...glassCard,
+      padding: '16px',
+      textAlign: 'center',
+      fontSize: '11.5px',
+      color: IRON.dust,
+      lineHeight: 1.5
+    }
+  }, "Nessuna dieta salvata. Creane una dalla sezione ", /*#__PURE__*/React.createElement("b", {
+    style: {
+      color: IRON.chalk
+    }
+  }, "Oggi"), "."), diete.map(d => {
+    const t = dietTotals(d);
+    return /*#__PURE__*/React.createElement(Riga, {
+      key: d.id,
+      on: di === d.id,
+      titolo: d.name,
+      sotto: r0(t.kcal) + ' kcal · P' + r0(t.p) + ' C' + r0(t.c) + ' G' + r0(t.f),
+      onClick: () => {
+        storage.set('dieta_attiva', d.id);
+        setDi(d.id);
+      }
+    });
+  }), /*#__PURE__*/React.createElement(InfoBox, {
+    color: "#8A8A93",
+    title: "A cosa serve"
+  }, "La ", /*#__PURE__*/React.createElement("b", {
+    style: {
+      color: IRON.chalk
+    }
+  }, "scheda attiva"), " decide quale seduta apre il pulsante in home e su quali dati lavorano le analisi. La ", /*#__PURE__*/React.createElement("b", {
+    style: {
+      color: IRON.chalk
+    }
+  }, "dieta attiva"), " \xE8 quella che si apre toccando \"Oggi\". Importazione e modifica restano nelle sezioni Schede e Oggi.")));
+}
+
+// ============================================================
 // UNIONE DELLE SCHERMATE
 // Le schermate che rispondono alla stessa domanda diventano
 // sezioni di un'unica destinazione. Il contenuto non cambia:
 // cambia il numero di porte da cui ci si passa.
 // ============================================================
 const DentroSezione = createContext(false);
-function SezioniScreen(_ref106) {
-  let titolo = _ref106.titolo,
-    sezioni = _ref106.sezioni,
-    goBack = _ref106.goBack,
-    _ref106$iniziale = _ref106.iniziale,
-    iniziale = _ref106$iniziale === void 0 ? 0 : _ref106$iniziale;
-  const _useState185 = useState(iniziale),
-    _useState186 = _slicedToArray(_useState185, 2),
-    i = _useState186[0],
-    setI = _useState186[1];
+function SezioniScreen(_ref109) {
+  let titolo = _ref109.titolo,
+    sezioni = _ref109.sezioni,
+    goBack = _ref109.goBack,
+    _ref109$iniziale = _ref109.iniziale,
+    iniziale = _ref109$iniziale === void 0 ? 0 : _ref109$iniziale;
+  const _useState193 = useState(iniziale),
+    _useState194 = _slicedToArray(_useState193, 2),
+    i = _useState194[0],
+    setI = _useState194[1];
   const sez = sezioni[i] || sezioni[0];
   const C = sez.C;
   return /*#__PURE__*/React.createElement("div", {
@@ -28796,15 +29173,10 @@ function SezioniScreen(_ref106) {
 const DESTINAZIONI = [{
   id: 'oggi',
   label: 'Oggi',
-  desc: 'Dieta e grammature del giorno',
+  desc: 'La dieta di oggi, aperta',
   icona: Utensils,
   colore: '#D8342C',
-  sezioni: [{
-    id: 'diets',
-    desc: 'Piani, macro e lista spesa',
-    label: 'Diete',
-    C: DietScreen
-  }]
+  diretta: DietaAttiva
 }, {
   id: 'corpo',
   label: 'Corpo',
@@ -28876,6 +29248,11 @@ const DESTINAZIONI = [{
   icona: Settings,
   colore: '#8A8A93',
   sezioni: [{
+    id: 'attive',
+    desc: 'Quale scheda e quale dieta usi ora',
+    label: 'Attive',
+    C: AttiveScreen
+  }, {
     id: 'library',
     desc: 'Integrate e personali, importa .v8w',
     label: 'Schede',
@@ -28909,8 +29286,8 @@ const DESTINAZIONI = [{
 }];
 
 // Le quattro voci in home, con il dato vivo
-function VociHome(_ref107) {
-  let apri = _ref107.apri;
+function VociHome(_ref110) {
+  let apri = _ref110.apri;
   const dato = id => {
     try {
       if (id === 'oggi') {
@@ -29035,10 +29412,10 @@ function VociHome(_ref107) {
 // ============= MAIN =============
 
 function App() {
-  const _useState187 = useState('home'),
-    _useState188 = _slicedToArray(_useState187, 2),
-    screen = _useState188[0],
-    setScreen = _useState188[1];
+  const _useState195 = useState('home'),
+    _useState196 = _slicedToArray(_useState195, 2),
+    screen = _useState196[0],
+    setScreen = _useState196[1];
   const goHome = useCallback(() => setScreen('home'), []);
   // Quando siamo fuori da home, intercetta il tasto indietro per tornare alla home
   useAndroidBack(goHome, screen !== 'home');
@@ -29063,7 +29440,10 @@ function App() {
     goBack: goHome
   }), screen === 'volume' && /*#__PURE__*/React.createElement(VolumeScreen, {
     goBack: goHome
-  }), DESTINAZIONI.map(d => screen === d.id ? /*#__PURE__*/React.createElement(SezioniScreen, {
+  }), DESTINAZIONI.map(d => screen === d.id ? d.diretta ? /*#__PURE__*/React.createElement(d.diretta, {
+    key: d.id,
+    goBack: goHome
+  }) : /*#__PURE__*/React.createElement(SezioniScreen, {
     key: d.id,
     titolo: d.label,
     sezioni: d.sezioni,
