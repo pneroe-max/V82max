@@ -2047,7 +2047,7 @@ document.addEventListener('visibilitychange', () => {
 // ============= TEMA v5 "VETRO & VIOLA" =============
 // Card-vetro semitrasparenti (img2) che lasciano filtrare le sfere viola;
 // accento UI viola elettrico (img1). Colori-disco solo per i giorni.
-const APP_VERSION = 'v21.1';
+const APP_VERSION = 'v21.2';
 const APP_BUILD = '2026-07-27';
 const displayFont = "'Archivo', -apple-system, system-ui, sans-serif";
 const monoFont = "'IBM Plex Mono', ui-monospace, 'SF Mono', monospace";
@@ -26613,33 +26613,55 @@ function GraficoPeso(_ref90) {
   let data = _ref90.data,
     _ref90$altezza = _ref90.altezza,
     altezza = _ref90$altezza === void 0 ? 130 : _ref90$altezza;
-  const serie = Object.keys(data).map(Number).sort((a, b) => a - b).map(w => ({
-    w,
-    m: mediaSett(data[w])
-  })).filter(x => x.m > 0);
-  if (serie.length < 2) {
+  // Traccia le PESATE SINGOLE, non una media a settimana: così il grafico
+  // esiste già dalla seconda pesata invece che dalla seconda settimana.
+  const punti = [];
+  Object.keys(data).map(Number).sort((a, b) => a - b).forEach(w => {
+    GIORNI_SETT.slice(1).concat(['dom']).forEach(g => {
+      const v = parseFloat((data[w] || {})[g]);
+      if (!isNaN(v) && v > 0) punti.push({
+        w,
+        g,
+        v
+      });
+    });
+  });
+  if (punti.length < 2) {
     return /*#__PURE__*/React.createElement("div", {
       style: {
         ...glassCard,
-        padding: '20px',
+        padding: '18px',
         textAlign: 'center',
-        ...lblStyle,
         marginBottom: '14px'
       }
-    }, "Servono almeno due settimane per il grafico");
+    }, /*#__PURE__*/React.createElement("div", {
+      style: lblStyle
+    }, "Andamento"), /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: '11.5px',
+        color: IRON.dust,
+        marginTop: '7px',
+        lineHeight: 1.5
+      }
+    }, punti.length === 0 ? 'Registra il primo peso per iniziare.' : 'Una pesata registrata. Dalla seconda compare il grafico.'));
   }
-  const vals = serie.map(x => x.m);
+  // medie settimanali sovrapposte, se ce ne sono almeno due
+  const medie = Object.keys(data).map(Number).sort((a, b) => a - b).map(w => ({
+    w,
+    m: mediaSett(data[w])
+  })).filter(x => x.m > 0);
+  const vals = punti.map(p => p.v);
   const mn = Math.min(...vals),
     mx = Math.max(...vals);
   const span = mx - mn || 1;
   const W = 100,
     H = 100;
-  const pt = (x, i) => [i / (serie.length - 1) * W, H - (x - mn) / span * H];
-  const punti = serie.map((s, i) => pt(s.m, i));
-  const d = punti.map((p, i) => (i ? 'L' : 'M') + p[0].toFixed(1) + ' ' + p[1].toFixed(1)).join(' ');
+  const xy = (v, i, n) => [(n > 1 ? i / (n - 1) : 0.5) * W, H - (v - mn) / span * H];
+  const pts = punti.map((p, i) => xy(p.v, i, punti.length));
+  const d = pts.map((p, i) => (i ? 'L' : 'M') + p[0].toFixed(1) + ' ' + p[1].toFixed(1)).join(' ');
   const area = d + ` L${W} ${H} L0 ${H} Z`;
   const delta = vals[vals.length - 1] - vals[0];
-  const perSett = serie.length > 1 ? delta / (serie[serie.length - 1].w - serie[0].w || 1) : 0;
+  const sett = medie.length > 1 ? (medie[medie.length - 1].m - medie[0].m) / Math.max(1, medie[medie.length - 1].w - medie[0].w) : null;
   return /*#__PURE__*/React.createElement("div", {
     style: {
       ...glassCard,
@@ -26655,13 +26677,13 @@ function GraficoPeso(_ref90) {
     }
   }, /*#__PURE__*/React.createElement("span", {
     style: lblStyle
-  }, "Andamento \xB7 ", serie.length, " settimane"), /*#__PURE__*/React.createElement("span", {
+  }, "Andamento \xB7 ", punti.length, " pesate"), /*#__PURE__*/React.createElement("span", {
     style: {
-      fontFamily: monoFont,
+      ...numStyle,
       fontSize: '11px',
       color: delta < 0 ? '#2FA055' : delta > 0 ? '#E5A82B' : IRON.dust
     }
-  }, delta > 0 ? '+' : '', delta.toFixed(1), " kg \xB7 ", perSett > 0 ? '+' : '', perSett.toFixed(2), "/sett")), /*#__PURE__*/React.createElement("svg", {
+  }, delta > 0 ? '+' : '', delta.toFixed(1).replace('.', ','), " kg", sett != null ? ' · ' + (sett > 0 ? '+' : '') + sett.toFixed(2).replace('.', ',') + '/sett' : '')), /*#__PURE__*/React.createElement("svg", {
     viewBox: `0 0 ${W} ${H}`,
     preserveAspectRatio: "none",
     style: {
@@ -26680,12 +26702,12 @@ function GraficoPeso(_ref90) {
     strokeWidth: "1.6",
     vectorEffect: "non-scaling-stroke",
     strokeLinejoin: "round"
-  }), punti.map((p, i) => /*#__PURE__*/React.createElement("circle", {
+  }), pts.map((p, i) => /*#__PURE__*/React.createElement("circle", {
     key: i,
     cx: p[0],
     cy: p[1],
-    r: "1.6",
-    fill: i === punti.length - 1 ? IRON.chalk : '#2FA055',
+    r: i === pts.length - 1 ? 2.1 : 1.5,
+    fill: i === pts.length - 1 ? IRON.chalk : '#2FA055',
     vectorEffect: "non-scaling-stroke"
   }))), /*#__PURE__*/React.createElement("div", {
     style: {
@@ -26695,23 +26717,23 @@ function GraficoPeso(_ref90) {
     }
   }, /*#__PURE__*/React.createElement("span", {
     style: {
-      fontFamily: monoFont,
+      ...numStyle,
       fontSize: '9.5px',
       color: IRON.ash
     }
-  }, "S", serie[0].w, " \xB7 ", vals[0].toFixed(1)), /*#__PURE__*/React.createElement("span", {
+  }, "S", punti[0].w, " \xB7 ", vals[0].toFixed(1)), /*#__PURE__*/React.createElement("span", {
     style: {
-      fontFamily: monoFont,
+      ...numStyle,
       fontSize: '9.5px',
       color: IRON.ash
     }
   }, "min ", mn.toFixed(1), " \xB7 max ", mx.toFixed(1)), /*#__PURE__*/React.createElement("span", {
     style: {
-      fontFamily: monoFont,
+      ...numStyle,
       fontSize: '9.5px',
       color: IRON.chalk
     }
-  }, "S", serie[serie.length - 1].w, " \xB7 ", vals[vals.length - 1].toFixed(1))));
+  }, "S", punti[punti.length - 1].w, " \xB7 ", vals[vals.length - 1].toFixed(1))));
 }
 
 // ============================================================
