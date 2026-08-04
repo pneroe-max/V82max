@@ -2047,7 +2047,7 @@ document.addEventListener('visibilitychange', () => {
 // ============= TEMA v5 "VETRO & VIOLA" =============
 // Card-vetro semitrasparenti (img2) che lasciano filtrare le sfere viola;
 // accento UI viola elettrico (img1). Colori-disco solo per i giorni.
-const APP_VERSION = 'v21.0';
+const APP_VERSION = 'v21.1';
 const APP_BUILD = '2026-07-27';
 const displayFont = "'Archivo', -apple-system, system-ui, sans-serif";
 const monoFont = "'IBM Plex Mono', ui-monospace, 'SF Mono', monospace";
@@ -28465,29 +28465,41 @@ function sedutaDiOggi() {
     const att = schedaAttiva();
     const cfg = att.config;
     const log = storage.get(cfg.storageKey) || {};
-    let week = cfg.weeks[0];
+    const giorni = cfg.days || [];
+
+    // Scorro il programma in ordine e prendo la PRIMA seduta non completata.
+    // Il calendario suggerisce, non comanda: se salti un giorno la scheda non
+    // salta con te, la ritrovi qui.
+    let week = null,
+      giorno = null,
+      arretrata = false;
     for (const w of cfg.weeks) {
-      const fatti = cfg.days.filter(d => (log[w] || {})[d.id] && log[w][d.id].completato).length;
-      if (fatti < cfg.days.length) {
+      const manca = giorni.find(d => !((log[w] || {})[d.id] || {}).completato);
+      if (manca) {
         week = w;
+        giorno = manca;
         break;
       }
-      week = w;
     }
+    if (!giorno) {
+      // programma finito: mostro l'ultima
+      week = cfg.weeks[cfg.weeks.length - 1];
+      giorno = giorni[giorni.length - 1];
+    }
+
+    // Oggi in calendario corrisponde a questa seduta?
     const oggi = GIORNI_SETT[new Date().getDay()];
-    const giorno = cfg.days.find(d => (d.dayName || '').toUpperCase() === NOMI_GIORNI[oggi]);
-    if (!giorno) return {
-      att,
-      cfg,
-      week,
-      giorno: null
-    };
+    const diOggi = giorni.find(d => (d.dayName || '').toUpperCase() === NOMI_GIORNI[oggi]);
+    arretrata = !!(diOggi && diOggi.id !== giorno.id) || !diOggi && !!giorno;
     const dl = (log[week] || {})[giorno.id] || {};
     const lista = cfg.exercises[giorno.id] || [];
     const finiti = lista.filter((ex, i) => {
       const r = (dl.esercizi || {})[i] || {};
       return (r.sets_done || []).filter(Boolean).length >= (ex.sets || 4);
     }).length;
+    // quante sedute restano in questa settimana
+    const restaSett = giorni.filter(d => !((log[week] || {})[d.id] || {}).completato).length;
+    const posizione = giorni.findIndex(d => d.id === giorno.id) + 1;
     return {
       att,
       cfg,
@@ -28495,6 +28507,10 @@ function sedutaDiOggi() {
       giorno,
       lista,
       finiti,
+      arretrata,
+      restaSett,
+      posizione,
+      totGiorni: giorni.length,
       completata: !!dl.completato,
       iniziata: finiti > 0 || Object.keys(dl.esercizi || {}).length > 0,
       serie: lista.reduce((a, e) => a + (e.sets || 0), 0)
@@ -28554,7 +28570,7 @@ function AzioneOggi(_ref104) {
     }
   }, /*#__PURE__*/React.createElement("span", {
     style: lblStyle
-  }, att.label, " \xB7 settimana ", week), /*#__PURE__*/React.createElement("span", {
+  }, att.label, " \xB7 settimana ", week, " \xB7 ", s.posizione, " di ", s.totGiorni), /*#__PURE__*/React.createElement("span", {
     style: {
       ...lblStyle,
       color: s.completata ? '#2FA055' : s.iniziata ? '#E5A82B' : IRON.ash
@@ -28579,7 +28595,15 @@ function AzioneOggi(_ref104) {
       color: IRON.dust,
       paddingBottom: '5px'
     }
-  }, s.lista.length, " es \xB7 ", s.serie, " serie", giorno.dur ? ' · ' + giorno.dur : '')), s.iniziata && !s.completata && /*#__PURE__*/React.createElement("div", {
+  }, s.lista.length, " es \xB7 ", s.serie, " serie", giorno.dur ? ' · ' + giorno.dur : '')), s.arretrata && !s.completata && /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontFamily: monoFont,
+      fontSize: '10px',
+      color: '#E5A82B',
+      marginTop: '7px',
+      lineHeight: 1.5
+    }
+  }, "prossima in programma", giorno.dayName ? ' · era prevista ' + giorno.dayName : '', " \xB7 ", s.restaSett, " da fare questa settimana"), s.iniziata && !s.completata && /*#__PURE__*/React.createElement("div", {
     style: {
       marginTop: '10px'
     }
