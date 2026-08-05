@@ -3,6 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#0C0C0E">
 <meta name="theme-color" content="#100F0D">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -30,7 +33,17 @@
     --p-red: #E0524A; --p-blue: #4D82E8; --p-yellow: #E8B43C; --p-green: #3FB66C; --p-purple: #A855F7;
   }
   * { box-sizing: border-box; }
+  /* fascia opaca dietro la barra di stato di iOS: il contenuto che scorre
+     non deve trasparire sotto il notch */
+  #statusbar {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 2000;
+    height: env(safe-area-inset-top);
+    background: #0C0C0E;
+    pointer-events: none;
+  }
   html, body {
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
     margin: 0; padding: 0;
     background:
       #0C0C0E;
@@ -65,7 +78,8 @@
 </style>
 </head>
 <body>
-<div id="root" style="position: relative; z-index: 1;"></div>
+<div id="statusbar" aria-hidden="true"></div>
+  <div id="root" style="position: relative; z-index: 1;"></div>
 
 <!-- React incluso nel file: nessuna dipendenza da CDN, funziona offline -->
 <script>/**
@@ -2047,7 +2061,7 @@ document.addEventListener('visibilitychange', () => {
 // ============= TEMA v5 "VETRO & VIOLA" =============
 // Card-vetro semitrasparenti (img2) che lasciano filtrare le sfere viola;
 // accento UI viola elettrico (img1). Colori-disco solo per i giorni.
-const APP_VERSION = 'v21.3';
+const APP_VERSION = 'v21.4';
 const APP_BUILD = '2026-07-27';
 const displayFont = "'Archivo', -apple-system, system-ui, sans-serif";
 const monoFont = "'IBM Plex Mono', ui-monospace, 'SF Mono', monospace";
@@ -2582,11 +2596,11 @@ function Header(_ref0) {
   return /*#__PURE__*/React.createElement("div", {
     style: {
       margin: '0',
-      padding: '14px 16px',
+      padding: 'calc(14px + env(safe-area-inset-top)) calc(16px + env(safe-area-inset-right)) 14px calc(16px + env(safe-area-inset-left))',
       position: 'sticky',
       top: '0',
       zIndex: 50,
-      background: 'rgba(16,15,13,0.82)',
+      background: 'rgba(16,15,13,0.94)',
       borderBottom: '1px solid var(--line)'
     }
   }, /*#__PURE__*/React.createElement("div", {
@@ -3071,7 +3085,7 @@ function HomeScreen(_ref12) {
     color: "#C0BEC6"
   })))), /*#__PURE__*/React.createElement("div", {
     style: {
-      padding: '12px 16px 18px'
+      padding: 'calc(12px + env(safe-area-inset-top)) calc(16px + env(safe-area-inset-right)) 18px calc(16px + env(safe-area-inset-left))'
     }
   }, /*#__PURE__*/React.createElement("div", {
     style: {
