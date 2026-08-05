@@ -2061,7 +2061,7 @@ document.addEventListener('visibilitychange', () => {
 // ============= TEMA v5 "VETRO & VIOLA" =============
 // Card-vetro semitrasparenti (img2) che lasciano filtrare le sfere viola;
 // accento UI viola elettrico (img1). Colori-disco solo per i giorni.
-const APP_VERSION = 'v21.4';
+const APP_VERSION = 'v21.5';
 const APP_BUILD = '2026-07-27';
 const displayFont = "'Archivo', -apple-system, system-ui, sans-serif";
 const monoFont = "'IBM Plex Mono', ui-monospace, 'SF Mono', monospace";
@@ -28822,43 +28822,7 @@ function DietaAttiva(_ref106) {
     lista = _useState188[0],
     setLista = _useState188[1];
   const tutte = storage.get('custom_diets') || [];
-  if (!d) {
-    return /*#__PURE__*/React.createElement("div", {
-      style: {
-        minHeight: '100vh',
-        paddingBottom: '120px'
-      }
-    }, /*#__PURE__*/React.createElement(Header, {
-      title: "Oggi",
-      subtitle: "Nessuna dieta impostata",
-      onBack: goBack
-    }), /*#__PURE__*/React.createElement("div", {
-      style: {
-        padding: '0 14px'
-      }
-    }, /*#__PURE__*/React.createElement("div", {
-      style: {
-        ...glassCard,
-        padding: '22px 16px',
-        textAlign: 'center'
-      }
-    }, /*#__PURE__*/React.createElement(Utensils, {
-      size: 28,
-      color: IRON.ash
-    }), /*#__PURE__*/React.createElement("div", {
-      style: {
-        ...lblStyle,
-        marginTop: '10px'
-      }
-    }, "Nessuna dieta"), /*#__PURE__*/React.createElement("div", {
-      style: {
-        fontSize: '11.5px',
-        color: IRON.dust,
-        marginTop: '7px',
-        lineHeight: 1.55
-      }
-    }, "Creane una da Impostazioni \xB7 Attive, oppure importa un file .v8d."))));
-  }
+  if (!d) return /*#__PURE__*/React.createElement(DietScreen, { goBack: goBack });
   const salva = nuova => {
     setD(nuova);
     const l = (storage.get('custom_diets') || []).map(x => x.id === nuova.id ? nuova : x);
@@ -29138,7 +29102,7 @@ function AttiveScreen(_ref107) {
       color: IRON.dust,
       lineHeight: 1.5
     }
-  }, "Nessuna dieta salvata. Creane una dalla sezione ", /*#__PURE__*/React.createElement("b", {
+  }, "Nessuna dieta salvata. Creala o importala nella sezione ", /*#__PURE__*/React.createElement("b", {
     style: {
       color: IRON.chalk
     }
@@ -29165,7 +29129,7 @@ function AttiveScreen(_ref107) {
     style: {
       color: IRON.chalk
     }
-  }, "dieta attiva"), " \xE8 quella che si apre toccando \"Oggi\". Importazione e modifica restano nelle sezioni Schede e Oggi.")));
+  }, "dieta attiva"), " \xE8 quella che si apre toccando \"Oggi\". Importazione e modifica stanno nelle sezioni Schede e Diete, qui accanto.")));
 }
 
 // ============================================================
@@ -29313,6 +29277,11 @@ const DESTINAZIONI = [{
     label: 'Attive',
     C: AttiveScreen
   }, {
+      id: 'diets',
+      desc: 'Crea, importa e modifica i piani',
+      label: 'Diete',
+      C: DietScreen
+    }, {
     id: 'library',
     desc: 'Integrate e personali, importa .v8w',
     label: 'Schede',
