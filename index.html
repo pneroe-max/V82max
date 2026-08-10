@@ -2061,7 +2061,7 @@ document.addEventListener('visibilitychange', () => {
 // ============= TEMA v5 "VETRO & VIOLA" =============
 // Card-vetro semitrasparenti (img2) che lasciano filtrare le sfere viola;
 // accento UI viola elettrico (img1). Colori-disco solo per i giorni.
-const APP_VERSION = 'v21.5';
+const APP_VERSION = 'v21.6';
 const APP_BUILD = '2026-07-27';
 const displayFont = "'Archivo', -apple-system, system-ui, sans-serif";
 const monoFont = "'IBM Plex Mono', ui-monospace, 'SF Mono', monospace";
@@ -4245,7 +4245,8 @@ function WorkoutScreen(_ref16) {
       var _exData$reps, _exData$sets_done;
       const repValue = ((_exData$reps = exData.reps) === null || _exData$reps === void 0 ? void 0 : _exData$reps[setIdx]) || '';
       const isDone = !!((_exData$sets_done = exData.sets_done) !== null && _exData$sets_done !== void 0 && _exData$sets_done[setIdx]);
-      const targets = parseRepRange(logic.reps);
+      const repTarget = repFase(ex.tec, setIdx, logic.sets, logic.reps);
+      const targets = parseRepRange(repTarget);
       const repNum = parseInt(repValue);
       let repCol = IRON.chalk;
       if (!isNaN(repNum) && repNum > 0) {
@@ -4279,7 +4280,7 @@ function WorkoutScreen(_ref16) {
       }, /*#__PURE__*/React.createElement("input", {
         type: "number",
         inputMode: "numeric",
-        placeholder: String(targets.max),
+        placeholder: String(repTarget).indexOf('-') > 0 ? String(repTarget) : String(targets.max),
         value: repValue,
         onChange: e => updateExercise(selectedWeek, selectedDay, idx, 'reps', e.target.value, setIdx),
         style: {
@@ -4303,7 +4304,7 @@ function WorkoutScreen(_ref16) {
       }, /*#__PURE__*/React.createElement("input", {
         type: "number",
         inputMode: "numeric",
-        placeholder: setIdx === 0 ? logic.rir || '—' : '—',
+        placeholder: rirFase(ex.tec, setIdx, logic.sets, setIdx === 0 ? logic.rir || '\u2014' : '\u2014'),
         value: setIdx === 0 ? exData.rir || '' : '',
         onChange: e => updateExercise(selectedWeek, selectedDay, idx, 'rir', e.target.value),
         disabled: setIdx !== 0,
@@ -4359,7 +4360,7 @@ function WorkoutScreen(_ref16) {
         paddingTop: '7px',
         fontSize: '9px'
       }
-    }, "tocca il cerchio per avviare il recupero di ", logic.rest), /*#__PURE__*/React.createElement(UltimaVolta, {
+    }, ex.tec === 'MYO' ? "attivazione: recupero " + logic.rest + " \u00b7 mini-serie: 20 secondi" : "tocca il cerchio per avviare il recupero di " + logic.rest), /*#__PURE__*/React.createElement(UltimaVolta, {
       log: data,
       week: selectedWeek,
       dayId: selectedDay,
@@ -4371,7 +4372,8 @@ function WorkoutScreen(_ref16) {
     idx: curEx,
     vai: setCurEx,
     nomeProssimo: (exercises[(blocchi[curEx + 1] || [])[0]] || {}).name,
-    superset: (blocchi[curEx] || []).length > 1,
+    tecnica: (exercises[(blocchi[curEx] || [0])[0]] || {}).tec,
+        superset: (blocchi[curEx] || []).length > 1,
     exData: ((_data$selectedWeek2 = data[selectedWeek]) === null || _data$selectedWeek2 === void 0 || (_data$selectedWeek2 = _data$selectedWeek2[selectedDay]) === null || _data$selectedWeek2 === void 0 || (_data$selectedWeek2 = _data$selectedWeek2.esercizi) === null || _data$selectedWeek2 === void 0 ? void 0 : _data$selectedWeek2[(blocchi[curEx] || [0])[0]]) || {},
     logic: applyLogic(exercises[(blocchi[curEx] || [0])[0]] || {}, selectedWeek),
     onSpunta: (setIdx, reps) => {
@@ -26089,6 +26091,7 @@ function BarraSeduta(_ref85) {
     completato = _ref85.completato,
     nomeProssimo = _ref85.nomeProssimo,
     superset = _ref85.superset;
+  const tecnica = _ref85.tecnica;
   const _useTimer4 = useTimer(),
     active = _useTimer4.active,
     remaining = _useTimer4.remaining,
@@ -26147,13 +26150,13 @@ function BarraSeduta(_ref85) {
         letterSpacing: '0.06em',
         textTransform: 'uppercase'
       }
-    }, superset ? 'Giro ' + (nextSet + 1) + ' fatto' : 'Serie ' + (nextSet + 1) + ' fatta'), /*#__PURE__*/React.createElement("span", {
+    }, superset ? 'Giro ' + (nextSet + 1) + ' fatto' : (tecnica ? rigaSerie(tecnica, nextSet, tot).toLowerCase() + ' fatta' : 'Serie ' + (nextSet + 1) + ' fatta')), /*#__PURE__*/React.createElement("span", {
       style: {
         ...lblStyle,
         color: 'rgba(12,12,14,0.6)',
         fontSize: '8.5px'
       }
-    }, superset ? 'segna A e B insieme · ' : '', fatte, " di ", tot, " \xB7 recupero ", logic.rest));
+    }, superset ? 'segna A e B insieme \u00b7 ' : '', fatte, " di ", tot, " \xB7 recupero ", (tecnica && recuperoSerie(tecnica, nextSet, 0) ? recuperoSerie(tecnica, nextSet, 0) + "s" : logic.rest)));
   } else if (!ultimoEsercizio) {
     centro = /*#__PURE__*/React.createElement("button", {
       onClick: () => vai(idx + 1),
@@ -26303,9 +26306,9 @@ const TECNICHE = {
     nome: 'Myo-reps',
     colore: '#A855F7',
     riga: (i, tot) => i === 0 ? 'ATTIVAZIONE' : 'MINI ' + i,
-    recupero: i => i === 0 ? null : 20,
-    breve: 'Serie di attivazione a RIR 0-1, poi mini-serie con 20 secondi di stacco.',
-    passi: ['Serie di attivazione: 12-15 ripetizioni fino a RIR 0-1', 'Stacca 15-20 secondi restando in posizione', 'Mini-serie da 3-5 ripetizioni', 'Ripeti finché non riesci più a chiudere 3 ripetizioni pulite']
+    recupero: () => 20,
+    breve: 'Una serie di attivazione a RIR 0-1, poi mini-serie da 3-5 rep staccando 20 secondi ogni volta.',
+    passi: ['Serie di attivazione: 12-15 ripetizioni fino a RIR 0-1', 'Stacca 20 secondi restando in posizione, senza mollare il peso', 'Mini-serie da 3-5 ripetizioni', 'Ripeti finché non chiudi più 3 ripetizioni pulite: le mini-serie in scheda sono un massimo, non un obbligo']
   },
   LLP: {
     nome: 'Parziali allungati',
@@ -26342,6 +26345,19 @@ const TECNICHE = {
 };
 
 // Etichetta di riga della serie secondo la tecnica
+// Ripetizioni e RIR attesi nella singola fase: nelle myo-reps le mini-serie
+// non hanno lo stesso bersaglio della serie di attivazione.
+const repFase = (tec, i, tot, base) => {
+  if (tec === 'MYO') return i === 0 ? base : '3-5';
+  if (tec === 'LLP') return i === tot - 1 ? '5-8' : base;
+  if (tec === 'AMRAP') return i === tot - 1 ? 'max' : base;
+  return base;
+};
+const rirFase = (tec, i, tot, base) => {
+  if (tec === 'MYO') return i === 0 ? '0-1' : '0';
+  if (tec === 'AMRAP' || tec === 'DROP' || tec === 'LLP') return i === tot - 1 ? '0' : base;
+  return base;
+};
 const rigaSerie = (tec, i, tot) => {
   const t = TECNICHE[tec];
   return t ? t.riga(i, tot) : String(i + 1).padStart(2, '0');
