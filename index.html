@@ -2061,7 +2061,7 @@ document.addEventListener('visibilitychange', () => {
 // ============= TEMA v5 "VETRO & VIOLA" =============
 // Card-vetro semitrasparenti (img2) che lasciano filtrare le sfere viola;
 // accento UI viola elettrico (img1). Colori-disco solo per i giorni.
-const APP_VERSION = 'v22.0';
+const APP_VERSION = 'v22.1';
 const APP_BUILD = '2026-07-27';
 const displayFont = "'Archivo', -apple-system, system-ui, sans-serif";
 const monoFont = "'IBM Plex Mono', ui-monospace, 'SF Mono', monospace";
@@ -29038,12 +29038,20 @@ function ConsegneScreen(_p) {
   var controlla = function () {
     setStato({ tipo: 'attesa', testo: 'Controllo in corso...' });
     setPacco(null);
-    fetch(BASE_CONSEGNE + encodeURIComponent(codice) + '.json?t=' + Date.now(), { cache: 'no-store' })
-      .then(function (r) {
-        if (r.status === 404) throw new Error('vuoto');
-        if (!r.ok) throw new Error('rete');
-        return r.json();
-      })
+    // provo il codice come scritto, poi in minuscolo e in maiuscolo:
+    // gli indirizzi di GitHub distinguono le maiuscole, i codici no
+    var varianti = [codice, codice.toLowerCase(), codice.toUpperCase()]
+      .filter(function (v, i, a) { return a.indexOf(v) === i; });
+    var tenta = function (k) {
+      if (k >= varianti.length) return Promise.reject(new Error('vuoto'));
+      return fetch(BASE_CONSEGNE + encodeURIComponent(varianti[k]) + '.json?t=' + Date.now(), { cache: 'no-store' })
+        .then(function (r) {
+          if (r.status === 404) return tenta(k + 1);
+          if (!r.ok) throw new Error('rete');
+          return r.json();
+        });
+    };
+    tenta(0)
       .then(function (j) {
         setPacco(j);
         setStato({ tipo: 'ok', testo: 'Trovato un pacchetto' });
@@ -29094,7 +29102,7 @@ function ConsegneScreen(_p) {
         h('div', { style: { display: 'flex', gap: '7px', marginTop: '11px' } },
           h('input', {
             type: 'text', value: modifica, placeholder: 'cambia codice',
-            onChange: function (e) { setModifica(e.target.value.toLowerCase().replace(/[^a-z0-9_-]/g, '')); },
+            onChange: function (e) { setModifica(e.target.value.replace(/[^A-Za-z0-9_-]/g, '')); },
             style: Object.assign({}, inputDark, { flex: 1, minHeight: '46px', fontSize: '14px' })
           }),
           h('button', {
