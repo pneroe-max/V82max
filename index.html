@@ -2061,7 +2061,7 @@ document.addEventListener('visibilitychange', () => {
 // ============= TEMA v5 "VETRO & VIOLA" =============
 // Card-vetro semitrasparenti (img2) che lasciano filtrare le sfere viola;
 // accento UI viola elettrico (img1). Colori-disco solo per i giorni.
-const APP_VERSION = 'v21.6';
+const APP_VERSION = 'v21.7';
 const APP_BUILD = '2026-07-27';
 const displayFont = "'Archivo', -apple-system, system-ui, sans-serif";
 const monoFont = "'IBM Plex Mono', ui-monospace, 'SF Mono', monospace";
@@ -26529,18 +26529,26 @@ const NOMI_GIORNI = {
 
 // La settimana corrente segue la scheda attiva: prima non ancora completata.
 function settimanaCorrente() {
+  // La settimana del PESO segue il calendario, non la scheda di allenamento:
+  // se ricominci un blocco il peso non deve tornare indietro nel tempo.
   try {
-    const att = schedaAttiva();
-    const cfg = att.config;
-    const log = storage.get(cfg.storageKey) || {};
-    for (const w of cfg.weeks) {
-      const fatti = cfg.days.filter(d => log[w] && log[w][d.id] && log[w][d.id].completato).length;
-      if (fatti < cfg.days.length) return w;
+    const lunedi = (d) => {
+      const x = new Date(d); const g = (x.getDay() + 6) % 7;
+      x.setHours(0,0,0,0); x.setDate(x.getDate() - g); return x;
+    };
+    const oggiLun = lunedi(new Date());
+    const log = storage.get('peso') || {};
+    const numeri = Object.keys(log).map(Number).filter(n => !isNaN(n));
+    const maxReg = numeri.length ? Math.max.apply(null, numeri) : 0;
+    let anc = storage.get('peso_ancora');
+    if (!anc || !anc.lunedi || !anc.settimana || maxReg > anc.settimana) {
+      if (!maxReg) return 1;
+      anc = { settimana: maxReg, lunedi: oggiLun.toISOString().slice(0, 10) };
+      storage.set('peso_ancora', anc);
     }
-    return cfg.weeks[cfg.weeks.length - 1];
-  } catch (e) {
-    return 1;
-  }
+    const diff = Math.round((oggiLun - lunedi(anc.lunedi)) / 604800000);
+    return Math.max(1, anc.settimana + diff);
+  } catch (e) { return 1; }
 }
 const mediaSett = r => {
   const v = GIORNI_SETT.map(g => parseFloat((r || {})[g])).filter(x => !isNaN(x) && x > 0);
