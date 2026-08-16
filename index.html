@@ -29012,6 +29012,150 @@ function DietaAttiva(_ref106) {
 }
 
 // ============================================================
+// CONSEGNE · schede e diete recapitate tramite GitHub
+// Il dispositivo ha un codice. Sul repository, alla cartella
+// consegne/<codice>.json, puo esserci un pacchetto da importare.
+// ============================================================
+var BASE_CONSEGNE = (typeof window !== 'undefined' && window.__BASE) || 'https://pneroe-max.github.io/V82max/consegne/';
+
+function codiceDispositivo() {
+  var c = storage.get('codice_dispositivo');
+  if (!c) {
+    c = 'd' + Math.random().toString(36).slice(2, 7);
+    storage.set('codice_dispositivo', c);
+  }
+  return c;
+}
+
+function ConsegneScreen(_p) {
+  var goBack = _p.goBack;
+  var h = React.createElement;
+  var _c = useState(codiceDispositivo), codice = _c[0], setCodice = _c[1];
+  var _m = useState(''), modifica = _m[0], setModifica = _m[1];
+  var _s = useState(null), stato = _s[0], setStato = _s[1];
+  var _p2 = useState(null), pacco = _p2[0], setPacco = _p2[1];
+
+  var controlla = function () {
+    setStato({ tipo: 'attesa', testo: 'Controllo in corso...' });
+    setPacco(null);
+    fetch(BASE_CONSEGNE + encodeURIComponent(codice) + '.json?t=' + Date.now(), { cache: 'no-store' })
+      .then(function (r) {
+        if (r.status === 404) throw new Error('vuoto');
+        if (!r.ok) throw new Error('rete');
+        return r.json();
+      })
+      .then(function (j) {
+        setPacco(j);
+        setStato({ tipo: 'ok', testo: 'Trovato un pacchetto' });
+      })
+      .catch(function (e) {
+        setStato({ tipo: e.message === 'vuoto' ? 'vuoto' : 'errore',
+          testo: e.message === 'vuoto'
+            ? 'Nessuna consegna per il codice ' + codice
+            : 'Connessione non riuscita. Riprova quando sei online.' });
+      });
+  };
+
+  var importa = function () {
+    if (!pacco) return;
+    var nSchede = 0, nDiete = 0;
+    if (pacco.schede && pacco.schede.length) {
+      var attuali = storage.get('custom_schedules') || [];
+      pacco.schede.forEach(function (sc) {
+        var k = attuali.findIndex(function (x) { return x.id === sc.id; });
+        if (k >= 0) attuali[k] = sc; else attuali.push(sc);
+        nSchede++;
+      });
+      storage.set('custom_schedules', attuali);
+    }
+    if (pacco.diete && pacco.diete.length) {
+      var dd = storage.get('custom_diets') || [];
+      pacco.diete.forEach(function (di) {
+        var k = dd.findIndex(function (x) { return x.id === di.id; });
+        if (k >= 0) dd[k] = di; else dd.push(di);
+        nDiete++;
+      });
+      storage.set('custom_diets', dd);
+    }
+    storage.set('ultima_consegna', pacco.aggiornato || new Date().toISOString().slice(0, 10));
+    setStato({ tipo: 'ok', testo: 'Importati: ' + nSchede + ' schede e ' + nDiete + ' diete. Le trovi in Schede e Diete.' });
+    setPacco(null);
+  };
+
+  var colore = stato ? ({ ok: '#2FA055', vuoto: '#8A8A93', errore: '#E5A82B', attesa: '#8A8A93' })[stato.tipo] : IRON.edge;
+
+  return h('div', { style: { minHeight: '100vh', paddingBottom: '120px' } },
+    h(Header, { title: 'Consegne', subtitle: 'Ricevi schede e diete assegnate a questo dispositivo', onBack: goBack }),
+    h('div', { style: { padding: '0 14px' } },
+
+      h('div', { style: Object.assign({}, glassCard, { padding: '14px', marginBottom: '13px' }) },
+        h('div', { style: Object.assign({}, lblStyle, { marginBottom: '9px' }) }, 'Codice di questo dispositivo'),
+        h('div', { style: Object.assign({}, numStyle, { fontSize: '30px', fontWeight: '600', color: IRON.chalk, letterSpacing: '0.08em', textAlign: 'center', padding: '6px 0' }) }, codice),
+        h('div', { style: { display: 'flex', gap: '7px', marginTop: '11px' } },
+          h('input', {
+            type: 'text', value: modifica, placeholder: 'cambia codice',
+            onChange: function (e) { setModifica(e.target.value.toLowerCase().replace(/[^a-z0-9_-]/g, '')); },
+            style: Object.assign({}, inputDark, { flex: 1, minHeight: '46px', fontSize: '14px' })
+          }),
+          h('button', {
+            onClick: function () {
+              if (!modifica.trim()) return;
+              storage.set('codice_dispositivo', modifica.trim());
+              setCodice(modifica.trim()); setModifica(''); setStato(null); setPacco(null);
+            },
+            style: { width: '90px', minHeight: '46px', background: modifica.trim() ? IRON.chalk : IRON.surface,
+              color: modifica.trim() ? IRON.bg : IRON.ash, border: 'none', borderRadius: '3px',
+              fontFamily: monoFont, fontSize: '11px', fontWeight: '600', cursor: 'pointer' }
+          }, 'imposta')
+        ),
+        h('div', { style: { fontSize: '10.5px', color: IRON.dust, marginTop: '9px', lineHeight: 1.5 } },
+          'Comunica questo codice a chi ti prepara le schede. Puoi anche sceglierne uno tuo, per esempio il tuo nome.')
+      ),
+
+      h('button', {
+        onClick: controlla,
+        style: { width: '100%', minHeight: '56px', background: IRON.chalk, color: IRON.bg, border: 'none',
+          borderRadius: '3px', fontFamily: displayFont, fontVariationSettings: "'wdth' 112", fontSize: '14px',
+          fontWeight: '800', letterSpacing: '0.07em', textTransform: 'uppercase', cursor: 'pointer', marginBottom: '13px' }
+      }, 'Controlla aggiornamenti'),
+
+      stato && h('div', { style: { border: '1px solid ' + colore + '66', borderLeft: '3px solid ' + colore,
+        background: colore + '10', borderRadius: '3px', padding: '12px 13px', marginBottom: '13px',
+        fontSize: '12px', color: '#C0BEC6', lineHeight: 1.55 } }, stato.testo),
+
+      pacco && h('div', { style: Object.assign({}, glassCard, { padding: '14px', marginBottom: '13px' }) },
+        h('div', { style: Object.assign({}, lblStyle, { marginBottom: '9px' }) },
+          'Contenuto' + (pacco.aggiornato ? ' \u00b7 ' + pacco.aggiornato : '')),
+        pacco.nota && h('div', { style: { fontSize: '12px', color: IRON.chalk, marginBottom: '11px', lineHeight: 1.55 } }, pacco.nota),
+        (pacco.schede || []).map(function (sc, i) {
+          return h('div', { key: 's' + i, style: { display: 'flex', alignItems: 'center', gap: '9px', padding: '6px 0', borderTop: '1px solid ' + IRON.edge } },
+            h('span', { style: { width: '3px', height: '18px', background: '#A855F7', display: 'block', flexShrink: 0 } }),
+            h('span', { style: { flex: 1, fontSize: '12px', color: '#C0BEC6' } }, sc.name || 'Scheda'),
+            h('span', { style: Object.assign({}, lblStyle, { fontSize: '8px' }) }, 'scheda'));
+        }),
+        (pacco.diete || []).map(function (di, i) {
+          return h('div', { key: 'd' + i, style: { display: 'flex', alignItems: 'center', gap: '9px', padding: '6px 0', borderTop: '1px solid ' + IRON.edge } },
+            h('span', { style: { width: '3px', height: '18px', background: '#D8342C', display: 'block', flexShrink: 0 } }),
+            h('span', { style: { flex: 1, fontSize: '12px', color: '#C0BEC6' } }, di.name || 'Dieta'),
+            h('span', { style: Object.assign({}, lblStyle, { fontSize: '8px' }) }, 'dieta'));
+        }),
+        h('button', {
+          onClick: importa,
+          style: { width: '100%', minHeight: '52px', marginTop: '12px', background: '#2FA055', color: '#08210F',
+            border: 'none', borderRadius: '3px', fontFamily: displayFont, fontVariationSettings: "'wdth' 112",
+            fontSize: '13px', fontWeight: '800', letterSpacing: '0.06em', textTransform: 'uppercase', cursor: 'pointer' }
+        }, 'Importa nel telefono')
+      ),
+
+      h(InfoBox, { color: '#8A8A93', title: 'Come funziona' },
+        'Il pacchetto viene letto da una cartella pubblica del repository. Le schede con lo stesso identificativo vengono ',
+        h('b', { style: { color: IRON.chalk } }, 'aggiornate'),
+        ', le altre aggiunte. I tuoi allenamenti registrati non vengono toccati.')
+    )
+  );
+}
+
+// ============================================================
 // IMPOSTAZIONI · scheda e dieta attive
 // ============================================================
 function AttiveScreen(_ref107) {
@@ -29301,15 +29445,15 @@ const DESTINAZIONI = [{
     label: 'Attive',
     C: AttiveScreen
   }, {
-      id: 'consegne',
-      desc: 'Ricevi schede e diete pubblicate per te',
-      label: 'Consegne',
-      C: ConsegneScreen
-    }, {
       id: 'diets',
       desc: 'Crea, importa e modifica i piani',
       label: 'Diete',
       C: DietScreen
+    }, {
+      id: 'consegne',
+      desc: 'Ricevi schede assegnate a questo dispositivo',
+      label: 'Consegne',
+      C: ConsegneScreen
     }, {
     id: 'library',
     desc: 'Integrate e personali, importa .v8w',
