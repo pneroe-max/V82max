@@ -2061,7 +2061,7 @@ document.addEventListener('visibilitychange', () => {
 // ============= TEMA v5 "VETRO & VIOLA" =============
 // Card-vetro semitrasparenti (img2) che lasciano filtrare le sfere viola;
 // accento UI viola elettrico (img1). Colori-disco solo per i giorni.
-const APP_VERSION = 'v21.7';
+const APP_VERSION = 'v22.0';
 const APP_BUILD = '2026-07-27';
 const displayFont = "'Archivo', -apple-system, system-ui, sans-serif";
 const monoFont = "'IBM Plex Mono', ui-monospace, 'SF Mono', monospace";
@@ -29301,6 +29301,11 @@ const DESTINAZIONI = [{
     label: 'Attive',
     C: AttiveScreen
   }, {
+      id: 'consegne',
+      desc: 'Ricevi schede e diete pubblicate per te',
+      label: 'Consegne',
+      C: ConsegneScreen
+    }, {
       id: 'diets',
       desc: 'Crea, importa e modifica i piani',
       label: 'Diete',
@@ -29460,6 +29465,151 @@ function VociHome(_ref110) {
       color: IRON.ash
     }));
   }));
+}
+
+// ============================================================
+// CONSEGNE · schede e diete pubblicate per questo dispositivo
+// L'app legge un file pubblico da GitHub Pages. Non puo scriverci:
+// servirebbe un token dentro l'app, leggibile da chiunque.
+// ============================================================
+function idDispositivo() {
+  let id = storage.get('device_id');
+  if (!id) {
+    const abc = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';   // niente 0/O/1/I: si leggono male
+    const blocco = () => Array.from({ length: 4 }, () => abc[Math.floor(Math.random() * abc.length)]).join('');
+    id = blocco() + '-' + blocco();
+    storage.set('device_id', id);
+  }
+  return id;
+}
+
+async function leggiConsegna(codice) {
+  const c = String(codice || '').trim().toUpperCase().replace(/\s/g, '');
+  if (!c) return { esito: 'vuoto' };
+  try {
+    const r = await fetch('consegne/' + c + '.json?t=' + Date.now(), { cache: 'no-store' });
+    if (r.status === 404) return { esito: 'assente' };
+    if (!r.ok) return { esito: 'errore', dettaglio: 'HTTP ' + r.status };
+    const j = await r.json();
+    if (!j || (!j.schede && !j.diete)) return { esito: 'malformato' };
+    return { esito: 'ok', dati: j };
+  } catch (e) {
+    return { esito: 'errore', dettaglio: String(e).slice(0, 60) };
+  }
+}
+
+// Applica la consegna: aggiunge il nuovo, sostituisce cio che ha lo stesso id
+function applicaConsegna(dati) {
+  const rep = { schede: 0, schedeAgg: 0, diete: 0, dieteAgg: 0 };
+  if (Array.isArray(dati.schede) && dati.schede.length) {
+    const attuali = storage.get('custom_schedules') || [];
+    dati.schede.forEach(s => {
+      if (!s || !s.id) return;
+      const i = attuali.findIndex(x => x.id === s.id);
+      if (i >= 0) { attuali[i] = s; rep.schedeAgg++; } else { attuali.push(s); rep.schede++; }
+    });
+    storage.set('custom_schedules', attuali);
+  }
+  if (Array.isArray(dati.diete) && dati.diete.length) {
+    const attuali = storage.get('custom_diets') || [];
+    dati.diete.forEach(d => {
+      if (!d || !d.id) return;
+      const i = attuali.findIndex(x => x.id === d.id);
+      if (i >= 0) { attuali[i] = d; rep.dieteAgg++; } else { attuali.push(d); rep.diete++; }
+    });
+    storage.set('custom_diets', attuali);
+  }
+  if (dati.attiva) storage.set('scheda_attiva', dati.attiva);
+  if (dati.dietaAttiva) storage.set('dieta_attiva', dati.dietaAttiva);
+  storage.set('ultima_consegna', { quando: Date.now(), nota: dati.nota || '', rep });
+  return rep;
+}
+
+function ConsegneScreen(_refCons) {
+  let goBack = _refCons.goBack;
+  const _c1 = useState(() => idDispositivo()), _c1a = _slicedToArray(_c1, 2), mioId = _c1a[0];
+  const _c2 = useState(''), _c2a = _slicedToArray(_c2, 2), codice = _c2a[0], setCodice = _c2a[1];
+  const _c3 = useState(null), _c3a = _slicedToArray(_c3, 2), stato = _c3a[0], setStato = _c3a[1];
+  const _c4 = useState(false), _c4a = _slicedToArray(_c4, 2), attesa = _c4a[0], setAttesa = _c4a[1];
+  const ultima = storage.get('ultima_consegna');
+
+  const controlla = async (c) => {
+    setAttesa(true); setStato(null);
+    const r = await leggiConsegna(c);
+    setAttesa(false);
+    if (r.esito !== 'ok') { setStato(r); return; }
+    const rep = applicaConsegna(r.dati);
+    setStato({ esito: 'importato', rep: rep, nota: r.dati.nota || '' });
+  };
+
+  const box = (col, titolo, testo) => React.createElement("div", {
+    style: { border: '1px solid ' + col + '66', borderLeft: '3px solid ' + col,
+      background: col + '12', borderRadius: '3px', padding: '12px', marginBottom: '12px' }
+  }, React.createElement("div", { style: { ...lblStyle, color: col, marginBottom: '5px' } }, titolo),
+     React.createElement("div", { style: { fontSize: '11.5px', color: '#C0BEC6', lineHeight: 1.55 } }, testo));
+
+  return React.createElement("div", { style: { minHeight: '100vh', paddingBottom: '120px' } },
+    React.createElement(Header, { title: "Consegne", subtitle: "Ricevi schede e diete", onBack: goBack }),
+    React.createElement("div", { style: { padding: '0 14px' } },
+
+      React.createElement("div", { style: { ...glassCard, padding: '14px', marginBottom: '13px' } },
+        React.createElement("div", { style: { ...lblStyle, marginBottom: '8px' } }, "Codice di questo dispositivo"),
+        React.createElement("div", { style: { ...numStyle, fontSize: '26px', fontWeight: '600',
+          letterSpacing: '0.08em', color: IRON.chalk, textAlign: 'center', padding: '8px 0' } }, mioId),
+        React.createElement("button", {
+          onClick: () => { try { navigator.clipboard.writeText(mioId); } catch (e) {} },
+          style: { width: '100%', minHeight: '46px', background: IRON.surface, border: '1px solid ' + IRON.edge,
+            borderRadius: '3px', color: IRON.dust, fontFamily: monoFont, fontSize: '11px', cursor: 'pointer' }
+        }, "copia il codice"),
+        React.createElement("div", { style: { fontSize: '10.5px', color: IRON.dust, marginTop: '9px', lineHeight: 1.55 } },
+          "Mandami questo codice e pubblico qui la tua scheda. Poi tocca Controlla.")),
+
+      React.createElement("button", {
+        onClick: () => controlla(mioId), disabled: attesa,
+        style: { width: '100%', minHeight: '58px', marginBottom: '12px', border: 'none', borderRadius: '3px',
+          background: attesa ? IRON.knurl : IRON.chalk, color: attesa ? IRON.dust : IRON.bg, cursor: 'pointer',
+          fontFamily: displayFont, fontVariationSettings: "'wdth' 112", fontSize: '14px', fontWeight: '800',
+          letterSpacing: '0.07em', textTransform: 'uppercase' }
+      }, attesa ? 'controllo...' : 'Controlla consegne'),
+
+      React.createElement("div", { style: { ...glassCard, padding: '13px', marginBottom: '13px' } },
+        React.createElement("div", { style: { ...lblStyle, marginBottom: '8px' } }, "Oppure un codice condiviso"),
+        React.createElement("div", { style: { display: 'flex', gap: '8px' } },
+          React.createElement("input", {
+            value: codice, onChange: e => setCodice(e.target.value.toUpperCase()),
+            placeholder: "ES. FRATELLO",
+            style: { flex: 1, minHeight: '48px', background: '#0E0E11', border: '1px solid ' + IRON.edge,
+              borderRadius: '3px', textAlign: 'center', ...numStyle, fontSize: '15px', fontWeight: '600',
+              color: IRON.chalk, outline: 'none', letterSpacing: '0.06em' } }),
+          React.createElement("button", {
+            onClick: () => controlla(codice), disabled: attesa || !codice.trim(),
+            style: { width: '96px', minHeight: '48px', borderRadius: '3px', border: '1px solid ' + IRON.edge,
+              background: codice.trim() ? IRON.surface : 'transparent',
+              color: codice.trim() ? '#2FA055' : IRON.ash, fontFamily: monoFont, fontSize: '11px',
+              fontWeight: '600', cursor: codice.trim() ? 'pointer' : 'default' } }, "scarica"))),
+
+      stato && stato.esito === 'importato' && box('#2FA055', 'Consegna ricevuta',
+        (stato.nota ? stato.nota + ' \u00b7 ' : '') +
+        [stato.rep.schede ? stato.rep.schede + ' schede nuove' : '',
+         stato.rep.schedeAgg ? stato.rep.schedeAgg + ' schede aggiornate' : '',
+         stato.rep.diete ? stato.rep.diete + ' diete nuove' : '',
+         stato.rep.dieteAgg ? stato.rep.dieteAgg + ' diete aggiornate' : ''].filter(Boolean).join(' \u00b7 ')
+        || 'nessuna novit\u00e0'),
+      stato && stato.esito === 'assente' && box('#E5A82B', 'Nessuna consegna',
+        'Per questo codice non c\'\u00e8 ancora niente pubblicato. Mandami il codice e riprova dopo.'),
+      stato && stato.esito === 'errore' && box('#D8342C', 'Non riesco a scaricare',
+        'Controlla la connessione. ' + (stato.dettaglio || '')),
+      stato && stato.esito === 'malformato' && box('#D8342C', 'File non valido',
+        'Il file trovato non contiene schede n\u00e9 diete.'),
+
+      ultima && React.createElement("div", { style: { ...lblStyle, fontSize: '8.5px', lineHeight: 1.7, padding: '4px 2px' } },
+        "Ultima consegna: " + fmtData(ultima.quando) + (ultima.nota ? ' \u00b7 ' + ultima.nota : '')),
+
+      React.createElement(InfoBox, { color: '#8A8A93', title: 'Come funziona' },
+        "Il codice identifica questo browser su questo telefono. Le consegne sono file pubblici: ",
+        React.createElement("b", { style: { color: IRON.chalk } }, "non metterci dati personali"),
+        ". Cambiando browser o cancellando i dati del sito il codice cambia.")
+    ));
 }
 
 // ============= MAIN =============
