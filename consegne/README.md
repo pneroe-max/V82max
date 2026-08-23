@@ -1,22 +1,22 @@
 # Consegne
 
-File pubblici che l'app scarica per ricevere schede e diete.
+Ogni file `<codice>.json` contiene schede e diete destinate a un dispositivo.
 
-Ogni file si chiama come il codice inserito nell'app: `CODICE.json`.
-Il codice può essere l'ID del dispositivo (es. `SEL7-MXA4.json`)
-oppure un nome condiviso (es. `FRATELLO.json`).
+Il codice si legge nell'app in **Impostazioni · Consegne**, dove si puo anche
+cambiare con uno scelto da te. L'app prova il codice cosi come e scritto,
+poi in minuscolo e in maiuscolo.
 
-Formato:
+Formato del pacchetto:
 
 ```json
 {
   "formato": "v8consegna/1",
-  "nota": "descrizione breve",
-  "schede": [ { ...contenuto .v8w... } ],
-  "diete":  [ { ...contenuto .v8d... } ],
-  "attiva": "id_scheda",
-  "dietaAttiva": "id_dieta"
+  "aggiornato": "AAAA-MM-GG",
+  "nota": "Messaggio mostrato prima dell'importazione",
+  "schede": [ ... file .v8w ... ],
+  "diete":  [ ... file .v8d ... ]
 }
 ```
 
-Sono file pubblici: non inserire dati personali.
+Le schede e le diete con lo stesso identificativo vengono **aggiornate**,
+le altre aggiunte. Gli allenamenti gia registrati non vengono toccati.
