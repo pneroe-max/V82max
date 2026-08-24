@@ -2061,7 +2061,7 @@ document.addEventListener('visibilitychange', () => {
 // ============= TEMA v5 "VETRO & VIOLA" =============
 // Card-vetro semitrasparenti (img2) che lasciano filtrare le sfere viola;
 // accento UI viola elettrico (img1). Colori-disco solo per i giorni.
-const APP_VERSION = 'v22.1';
+const APP_VERSION = 'v23.0';
 const APP_BUILD = '2026-07-27';
 const displayFont = "'Archivo', -apple-system, system-ui, sans-serif";
 const monoFont = "'IBM Plex Mono', ui-monospace, 'SF Mono', monospace";
@@ -3147,7 +3147,7 @@ function HomeScreen(_ref12) {
       color: IRON.chalk,
       fontSize: '10.5px'
     }
-  }, "CUT")))), /*#__PURE__*/React.createElement(AzioneOggi, {
+  }, "CUT")))), /*#__PURE__*/React.createElement(AvvisoBackup, null), React.createElement(AzioneOggi, {
     apriSeduta: () => navigate('seduta')
   }), /*#__PURE__*/React.createElement("div", {
     style: {
@@ -29011,6 +29011,180 @@ function DietaAttiva(_ref106) {
   }, "Tutte le diete", tutte.length > 1 ? ' · ' + tutte.length : '')));
 }
 
+
+// ============================================================
+// SALVATAGGIO AUTOMATICO
+// Tre livelli: memoria persistente richiesta al browser, backup
+// automatico scaricato a intervalli, avviso quando e vecchio.
+// ============================================================
+var BACKUP_OGNI_GIORNI = 5;
+
+function quantiDati() {
+  try {
+    var d = storage.get('peso') || {};
+    var pesate = 0;
+    Object.keys(d).forEach(function (w) {
+      GIORNI_SETT.forEach(function (g) { if ((d[w] || {})[g]) pesate++; });
+    });
+    var sedute = 0;
+    tutteLeSchede().forEach(function (p) {
+      var log = storage.get(p.config.storageKey) || {};
+      Object.keys(log).forEach(function (w) {
+        (p.config.days || []).forEach(function (dd) {
+          if ((log[w][dd.id] || {}).completato) sedute++;
+        });
+      });
+    });
+    return { pesate: pesate, sedute: sedute,
+             schede: (storage.get('custom_schedules') || []).length,
+             diete: (storage.get('custom_diets') || []).length };
+  } catch (e) { return { pesate: 0, sedute: 0, schede: 0, diete: 0 }; }
+}
+
+function scaricaBackup(automatico) {
+  try {
+    var data = storage.exportAll();
+    var blob = new Blob([JSON.stringify(data)], { type: 'application/json' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    var d = new Date();
+    var stamp = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+    a.download = 'v8tracker-backup-' + stamp + '.json';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(function () { URL.revokeObjectURL(url); }, 4000);
+    storage.set('ultimo_backup', new Date().toISOString());
+    if (automatico) storage.set('ultimo_backup_auto', new Date().toISOString());
+    return true;
+  } catch (e) { return false; }
+}
+
+function giorniDaBackup() {
+  var u = storage.get('ultimo_backup');
+  if (!u) return null;
+  return Math.floor((Date.now() - new Date(u).getTime()) / 86400000);
+}
+
+// Chiede al browser di NON cancellare i dati per fare spazio.
+function chiediPersistenza(cb) {
+  try {
+    if (navigator.storage && navigator.storage.persist) {
+      navigator.storage.persisted().then(function (gia) {
+        if (gia) { if (cb) cb(true); return; }
+        navigator.storage.persist().then(function (ok) { if (cb) cb(ok); });
+      });
+    } else if (cb) cb(null);
+  } catch (e) { if (cb) cb(null); }
+}
+
+// Avviso in home quando il backup manca o e vecchio
+function AvvisoBackup() {
+  var h = React.createElement;
+  var _a = useState(false), chiuso = _a[0], setChiuso = _a[1];
+  var giorni = giorniDaBackup();
+  var dati = quantiDati();
+  var haRoba = dati.sedute > 0 || dati.pesate > 2;
+  useEffect(function () { chiediPersistenza(null); }, []);
+  useEffect(function () {
+    // backup automatico: scatta da solo se e passato troppo tempo
+    if (!haRoba) return;
+    if (storage.get('backup_auto') === false) return;
+    var g = giorniDaBackup();
+    if (g === null || g >= BACKUP_OGNI_GIORNI) {
+      var t = setTimeout(function () { scaricaBackup(true); }, 2500);
+      return function () { clearTimeout(t); };
+    }
+  }, []);
+  if (chiuso || !haRoba) return null;
+  if (giorni !== null && giorni < BACKUP_OGNI_GIORNI) return null;
+  var mai = giorni === null;
+  return h('div', { style: { border: '1px solid rgba(224,82,74,0.45)', borderLeft: '3px solid #D8342C',
+      background: 'rgba(216,52,44,0.10)', borderRadius: '3px', padding: '12px 13px', marginBottom: '13px' } },
+    h('div', { style: Object.assign({}, lblStyle, { color: '#D8342C', marginBottom: '6px' }) },
+      mai ? 'Nessun backup' : 'Backup di ' + giorni + ' giorni fa'),
+    h('div', { style: { fontSize: '11.5px', color: '#C0BEC6', lineHeight: 1.5, marginBottom: '10px' } },
+      'Hai ', h('b', { style: { color: IRON.chalk } }, dati.sedute + ' sedute'), ' e ',
+      h('b', { style: { color: IRON.chalk } }, dati.pesate + ' pesate'),
+      ' salvate solo su questo telefono. Se cancelli i dati del sito, spariscono.'),
+    h('div', { style: { display: 'flex', gap: '7px' } },
+      h('button', { onClick: function () { if (scaricaBackup(false)) setChiuso(true); },
+        style: { flex: 1, minHeight: '46px', background: IRON.chalk, color: IRON.bg, border: 'none',
+          borderRadius: '3px', fontFamily: monoFont, fontSize: '11.5px', fontWeight: '600', cursor: 'pointer' } },
+        'Scarica backup'),
+      h('button', { onClick: function () { setChiuso(true); },
+        style: { width: '84px', minHeight: '46px', background: 'transparent', color: IRON.ash,
+          border: '1px solid ' + IRON.edge, borderRadius: '3px', fontFamily: monoFont, fontSize: '11px', cursor: 'pointer' } },
+        'dopo')));
+}
+
+// Pannello completo, dentro Impostazioni
+function SicurezzaScreen(_p) {
+  var goBack = _p.goBack;
+  var h = React.createElement;
+  var _s = useState(null), pers = _s[0], setPers = _s[1];
+  var _m = useState(null), msg = _m[0], setMsg = _m[1];
+  var _a = useState(storage.get('backup_auto') !== false), auto = _a[0], setAuto = _a[1];
+  var dati = quantiDati();
+  var giorni = giorniDaBackup();
+  useEffect(function () { chiediPersistenza(function (ok) { setPers(ok); }); }, []);
+
+  return h('div', { style: { minHeight: '100vh', paddingBottom: '120px' } },
+    h(Header, { title: 'Sicurezza dati', subtitle: 'Backup automatico e memoria persistente', onBack: goBack }),
+    h('div', { style: { padding: '0 14px' } },
+
+      h('div', { style: Object.assign({}, glassCard, { padding: '14px', marginBottom: '13px' }) },
+        h('div', { style: Object.assign({}, lblStyle, { marginBottom: '10px' }) }, 'Cosa hai da perdere'),
+        [['Sedute registrate', dati.sedute], ['Pesate', dati.pesate],
+         ['Schede', dati.schede], ['Diete', dati.diete]].map(function (r) {
+          return h('div', { key: r[0], style: { display: 'flex', justifyContent: 'space-between',
+              padding: '6px 0', borderBottom: '1px solid ' + IRON.edge } },
+            h('span', { style: { fontSize: '12px', color: '#C0BEC6' } }, r[0]),
+            h('span', { style: Object.assign({}, numStyle, { fontSize: '14px', fontWeight: '600',
+              color: r[1] > 0 ? IRON.chalk : IRON.ash }) }, String(r[1])));
+        })),
+
+      h('div', { style: Object.assign({}, glassCard, { padding: '14px', marginBottom: '13px',
+          borderLeft: '3px solid ' + (giorni === null ? '#D8342C' : (giorni >= BACKUP_OGNI_GIORNI ? '#E5A82B' : '#2FA055')) }) },
+        h('div', { style: Object.assign({}, lblStyle, { marginBottom: '7px' }) }, 'Ultimo backup'),
+        h('div', { style: Object.assign({}, numStyle, { fontSize: '17px', fontWeight: '600', color: IRON.chalk, marginBottom: '11px' }) },
+          giorni === null ? 'mai' : (giorni === 0 ? 'oggi' : giorni + ' giorni fa')),
+        h('button', { onClick: function () {
+            setMsg(scaricaBackup(false) ? 'Backup scaricato nella cartella dei download.' : 'Scaricamento non riuscito.');
+          },
+          style: { width: '100%', minHeight: '52px', background: IRON.chalk, color: IRON.bg, border: 'none',
+            borderRadius: '3px', fontFamily: displayFont, fontVariationSettings: "'wdth' 112", fontSize: '13px',
+            fontWeight: '800', letterSpacing: '0.06em', textTransform: 'uppercase', cursor: 'pointer' } },
+          'Scarica backup adesso'),
+        h('button', { onClick: function () {
+            var n = !auto; setAuto(n); storage.set('backup_auto', n);
+            setMsg(n ? 'Il backup partira da solo ogni ' + BACKUP_OGNI_GIORNI + ' giorni all\u2019apertura dell\u2019app.'
+                     : 'Backup automatico disattivato.');
+          },
+          style: { width: '100%', minHeight: '46px', marginTop: '8px',
+            background: auto ? 'rgba(47,160,85,0.12)' : IRON.surface,
+            color: auto ? '#2FA055' : IRON.dust,
+            border: '1px solid ' + (auto ? '#2FA05555' : IRON.edge), borderRadius: '3px',
+            fontFamily: monoFont, fontSize: '11.5px', fontWeight: '600', cursor: 'pointer' } },
+          auto ? 'Backup automatico: attivo, ogni ' + BACKUP_OGNI_GIORNI + ' giorni' : 'Backup automatico: disattivato')),
+
+      h('div', { style: Object.assign({}, glassCard, { padding: '14px', marginBottom: '13px',
+          borderLeft: '3px solid ' + (pers === true ? '#2FA055' : (pers === false ? '#E5A82B' : IRON.edge)) }) },
+        h('div', { style: Object.assign({}, lblStyle, { marginBottom: '7px' }) }, 'Memoria persistente'),
+        h('div', { style: { fontSize: '11.5px', color: '#C0BEC6', lineHeight: 1.55 } },
+          pers === true ? 'Attiva. Il browser non cancellera i tuoi dati per liberare spazio.'
+          : pers === false ? 'Non concessa dal browser. I dati restano, ma potrebbero essere rimossi se lo spazio scarseggia. Installando l\u2019app sulla schermata home la probabilita che venga concessa aumenta molto.'
+          : 'Il browser non espone questa funzione.')),
+
+      h(InfoBox, { color: '#E5A82B', title: 'Cosa il backup NON protegge' },
+        'Il file finisce nei download del telefono, quindi sopravvive alla cancellazione dei dati del sito. ',
+        h('b', { style: { color: IRON.chalk } }, 'Ma se cancelli anche i download, o cambi telefono senza portarlo con te, e perso lo stesso.'),
+        ' Ogni tanto spostane una copia su una chat con te stesso, su una mail o su un cloud.'),
+      h(InfoBox, { color: '#8A8A93', title: 'Come si ripristina' },
+        'Impostazioni \u00b7 Backup \u00b7 Importa, e scegli il file. Sovrascrive tutto con il contenuto del backup, quindi usa il piu recente.')
+    )
+  );
+}
+
 // ============================================================
 // CONSEGNE · schede e diete recapitate tramite GitHub
 // Il dispositivo ha un codice. Sul repository, alla cartella
@@ -29462,6 +29636,11 @@ const DESTINAZIONI = [{
       desc: 'Ricevi schede assegnate a questo dispositivo',
       label: 'Consegne',
       C: ConsegneScreen
+    }, {
+      id: 'sicurezza',
+      desc: 'Backup automatico e memoria persistente',
+      label: 'Sicurezza',
+      C: SicurezzaScreen
     }, {
     id: 'library',
     desc: 'Integrate e personali, importa .v8w',
