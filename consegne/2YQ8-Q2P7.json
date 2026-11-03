@@ -1,1 +1,1504 @@
-{"formato": "v8consegna/1", "aggiornato": "2026-08-22", "nota": "RECOMP 12 corretta piu cinque diete: mantenimento, lean gain, deficit, riposo e refeed con sgarro. Riso normale da cuocere. Il pasto libero del refeed ha un budget di 1.080 kcal gia dentro il conto. Tonno massimo due volte a settimana per il mercurio.", "schede": [{"format": "v8w/1", "id": "recomp12", "name": "RECOMP 12 v2 · corretto", "subtitle": "12 sett · 5 gg · volume fisso · RIR floor 1", "weeks": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12], "rotation": false, "storageKey": "sched_recomp12", "phase": {"1": {"name": "RIADATTAMENTO · sett 1/3", "variable": "stabilisci i carichi", "repPos": "bottom", "compRir": "3", "accRir": "2", "load": "base"}, "2": {"name": "RIADATTAMENTO · sett 2/3", "variable": "+1 ripetizione a parità di carico", "repPos": "mid", "compRir": "3", "accRir": "2", "load": "base"}, "3": {"name": "RIADATTAMENTO · sett 3/3", "variable": "+2,5 kg a parità di ripetizioni", "repPos": "top", "compRir": "3", "accRir": "2", "load": "up"}, "4": {"name": "SCARICO M1", "variable": "−45% serie · carico invariato", "repPos": "mid", "compRir": "4", "accRir": "3", "load": "hold"}, "5": {"name": "ACCUMULO · sett 1/3", "variable": "stabilisci i carichi", "repPos": "bottom", "compRir": "2", "accRir": "1", "load": "base"}, "6": {"name": "ACCUMULO · sett 2/3", "variable": "+1 ripetizione a parità di carico", "repPos": "mid", "compRir": "2", "accRir": "1", "load": "base"}, "7": {"name": "ACCUMULO · sett 3/3", "variable": "+2,5 kg a parità di ripetizioni", "repPos": "top", "compRir": "2", "accRir": "1", "load": "up"}, "8": {"name": "SCARICO M2", "variable": "−45% serie · carico invariato", "repPos": "mid", "compRir": "4", "accRir": "3", "load": "hold"}, "9": {"name": "ESPRESSIONE · sett 1/3", "variable": "stabilisci i carichi", "repPos": "bottom", "compRir": "1-2", "accRir": "0-1", "load": "base"}, "10": {"name": "ESPRESSIONE · sett 2/3", "variable": "+1 ripetizione a parità di carico", "repPos": "mid", "compRir": "1-2", "accRir": "0-1", "load": "base"}, "11": {"name": "ESPRESSIONE · sett 3/3", "variable": "+2,5 kg a parità di ripetizioni", "repPos": "top", "compRir": "1-2", "accRir": "0-1", "load": "up"}, "12": {"name": "SCARICO M3", "variable": "−45% serie · carico invariato", "repPos": "mid", "compRir": "4", "accRir": "3", "load": "hold"}}, "blocks": [{"id": "R", "label": "RECOMP 12 · mantenimento con ciclizzazione", "weeks": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12], "color": "#2FA055", "reps": "volume fisso · una variabile/sett", "rir": "3 → 1-2 (multiart. mai sotto 1)"}], "days": [{"id": "r_push", "label": "PUSH", "dayName": "LUN", "color": "#D8342C", "subtitle": "Petto / Spalle ant-med / Tricipiti", "dur": "~65 min", "exercises": [{"ref": "Incline_Dumbbell_Press", "sets": 4, "reps": "6-8", "rest": "2:30"}, {"ref": "Barbell_Bench_Press_-_Medium_Grip", "sets": 3, "reps": "6-8", "rest": "2:30"}, {"ref": "Incline_Cable_Flye", "sets": 3, "reps": "12-15", "rest": "75s"}, {"ref": "Dumbbell_Shoulder_Press", "sets": 3, "reps": "8-10", "rest": "2:00"}, {"ref": "Cable_Seated_Lateral_Raise", "sets": 4, "reps": "15-20", "rest": "60s", "tec": "LLP"}, {"ref": "Cable_Rope_Overhead_Triceps_Extension", "sets": 3, "reps": "10-12", "rest": "75s"}, {"ref": "Triceps_Pushdown_-_Rope_Attachment", "sets": 4, "reps": "12-15", "rest": "60s", "tec": "MYO"}]}, {"id": "r_pull", "label": "PULL", "dayName": "MAR", "color": "#1F62D2", "subtitle": "Dorso / Bicipiti / Deltoide post.", "dur": "~65 min", "exercises": [{"ref": "Pullups", "sets": 3, "reps": "6-10", "rest": "2:30"}, {"ref": "Bent_Over_Barbell_Row", "sets": 3, "reps": "8-10", "rest": "2:30"}, {"ref": "Seated_Cable_Rows", "sets": 2, "reps": "10-12", "rest": "90s"}, {"ref": "Rope_Straight-Arm_Pulldown", "sets": 3, "reps": "12-15", "rest": "75s"}, {"ref": "Face_Pull", "sets": 4, "reps": "15-20", "rest": "60s"}, {"ref": "Reverse_Flyes", "sets": 3, "reps": "15-20", "rest": "60s", "sup": "A"}, {"ref": "Incline_Dumbbell_Curl", "sets": 3, "reps": "10-12", "rest": "75s", "sup": "A"}, {"ref": "Hammer_Curls", "sets": 3, "reps": "12-15", "rest": "60s"}]}, {"id": "r_legs", "label": "GAMBE", "dayName": "GIO", "color": "#E5A82B", "subtitle": "Quad / Femorali / Glutei / Polpacci", "dur": "~75 min", "exercises": [{"ref": "Barbell_Full_Squat", "sets": 4, "reps": "6-8", "rest": "3:00"}, {"ref": "Romanian_Deadlift", "sets": 4, "reps": "8-10", "rest": "2:30"}, {"ref": "Split_Squat_with_Dumbbells", "sets": 3, "reps": "8-12", "rest": "2:00"}, {"ref": "Seated_Leg_Curl", "sets": 3, "reps": "12-15", "rest": "75s"}, {"ref": "Barbell_Hip_Thrust", "sets": 4, "reps": "10-12", "rest": "90s"}, {"ref": "Hanging_Leg_Raise", "sets": 3, "reps": "8-15", "rest": "60s"}, {"ref": "Standing_Barbell_Calf_Raise", "sets": 4, "reps": "12-20", "rest": "60s", "tec": "ECC"}]}, {"id": "r_upper", "label": "UPPER", "dayName": "VEN", "color": "#2FA055", "subtitle": "Secondo passaggio · angoli diversi", "dur": "~65 min", "exercises": [{"ref": "Dumbbell_Bench_Press", "sets": 4, "reps": "8-10", "rest": "2:30"}, {"ref": "V-Bar_Pulldown", "sets": 3, "reps": "8-12", "rest": "2:00"}, {"ref": "Arnold_Dumbbell_Press", "sets": 3, "reps": "10-12", "rest": "90s"}, {"ref": "One-Arm_Dumbbell_Row", "sets": 2, "reps": "10-12", "rest": "90s"}, {"ref": "One-Arm_Incline_Lateral_Raise", "sets": 3, "reps": "12-15", "rest": "60s"}, {"ref": "EZ-Bar_Curl", "sets": 3, "reps": "8-12", "rest": "75s", "sup": "B"}, {"ref": "EZ-Bar_Skullcrusher", "sets": 3, "reps": "10-12", "rest": "75s", "sup": "B"}]}, {"id": "r_full", "label": "FULL", "dayName": "SAB", "color": "#A855F7", "subtitle": "Richiami · gambe 2° passaggio · core", "dur": "~60 min", "exercises": [{"ref": "Front_Barbell_Squat", "sets": 3, "reps": "8-10", "rest": "2:30"}, {"ref": "Stiff-Legged_Dumbbell_Deadlift", "sets": 3, "reps": "10-12", "rest": "2:00"}, {"ref": "Natural_Glute_Ham_Raise", "sets": 3, "reps": "6-10", "rest": "90s"}, {"ref": "Flat_Bench_Cable_Flyes", "sets": 3, "reps": "12-15", "rest": "75s"}, {"ref": "Side_Lateral_Raise", "sets": 4, "reps": "15-20", "rest": "60s"}, {"ref": "Bent_Over_Dumbbell_Rear_Delt_Raise_With_Head_On_Bench", "sets": 3, "reps": "15-20", "rest": "60s"}, {"ref": "Barbell_Seated_Calf_Raise", "sets": 3, "reps": "15-20", "rest": "60s"}, {"ref": "Barbell_Ab_Rollout_-_On_Knees", "sets": 3, "reps": "8-12", "rest": "60s"}, {"ref": "Pallof_Press", "sets": 2, "reps": "8-10", "rest": "45s"}]}]}], "diete": [{"format": "v8d/1", "id": "recomp_mantenimento", "name": "RECOMP · mantenimento", "subtitle": "Pareggio · ricomposizione lenta · 12-15% BF", "dayType": "riposo", "target": {"p": 200, "c": 285, "f": 80}, "meals": [{"id": "m1", "name": "Pranzo", "time": "12:30", "items": [{"ref": "f_pollo", "g": 180}, {"ref": "f_uovo", "g": 110}, {"ref": "f_basmati", "g": 115}, {"ref": "f_zucchine", "g": 200}, {"ref": "f_pomodori", "g": 150}, {"ref": "f_evo", "g": 20}]}, {"id": "m2", "name": "Pre-workout", "time": "15:45", "items": [{"ref": "f_banana", "g": 155}, {"ref": "f_miele", "g": 35}, {"ref": "f_wheyiso", "g": 25}]}, {"id": "m3", "name": "Cena · post-allenamento", "time": "18:45", "items": [{"ref": "f_tacchino", "g": 225}, {"ref": "f_patate", "g": 355}, {"ref": "f_paneint", "g": 75}, {"ref": "f_broccoli", "g": 200}, {"ref": "f_evo", "g": 15}]}, {"id": "m4", "name": "Pre-nanna", "time": "21:30", "items": [{"ref": "f_fiocchi", "g": 265}, {"ref": "f_mandorle", "g": 20}]}]}, {"format": "v8d/1", "id": "recomp_lean_gain", "name": "RECOMP · lean gain", "subtitle": "+8% · riso da cuocere · caseine pre-nanna · tonno max 2 volte a settimana", "dayType": "allenamento", "target": {"p": 200, "c": 335, "f": 80}, "meals": [{"id": "m1", "name": "Pranzo · assemblaggio", "time": "12:30", "items": [{"ref": "f_pollo", "g": 135}, {"ref": "f_uovo", "g": 110}, {"ref": "f_basmati", "g": 85}, {"ref": "f_paneint", "g": 95}, {"ref": "f_pomodori", "g": 150}, {"ref": "f_evo", "g": 20}]}, {"id": "m2", "name": "Pre-workout · shaker", "time": "15:45", "items": [{"ref": "f_banana", "g": 150}, {"ref": "f_miele", "g": 25}, {"ref": "f_wheyconc", "g": 30}]}, {"id": "m3", "name": "Cena · unica cottura", "time": "18:45", "items": [{"ref": "f_tacchino", "g": 185}, {"ref": "f_patate", "g": 425}, {"ref": "f_pane", "g": 115}, {"ref": "f_broccoli", "g": 200}, {"ref": "f_evo", "g": 20}]}, {"id": "m4", "name": "Pre-nanna · shaker", "time": "21:30", "items": [{"ref": "f_caseine", "g": 30}, {"ref": "f_greco0", "g": 170}, {"ref": "f_burroarach", "g": 25}]}]}, {"format": "v8d/1", "id": "recomp_deficit", "name": "RECOMP · deficit", "subtitle": "-15% · continua a smagrire · sopra 15-16% BF", "dayType": "riposo", "target": {"p": 200, "c": 185, "f": 78}, "meals": [{"id": "m1", "name": "Pranzo", "time": "12:30", "items": [{"ref": "f_pollo", "g": 180}, {"ref": "f_uovo", "g": 110}, {"ref": "f_basmati", "g": 65}, {"ref": "f_zucchine", "g": 200}, {"ref": "f_pomodori", "g": 150}, {"ref": "f_evo", "g": 20}]}, {"id": "m2", "name": "Pre-workout", "time": "15:45", "items": [{"ref": "f_banana", "g": 105}, {"ref": "f_miele", "g": 10}, {"ref": "f_wheyiso", "g": 25}]}, {"id": "m3", "name": "Cena · post-allenamento", "time": "18:45", "items": [{"ref": "f_tacchino", "g": 250}, {"ref": "f_patate", "g": 295}, {"ref": "f_paneint", "g": 25}, {"ref": "f_broccoli", "g": 200}, {"ref": "f_evo", "g": 15}]}, {"id": "m4", "name": "Pre-nanna", "time": "21:30", "items": [{"ref": "f_fiocchi", "g": 290}, {"ref": "f_mandorle", "g": 20}]}]}, {"format": "v8d/1", "id": "recomp_riposo", "name": "RECOMP · riposo", "subtitle": "Giorni senza allenamento · 3 pasti · meno carboidrati", "dayType": "riposo", "target": {"p": 200, "c": 180, "f": 80}, "meals": [{"id": "m1", "name": "Pranzo", "time": "12:30", "items": [{"ref": "f_pollo", "g": 220}, {"ref": "f_uovo", "g": 110}, {"ref": "f_basmati", "g": 100}, {"ref": "f_zucchine", "g": 200}, {"ref": "f_pomodori", "g": 150}, {"ref": "f_evo", "g": 20}]}, {"id": "m2", "name": "Cena", "time": "19:30", "items": [{"ref": "f_merluzzo", "g": 280}, {"ref": "f_patate", "g": 330}, {"ref": "f_broccoli", "g": 200}, {"ref": "f_evo", "g": 20}]}, {"id": "m3", "name": "Pre-nanna · shaker", "time": "21:30", "items": [{"ref": "f_caseine", "g": 50}, {"ref": "f_greco0", "g": 180}, {"ref": "f_mandorle", "g": 30}]}]}, {"format": "v8d/1", "id": "recomp_refeed", "name": "RECOMP · refeed con sgarro", "subtitle": "Ogni 10-12 giorni · il pasto libero e gia nel conto · piu carbo, meno grassi", "dayType": "allenamento", "target": {"p": 205, "c": 430, "f": 62}, "meals": [{"id": "m1", "name": "Pranzo · leggero", "time": "12:30", "items": [{"ref": "f_pollo", "g": 235}, {"ref": "f_basmati", "g": 175}, {"ref": "f_paneint", "g": 135}, {"ref": "f_zucchine", "g": 200}, {"ref": "f_evo", "g": 15}]}, {"id": "m2", "name": "Pre-workout · shaker", "time": "15:45", "items": [{"ref": "f_banana", "g": 180}, {"ref": "f_miele", "g": 40}, {"ref": "f_wheyconc", "g": 30}]}, {"id": "m3", "name": "PASTO LIBERO · budget", "time": "20:30", "items": [{"name": "Sgarro: pizza, sushi o burger", "g": 100, "per100": {"p": 45, "c": 140, "f": 38}}]}, {"id": "m4", "name": "Pre-nanna · shaker", "time": "22:30", "items": [{"ref": "f_caseine", "g": 45}, {"ref": "f_greco0", "g": 160}]}]}]}
+{
+  "formato": "v8consegna/1",
+  "aggiornato": "2026-11-03",
+  "nota": "MASSA & FORZA 16 settimane: scheda M1 (sett 1-8) e M2 (sett 9-16), dieta allenamento e riposo. La RECOMP resta in Libreria. Deload: fai metà delle serie a mano.",
+  "schede": [
+    {
+      "format": "v8w/1",
+      "id": "massa_m1",
+      "name": "MASSA & FORZA · M1",
+      "subtitle": "Sett 1–8 · top set 5–7 + back-off −10% · deload S8",
+      "weeks": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8
+      ],
+      "rotation": false,
+      "storageKey": "sched_massa_m1",
+      "phase": {
+        "1": {
+          "name": "M1 · BASE · sett 1/7",
+          "variable": "Stabilisci i carichi al minimo del range",
+          "repPos": "bottom",
+          "compRir": "2",
+          "accRir": "1",
+          "load": "base",
+          "loadCue": "base"
+        },
+        "2": {
+          "name": "M1 · ACCUMULO · sett 2/7",
+          "variable": "+1 ripetizione a parità di carico",
+          "repPos": "mid",
+          "compRir": "2",
+          "accRir": "1",
+          "load": "hold",
+          "loadCue": "hold"
+        },
+        "3": {
+          "name": "M1 · ACCUMULO · sett 3/7",
+          "variable": "+1 ripetizione: massimo del range",
+          "repPos": "top",
+          "compRir": "1-2",
+          "accRir": "0-1",
+          "load": "hold",
+          "loadCue": "hold"
+        },
+        "4": {
+          "name": "M1 · SALITA · sett 4/7",
+          "variable": "+2,5 kg sopra · +5 kg gambe, riparti dal minimo",
+          "repPos": "bottom",
+          "compRir": "2",
+          "accRir": "1",
+          "load": "up",
+          "loadCue": "up"
+        },
+        "5": {
+          "name": "M1 · ACCUMULO · sett 5/7",
+          "variable": "+1 ripetizione a parità di carico",
+          "repPos": "mid",
+          "compRir": "1-2",
+          "accRir": "0-1",
+          "load": "hold",
+          "loadCue": "hold"
+        },
+        "6": {
+          "name": "M1 · ACCUMULO · sett 6/7",
+          "variable": "+1 ripetizione: massimo del range",
+          "repPos": "top",
+          "compRir": "1-2",
+          "accRir": "0-1",
+          "load": "hold",
+          "loadCue": "hold"
+        },
+        "7": {
+          "name": "M1 · SALITA · sett 7/7",
+          "variable": "+2,5 kg sopra · +5 kg gambe, riparti dal minimo",
+          "repPos": "bottom",
+          "compRir": "1-2",
+          "accRir": "0-1",
+          "load": "up",
+          "loadCue": "up"
+        },
+        "8": {
+          "name": "M1 · DELOAD",
+          "variable": "−15% carico · fai metà delle serie (arrotonda per eccesso)",
+          "repPos": "mid",
+          "compRir": "3-4",
+          "accRir": "3",
+          "load": "deload",
+          "loadCue": "deload"
+        }
+      },
+      "blocks": [
+        {
+          "id": "M1",
+          "label": "Meso 1 · forza-ipertrofia",
+          "weeks": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8
+          ],
+          "color": "#E5A82B",
+          "reps": "onda: +rep, +rep, +carico · una variabile/sett",
+          "rir": "2 → 1-2 (multiart. mai sotto 1)"
+        }
+      ],
+      "newExercises": {
+        "Barbell_Full_Squat": {
+          "id": "Barbell_Full_Squat",
+          "name": "Squat · TOP SET",
+          "nameEn": "Barbell Full Squat",
+          "sets": 4,
+          "reps": "6-10",
+          "rir": "1-2",
+          "rest": "2:30",
+          "isCompound": true,
+          "tags": [
+            "QUAD",
+            "POLP"
+          ],
+          "badges": [
+            "C"
+          ],
+          "equip": "Bilanciere",
+          "level": "Intermedio",
+          "shortNote": "Una serie pesante al RIR della settimana. Il suo carico fa da base per il back-off.",
+          "execution": [
+            "Bilanciere dal rack appoggiato sui trapezi, arretra e piazza i piedi alla larghezza delle spalle",
+            "Punte leggermente in fuori, testa alta e schiena compatta",
+            "Scendi piegando le ginocchia e portando indietro il bacino, fino alla massima profondità controllata",
+            "Risali espirando spingendo il pavimento con tallone o centro del piede, estendendo anche e ginocchia"
+          ],
+          "cues": "Scendi finché mantieni la schiena neutra: se il bacino si arrotonda in basso, sei sceso troppo.",
+          "img": "exercises/Barbell_Full_Squat/0.webp",
+          "lang": "it",
+          "img2": "exercises/Barbell_Full_Squat/1.webp",
+          "prof": "ALLUNGATO"
+        },
+        "Barbell_Squat": {
+          "id": "Barbell_Squat",
+          "name": "Squat · back-off −10%",
+          "nameEn": "Barbell Squat",
+          "sets": 4,
+          "reps": "6-10",
+          "rir": "1-2",
+          "rest": "2:30",
+          "isCompound": true,
+          "tags": [
+            "QUAD",
+            "POLP"
+          ],
+          "badges": [
+            "C"
+          ],
+          "equip": "Bilanciere",
+          "level": "Base",
+          "shortNote": "Carico = top set di oggi −10%. Stessa profondità, ritmo costante.",
+          "execution": [
+            "Bilanciere sul rack poco sotto l'altezza delle spalle, mettiti sotto e appoggialo sui trapezi",
+            "Impugna il bilanciere ai lati e staccalo spingendo con le gambe e raddrizzando il busto",
+            "Arretra e posiziona i piedi alla larghezza delle spalle, punte leggermente in fuori",
+            "Scendi piegando ginocchia e anche mantenendo il busto compatto, fino a poco sotto il parallelo",
+            "Risali espirando, spingendo il pavimento col tallone fino a gambe distese"
+          ],
+          "cues": "Testa alta e schiena dritta. Ginocchia che seguono la direzione delle punte, mai crollate dentro.",
+          "img": "exercises/Barbell_Squat/0.webp",
+          "lang": "it",
+          "img2": "exercises/Barbell_Squat/1.webp",
+          "prof": "MEDIO"
+        },
+        "Barbell_Bench_Press_-_Medium_Grip": {
+          "id": "Barbell_Bench_Press_-_Medium_Grip",
+          "name": "Panca piana · TOP SET",
+          "nameEn": "Barbell Bench Press - Medium Grip",
+          "sets": 4,
+          "reps": "6-10",
+          "rir": "1-2",
+          "rest": "2:30",
+          "isCompound": true,
+          "tags": [
+            "PETTO",
+            "D.ANT"
+          ],
+          "badges": [
+            "C"
+          ],
+          "equip": "Bilanciere",
+          "level": "Base",
+          "shortNote": "Una serie pesante al RIR della settimana. Pausa breve al petto, scapole addotte.",
+          "execution": [
+            "Sdraiato su panca piana, presa media (avambracci verticali a metà movimento)",
+            "Stacca il bilanciere dai supporti e tienilo sopra di te a braccia tese",
+            "Inspira e scendi lentamente fino a sfiorare il centro del petto",
+            "Breve pausa, poi spingi espirando e contrai il petto in alto",
+            "A fine serie riappoggia il bilanciere sui supporti"
+          ],
+          "cues": "Scapole retratte e depresse per tutta la serie, piedi ben piantati a terra.",
+          "img": "exercises/Barbell_Bench_Press_-_Medium_Grip/0.webp",
+          "lang": "it",
+          "img2": "exercises/Barbell_Bench_Press_-_Medium_Grip/1.webp",
+          "prof": "MEDIO"
+        },
+        "Bench_Press_-_Powerlifting": {
+          "id": "Bench_Press_-_Powerlifting",
+          "name": "Panca piana · back-off −10%",
+          "nameEn": "Bench Press - Powerlifting",
+          "sets": 4,
+          "reps": "6-10",
+          "rir": "1-2",
+          "rest": "2:30",
+          "isCompound": true,
+          "tags": [
+            "TRI",
+            "PETTO"
+          ],
+          "badges": [
+            "C"
+          ],
+          "equip": "Bilanciere",
+          "level": "Intermedio",
+          "shortNote": "Carico = top set di oggi −10%. Stessa presa e stesso arco del top set.",
+          "execution": [
+            "Sdraiato sulla panca, piedi raccolti sotto di te e arco lombare marcato",
+            "Presa che copre gli anelli della barra, scapole strette e depresse",
+            "Stacca la barra senza protrarre le spalle, stringi la barra come per spezzarla",
+            "Scendi al petto basso mantenendo barra, polsi e gomiti in linea",
+            "Pausa al contatto, poi spingi con la massima forza tenendo i gomiti raccolti fino al lockout"
+          ],
+          "cues": "L'arco è dorsale, non lombare forzato: i glutei restano sempre a contatto con la panca.",
+          "img": "exercises/Bench_Press_-_Powerlifting/0.webp",
+          "lang": "it",
+          "img2": "exercises/Bench_Press_-_Powerlifting/1.webp",
+          "prof": "MEDIO"
+        },
+        "Barbell_Deadlift": {
+          "id": "Barbell_Deadlift",
+          "name": "Stacco · TOP SET",
+          "nameEn": "Barbell Deadlift",
+          "sets": 4,
+          "reps": "6-10",
+          "rir": "1-2",
+          "rest": "2:30",
+          "isCompound": true,
+          "tags": [
+            "HAM",
+            "GLUTE",
+            "DORSO"
+          ],
+          "badges": [
+            "C"
+          ],
+          "equip": "Bilanciere",
+          "level": "Intermedio",
+          "shortNote": "Una serie pesante al RIR della settimana. Riparti da fermo a ogni ripetizione.",
+          "execution": [
+            "In piedi davanti al bilanciere carico, piedi sotto la barra",
+            "Schiena più dritta possibile: piega le ginocchia, fletti in avanti e impugna con presa prona alla larghezza delle spalle",
+            "Spingi con le gambe e porta contemporaneamente il busto in posizione eretta, espirando",
+            "Torna giù piegando le ginocchia e inclinando il busto dalle anche, schiena sempre dritta"
+          ],
+          "cues": "Il bilanciere resta attaccato alle gambe per tutta la salita: se si allontana, la lombare paga.",
+          "img": "exercises/Barbell_Deadlift/0.webp",
+          "lang": "it",
+          "img2": "exercises/Barbell_Deadlift/1.webp",
+          "prof": "MEDIO"
+        },
+        "mf_stacco_bo": {
+          "name": "Stacco · back-off −10%",
+          "nameEn": "Barbell Deadlift",
+          "sets": 4,
+          "reps": "6-10",
+          "rir": "1-2",
+          "rest": "2:30",
+          "isCompound": true,
+          "tags": [
+            "HAM",
+            "GLUTE",
+            "DORSO"
+          ],
+          "badges": [
+            "C"
+          ],
+          "equip": "Bilanciere",
+          "level": "Intermedio",
+          "shortNote": "Carico = top set di oggi −10%. Ripetizioni da fermo, schiena neutra.",
+          "execution": [
+            "In piedi davanti al bilanciere carico, piedi sotto la barra",
+            "Schiena più dritta possibile: piega le ginocchia, fletti in avanti e impugna con presa prona alla larghezza delle spalle",
+            "Spingi con le gambe e porta contemporaneamente il busto in posizione eretta, espirando",
+            "Torna giù piegando le ginocchia e inclinando il busto dalle anche, schiena sempre dritta"
+          ],
+          "cues": "Il bilanciere resta attaccato alle gambe per tutta la salita: se si allontana, la lombare paga.",
+          "lang": "it",
+          "prof": "MEDIO"
+        },
+        "mf_panca_vol": {
+          "name": "Panca piana · volume",
+          "nameEn": "Barbell Bench Press - Medium Grip",
+          "sets": 4,
+          "reps": "6-10",
+          "rir": "1-2",
+          "rest": "2:30",
+          "isCompound": true,
+          "tags": [
+            "PETTO",
+            "D.ANT"
+          ],
+          "badges": [
+            "C"
+          ],
+          "equip": "Bilanciere",
+          "level": "Base",
+          "shortNote": "Seconda panca della settimana: più ripetizioni, carico moderato. Per la forza conta la frequenza.",
+          "execution": [
+            "Sdraiato su panca piana, presa media (avambracci verticali a metà movimento)",
+            "Stacca il bilanciere dai supporti e tienilo sopra di te a braccia tese",
+            "Inspira e scendi lentamente fino a sfiorare il centro del petto",
+            "Breve pausa, poi spingi espirando e contrai il petto in alto",
+            "A fine serie riappoggia il bilanciere sui supporti"
+          ],
+          "cues": "Scapole retratte e depresse per tutta la serie, piedi ben piantati a terra.",
+          "lang": "it",
+          "prof": "MEDIO"
+        }
+      },
+      "days": [
+        {
+          "id": "mf_lun",
+          "label": "LOWER A",
+          "dayName": "LUN",
+          "color": "#E5A82B",
+          "subtitle": "Squat forza · femorali · polpacci",
+          "dur": "~70 min",
+          "exercises": [
+            {
+              "ref": "Barbell_Full_Squat",
+              "sets": 1,
+              "reps": "5-7",
+              "rest": "3:00"
+            },
+            {
+              "ref": "Barbell_Squat",
+              "sets": 3,
+              "reps": "6-8",
+              "rest": "3:00"
+            },
+            {
+              "ref": "Romanian_Deadlift",
+              "sets": 3,
+              "reps": "6-8",
+              "rest": "3:00"
+            },
+            {
+              "ref": "Split_Squat_with_Dumbbells",
+              "sets": 3,
+              "reps": "8-10",
+              "rest": "2:00"
+            },
+            {
+              "ref": "Seated_Leg_Curl",
+              "sets": 3,
+              "reps": "10-12",
+              "rest": "1:30"
+            },
+            {
+              "ref": "Standing_Dumbbell_Calf_Raise",
+              "sets": 4,
+              "reps": "8-12",
+              "rest": "1:30"
+            },
+            {
+              "ref": "Side_Lateral_Raise",
+              "sets": 3,
+              "reps": "12-20",
+              "rest": "1:00",
+              "sup": "A"
+            },
+            {
+              "ref": "Cable_Crunch",
+              "sets": 3,
+              "reps": "10-15",
+              "rest": "1:00",
+              "sup": "A"
+            }
+          ]
+        },
+        {
+          "id": "mf_mar",
+          "label": "UPPER A",
+          "dayName": "MAR",
+          "color": "#4D82E8",
+          "subtitle": "Panca forza · dorso · spalle · braccia",
+          "dur": "~70 min",
+          "exercises": [
+            {
+              "ref": "Barbell_Bench_Press_-_Medium_Grip",
+              "sets": 1,
+              "reps": "5-7",
+              "rest": "3:00"
+            },
+            {
+              "ref": "Bench_Press_-_Powerlifting",
+              "sets": 3,
+              "reps": "6-8",
+              "rest": "3:00"
+            },
+            {
+              "ref": "Bent_Over_Barbell_Row",
+              "sets": 3,
+              "reps": "6-8",
+              "rest": "2:30"
+            },
+            {
+              "ref": "Standing_Military_Press",
+              "sets": 3,
+              "reps": "6-8",
+              "rest": "2:30"
+            },
+            {
+              "ref": "Wide-Grip_Lat_Pulldown",
+              "sets": 3,
+              "reps": "8-10",
+              "rest": "2:00"
+            },
+            {
+              "ref": "Cable_Rope_Overhead_Triceps_Extension",
+              "sets": 3,
+              "reps": "10-12",
+              "rest": "1:30"
+            },
+            {
+              "ref": "EZ-Bar_Curl",
+              "sets": 3,
+              "reps": "8-10",
+              "rest": "1:30"
+            }
+          ]
+        },
+        {
+          "id": "mf_gio",
+          "label": "PUSH",
+          "dayName": "GIO",
+          "color": "#D8342C",
+          "subtitle": "Petto · spalle · tricipiti",
+          "dur": "~70 min",
+          "exercises": [
+            {
+              "ref": "mf_panca_vol",
+              "sets": 3,
+              "reps": "8-10",
+              "rest": "2:30"
+            },
+            {
+              "ref": "Incline_Dumbbell_Press",
+              "sets": 3,
+              "reps": "8-10",
+              "rest": "2:30"
+            },
+            {
+              "ref": "Low_Cable_Crossover",
+              "sets": 3,
+              "reps": "12-15",
+              "rest": "1:30"
+            },
+            {
+              "ref": "Dumbbell_Shoulder_Press",
+              "sets": 3,
+              "reps": "8-10",
+              "rest": "2:00"
+            },
+            {
+              "ref": "One-Arm_Incline_Lateral_Raise",
+              "sets": 4,
+              "reps": "12-15",
+              "rest": "1:00",
+              "tec": "LLP"
+            },
+            {
+              "ref": "Triceps_Pushdown_-_Rope_Attachment",
+              "sets": 3,
+              "reps": "10-12",
+              "rest": "1:00"
+            },
+            {
+              "ref": "Standing_Dumbbell_Triceps_Extension",
+              "sets": 2,
+              "reps": "12-15",
+              "rest": "1:00"
+            }
+          ]
+        },
+        {
+          "id": "mf_ven",
+          "label": "PULL",
+          "dayName": "VEN",
+          "color": "#8B5CF6",
+          "subtitle": "Dorso · deltoidi post. · bicipiti · trazioni zavorrate oltre 10 rip",
+          "dur": "~65 min",
+          "exercises": [
+            {
+              "ref": "Pullups",
+              "sets": 4,
+              "reps": "6-10",
+              "rest": "2:30"
+            },
+            {
+              "ref": "Dumbbell_Incline_Row",
+              "sets": 3,
+              "reps": "8-12",
+              "rest": "2:00"
+            },
+            {
+              "ref": "Seated_Cable_Rows",
+              "sets": 3,
+              "reps": "10-12",
+              "rest": "1:30"
+            },
+            {
+              "ref": "Rope_Straight-Arm_Pulldown",
+              "sets": 2,
+              "reps": "12-15",
+              "rest": "1:30"
+            },
+            {
+              "ref": "Face_Pull",
+              "sets": 3,
+              "reps": "15-20",
+              "rest": "1:00"
+            },
+            {
+              "ref": "Incline_Dumbbell_Curl",
+              "sets": 3,
+              "reps": "10-12",
+              "rest": "1:30"
+            },
+            {
+              "ref": "Hammer_Curls",
+              "sets": 2,
+              "reps": "10-12",
+              "rest": "1:00"
+            }
+          ]
+        },
+        {
+          "id": "mf_sab",
+          "label": "LOWER B",
+          "dayName": "SAB",
+          "color": "#2FA055",
+          "subtitle": "Stacco forza · quadricipiti · glutei",
+          "dur": "~70 min",
+          "exercises": [
+            {
+              "ref": "Barbell_Deadlift",
+              "sets": 1,
+              "reps": "4-6",
+              "rest": "3:30"
+            },
+            {
+              "ref": "mf_stacco_bo",
+              "sets": 2,
+              "reps": "5",
+              "rest": "3:00"
+            },
+            {
+              "ref": "Front_Barbell_Squat",
+              "sets": 3,
+              "reps": "8-10",
+              "rest": "2:30"
+            },
+            {
+              "ref": "Barbell_Hip_Thrust",
+              "sets": 3,
+              "reps": "8-12",
+              "rest": "2:00"
+            },
+            {
+              "ref": "Seated_Leg_Curl",
+              "sets": 4,
+              "reps": "12-15",
+              "rest": "1:30"
+            },
+            {
+              "ref": "Standing_Barbell_Calf_Raise",
+              "sets": 4,
+              "reps": "10-15",
+              "rest": "1:00",
+              "tec": "LLP"
+            },
+            {
+              "ref": "Reverse_Crunch",
+              "sets": 3,
+              "reps": "10-15",
+              "rest": "1:00"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "format": "v8w/1",
+      "id": "massa_m2",
+      "name": "MASSA & FORZA · M2",
+      "subtitle": "Sett 9–16 · top set 3–5 + back-off −12% · deload S16",
+      "weeks": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8
+      ],
+      "rotation": false,
+      "storageKey": "sched_massa_m2",
+      "phase": {
+        "1": {
+          "name": "M2 · BASE · sett 1/7",
+          "variable": "Stabilisci i carichi al minimo del range",
+          "repPos": "bottom",
+          "compRir": "2",
+          "accRir": "1",
+          "load": "base",
+          "loadCue": "base"
+        },
+        "2": {
+          "name": "M2 · ACCUMULO · sett 2/7",
+          "variable": "+1 ripetizione a parità di carico",
+          "repPos": "mid",
+          "compRir": "1-2",
+          "accRir": "0-1",
+          "load": "hold",
+          "loadCue": "hold"
+        },
+        "3": {
+          "name": "M2 · ACCUMULO · sett 3/7",
+          "variable": "+1 ripetizione: massimo del range",
+          "repPos": "top",
+          "compRir": "1-2",
+          "accRir": "0-1",
+          "load": "hold",
+          "loadCue": "hold"
+        },
+        "4": {
+          "name": "M2 · SALITA · sett 4/7",
+          "variable": "+2,5 kg sopra · +5 kg gambe, riparti dal minimo",
+          "repPos": "bottom",
+          "compRir": "1-2",
+          "accRir": "0-1",
+          "load": "up",
+          "loadCue": "up"
+        },
+        "5": {
+          "name": "M2 · ACCUMULO · sett 5/7",
+          "variable": "+1 ripetizione a parità di carico",
+          "repPos": "mid",
+          "compRir": "1-2",
+          "accRir": "0-1",
+          "load": "hold",
+          "loadCue": "hold"
+        },
+        "6": {
+          "name": "M2 · ACCUMULO · sett 6/7",
+          "variable": "+1 ripetizione: massimo del range",
+          "repPos": "top",
+          "compRir": "1",
+          "accRir": "0-1",
+          "load": "hold",
+          "loadCue": "hold"
+        },
+        "7": {
+          "name": "M2 · SALITA · sett 7/7",
+          "variable": "+2,5 kg sopra · +5 kg gambe, riparti dal minimo",
+          "repPos": "bottom",
+          "compRir": "1-2",
+          "accRir": "0-1",
+          "load": "up",
+          "loadCue": "up"
+        },
+        "8": {
+          "name": "M2 · DELOAD",
+          "variable": "−15% carico · fai metà delle serie (arrotonda per eccesso)",
+          "repPos": "mid",
+          "compRir": "3-4",
+          "accRir": "3",
+          "load": "deload",
+          "loadCue": "deload"
+        }
+      },
+      "blocks": [
+        {
+          "id": "M2",
+          "label": "Meso 2 · forza",
+          "weeks": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8
+          ],
+          "color": "#D8342C",
+          "reps": "onda: +rep, +rep, +carico · una variabile/sett",
+          "rir": "2 → 1 (multiart. mai sotto 1)"
+        }
+      ],
+      "newExercises": {
+        "Barbell_Full_Squat": {
+          "id": "Barbell_Full_Squat",
+          "name": "Squat · TOP SET",
+          "nameEn": "Barbell Full Squat",
+          "sets": 4,
+          "reps": "6-10",
+          "rir": "1-2",
+          "rest": "2:30",
+          "isCompound": true,
+          "tags": [
+            "QUAD",
+            "POLP"
+          ],
+          "badges": [
+            "C"
+          ],
+          "equip": "Bilanciere",
+          "level": "Intermedio",
+          "shortNote": "Una serie pesante al RIR della settimana. Il suo carico fa da base per il back-off.",
+          "execution": [
+            "Bilanciere dal rack appoggiato sui trapezi, arretra e piazza i piedi alla larghezza delle spalle",
+            "Punte leggermente in fuori, testa alta e schiena compatta",
+            "Scendi piegando le ginocchia e portando indietro il bacino, fino alla massima profondità controllata",
+            "Risali espirando spingendo il pavimento con tallone o centro del piede, estendendo anche e ginocchia"
+          ],
+          "cues": "Scendi finché mantieni la schiena neutra: se il bacino si arrotonda in basso, sei sceso troppo.",
+          "img": "exercises/Barbell_Full_Squat/0.webp",
+          "lang": "it",
+          "img2": "exercises/Barbell_Full_Squat/1.webp",
+          "prof": "ALLUNGATO"
+        },
+        "Barbell_Squat": {
+          "id": "Barbell_Squat",
+          "name": "Squat · back-off −12%",
+          "nameEn": "Barbell Squat",
+          "sets": 4,
+          "reps": "6-10",
+          "rir": "1-2",
+          "rest": "2:30",
+          "isCompound": true,
+          "tags": [
+            "QUAD",
+            "POLP"
+          ],
+          "badges": [
+            "C"
+          ],
+          "equip": "Bilanciere",
+          "level": "Base",
+          "shortNote": "Carico = top set di oggi −12%. Stessa profondità, ritmo costante.",
+          "execution": [
+            "Bilanciere sul rack poco sotto l'altezza delle spalle, mettiti sotto e appoggialo sui trapezi",
+            "Impugna il bilanciere ai lati e staccalo spingendo con le gambe e raddrizzando il busto",
+            "Arretra e posiziona i piedi alla larghezza delle spalle, punte leggermente in fuori",
+            "Scendi piegando ginocchia e anche mantenendo il busto compatto, fino a poco sotto il parallelo",
+            "Risali espirando, spingendo il pavimento col tallone fino a gambe distese"
+          ],
+          "cues": "Testa alta e schiena dritta. Ginocchia che seguono la direzione delle punte, mai crollate dentro.",
+          "img": "exercises/Barbell_Squat/0.webp",
+          "lang": "it",
+          "img2": "exercises/Barbell_Squat/1.webp",
+          "prof": "MEDIO"
+        },
+        "Barbell_Bench_Press_-_Medium_Grip": {
+          "id": "Barbell_Bench_Press_-_Medium_Grip",
+          "name": "Panca piana · TOP SET",
+          "nameEn": "Barbell Bench Press - Medium Grip",
+          "sets": 4,
+          "reps": "6-10",
+          "rir": "1-2",
+          "rest": "2:30",
+          "isCompound": true,
+          "tags": [
+            "PETTO",
+            "D.ANT"
+          ],
+          "badges": [
+            "C"
+          ],
+          "equip": "Bilanciere",
+          "level": "Base",
+          "shortNote": "Una serie pesante al RIR della settimana. Pausa breve al petto, scapole addotte.",
+          "execution": [
+            "Sdraiato su panca piana, presa media (avambracci verticali a metà movimento)",
+            "Stacca il bilanciere dai supporti e tienilo sopra di te a braccia tese",
+            "Inspira e scendi lentamente fino a sfiorare il centro del petto",
+            "Breve pausa, poi spingi espirando e contrai il petto in alto",
+            "A fine serie riappoggia il bilanciere sui supporti"
+          ],
+          "cues": "Scapole retratte e depresse per tutta la serie, piedi ben piantati a terra.",
+          "img": "exercises/Barbell_Bench_Press_-_Medium_Grip/0.webp",
+          "lang": "it",
+          "img2": "exercises/Barbell_Bench_Press_-_Medium_Grip/1.webp",
+          "prof": "MEDIO"
+        },
+        "Bench_Press_-_Powerlifting": {
+          "id": "Bench_Press_-_Powerlifting",
+          "name": "Panca piana · back-off −12%",
+          "nameEn": "Bench Press - Powerlifting",
+          "sets": 4,
+          "reps": "6-10",
+          "rir": "1-2",
+          "rest": "2:30",
+          "isCompound": true,
+          "tags": [
+            "TRI",
+            "PETTO"
+          ],
+          "badges": [
+            "C"
+          ],
+          "equip": "Bilanciere",
+          "level": "Intermedio",
+          "shortNote": "Carico = top set di oggi −12%. Stessa presa e stesso arco del top set.",
+          "execution": [
+            "Sdraiato sulla panca, piedi raccolti sotto di te e arco lombare marcato",
+            "Presa che copre gli anelli della barra, scapole strette e depresse",
+            "Stacca la barra senza protrarre le spalle, stringi la barra come per spezzarla",
+            "Scendi al petto basso mantenendo barra, polsi e gomiti in linea",
+            "Pausa al contatto, poi spingi con la massima forza tenendo i gomiti raccolti fino al lockout"
+          ],
+          "cues": "L'arco è dorsale, non lombare forzato: i glutei restano sempre a contatto con la panca.",
+          "img": "exercises/Bench_Press_-_Powerlifting/0.webp",
+          "lang": "it",
+          "img2": "exercises/Bench_Press_-_Powerlifting/1.webp",
+          "prof": "MEDIO"
+        },
+        "Barbell_Deadlift": {
+          "id": "Barbell_Deadlift",
+          "name": "Stacco · TOP SET",
+          "nameEn": "Barbell Deadlift",
+          "sets": 4,
+          "reps": "6-10",
+          "rir": "1-2",
+          "rest": "2:30",
+          "isCompound": true,
+          "tags": [
+            "HAM",
+            "GLUTE",
+            "DORSO"
+          ],
+          "badges": [
+            "C"
+          ],
+          "equip": "Bilanciere",
+          "level": "Intermedio",
+          "shortNote": "Una serie pesante al RIR della settimana. Riparti da fermo a ogni ripetizione.",
+          "execution": [
+            "In piedi davanti al bilanciere carico, piedi sotto la barra",
+            "Schiena più dritta possibile: piega le ginocchia, fletti in avanti e impugna con presa prona alla larghezza delle spalle",
+            "Spingi con le gambe e porta contemporaneamente il busto in posizione eretta, espirando",
+            "Torna giù piegando le ginocchia e inclinando il busto dalle anche, schiena sempre dritta"
+          ],
+          "cues": "Il bilanciere resta attaccato alle gambe per tutta la salita: se si allontana, la lombare paga.",
+          "img": "exercises/Barbell_Deadlift/0.webp",
+          "lang": "it",
+          "img2": "exercises/Barbell_Deadlift/1.webp",
+          "prof": "MEDIO"
+        },
+        "mf_stacco_bo": {
+          "name": "Stacco · back-off −12%",
+          "nameEn": "Barbell Deadlift",
+          "sets": 4,
+          "reps": "6-10",
+          "rir": "1-2",
+          "rest": "2:30",
+          "isCompound": true,
+          "tags": [
+            "HAM",
+            "GLUTE",
+            "DORSO"
+          ],
+          "badges": [
+            "C"
+          ],
+          "equip": "Bilanciere",
+          "level": "Intermedio",
+          "shortNote": "Carico = top set di oggi −12%. Ripetizioni da fermo, schiena neutra.",
+          "execution": [
+            "In piedi davanti al bilanciere carico, piedi sotto la barra",
+            "Schiena più dritta possibile: piega le ginocchia, fletti in avanti e impugna con presa prona alla larghezza delle spalle",
+            "Spingi con le gambe e porta contemporaneamente il busto in posizione eretta, espirando",
+            "Torna giù piegando le ginocchia e inclinando il busto dalle anche, schiena sempre dritta"
+          ],
+          "cues": "Il bilanciere resta attaccato alle gambe per tutta la salita: se si allontana, la lombare paga.",
+          "lang": "it",
+          "prof": "MEDIO"
+        },
+        "mf_panca_vol": {
+          "name": "Panca piana · volume",
+          "nameEn": "Barbell Bench Press - Medium Grip",
+          "sets": 4,
+          "reps": "6-10",
+          "rir": "1-2",
+          "rest": "2:30",
+          "isCompound": true,
+          "tags": [
+            "PETTO",
+            "D.ANT"
+          ],
+          "badges": [
+            "C"
+          ],
+          "equip": "Bilanciere",
+          "level": "Base",
+          "shortNote": "Seconda panca della settimana: più ripetizioni, carico moderato. Per la forza conta la frequenza.",
+          "execution": [
+            "Sdraiato su panca piana, presa media (avambracci verticali a metà movimento)",
+            "Stacca il bilanciere dai supporti e tienilo sopra di te a braccia tese",
+            "Inspira e scendi lentamente fino a sfiorare il centro del petto",
+            "Breve pausa, poi spingi espirando e contrai il petto in alto",
+            "A fine serie riappoggia il bilanciere sui supporti"
+          ],
+          "cues": "Scapole retratte e depresse per tutta la serie, piedi ben piantati a terra.",
+          "lang": "it",
+          "prof": "MEDIO"
+        }
+      },
+      "days": [
+        {
+          "id": "mf2_lun",
+          "label": "LOWER A",
+          "dayName": "LUN",
+          "color": "#E5A82B",
+          "subtitle": "Squat forza · femorali · polpacci",
+          "dur": "~70 min",
+          "exercises": [
+            {
+              "ref": "Barbell_Full_Squat",
+              "sets": 1,
+              "reps": "3-5",
+              "rest": "3:00"
+            },
+            {
+              "ref": "Barbell_Squat",
+              "sets": 3,
+              "reps": "5-6",
+              "rest": "3:00"
+            },
+            {
+              "ref": "Romanian_Deadlift",
+              "sets": 3,
+              "reps": "6-8",
+              "rest": "3:00"
+            },
+            {
+              "ref": "Split_Squat_with_Dumbbells",
+              "sets": 3,
+              "reps": "8-10",
+              "rest": "2:00"
+            },
+            {
+              "ref": "Seated_Leg_Curl",
+              "sets": 3,
+              "reps": "10-12",
+              "rest": "1:30"
+            },
+            {
+              "ref": "Standing_Dumbbell_Calf_Raise",
+              "sets": 4,
+              "reps": "8-12",
+              "rest": "1:30"
+            },
+            {
+              "ref": "Side_Lateral_Raise",
+              "sets": 3,
+              "reps": "12-20",
+              "rest": "1:00",
+              "sup": "A"
+            },
+            {
+              "ref": "Cable_Crunch",
+              "sets": 3,
+              "reps": "10-15",
+              "rest": "1:00",
+              "sup": "A"
+            }
+          ]
+        },
+        {
+          "id": "mf2_mar",
+          "label": "UPPER A",
+          "dayName": "MAR",
+          "color": "#4D82E8",
+          "subtitle": "Panca forza · dorso · spalle · braccia",
+          "dur": "~70 min",
+          "exercises": [
+            {
+              "ref": "Barbell_Bench_Press_-_Medium_Grip",
+              "sets": 1,
+              "reps": "3-5",
+              "rest": "3:00"
+            },
+            {
+              "ref": "Bench_Press_-_Powerlifting",
+              "sets": 3,
+              "reps": "5-6",
+              "rest": "3:00"
+            },
+            {
+              "ref": "Bent_Over_Barbell_Row",
+              "sets": 3,
+              "reps": "6-8",
+              "rest": "2:30"
+            },
+            {
+              "ref": "Standing_Military_Press",
+              "sets": 3,
+              "reps": "5-7",
+              "rest": "2:30"
+            },
+            {
+              "ref": "Wide-Grip_Lat_Pulldown",
+              "sets": 3,
+              "reps": "8-10",
+              "rest": "2:00"
+            },
+            {
+              "ref": "Cable_Rope_Overhead_Triceps_Extension",
+              "sets": 3,
+              "reps": "10-12",
+              "rest": "1:30"
+            },
+            {
+              "ref": "EZ-Bar_Curl",
+              "sets": 3,
+              "reps": "8-10",
+              "rest": "1:30"
+            }
+          ]
+        },
+        {
+          "id": "mf2_gio",
+          "label": "PUSH",
+          "dayName": "GIO",
+          "color": "#D8342C",
+          "subtitle": "Petto · spalle · tricipiti",
+          "dur": "~70 min",
+          "exercises": [
+            {
+              "ref": "mf_panca_vol",
+              "sets": 3,
+              "reps": "6-8",
+              "rest": "2:30"
+            },
+            {
+              "ref": "Incline_Dumbbell_Press",
+              "sets": 3,
+              "reps": "8-10",
+              "rest": "2:30"
+            },
+            {
+              "ref": "Low_Cable_Crossover",
+              "sets": 3,
+              "reps": "12-15",
+              "rest": "1:30"
+            },
+            {
+              "ref": "Dumbbell_Shoulder_Press",
+              "sets": 3,
+              "reps": "8-10",
+              "rest": "2:00"
+            },
+            {
+              "ref": "One-Arm_Incline_Lateral_Raise",
+              "sets": 5,
+              "reps": "12-15",
+              "rest": "1:00",
+              "tec": "LLP"
+            },
+            {
+              "ref": "Triceps_Pushdown_-_Rope_Attachment",
+              "sets": 3,
+              "reps": "10-12",
+              "rest": "1:00"
+            },
+            {
+              "ref": "Standing_Dumbbell_Triceps_Extension",
+              "sets": 2,
+              "reps": "12-15",
+              "rest": "1:00"
+            }
+          ]
+        },
+        {
+          "id": "mf2_ven",
+          "label": "PULL",
+          "dayName": "VEN",
+          "color": "#8B5CF6",
+          "subtitle": "Dorso · deltoidi post. · bicipiti · trazioni zavorrate oltre 10 rip",
+          "dur": "~65 min",
+          "exercises": [
+            {
+              "ref": "Pullups",
+              "sets": 4,
+              "reps": "6-10",
+              "rest": "2:30"
+            },
+            {
+              "ref": "Dumbbell_Incline_Row",
+              "sets": 3,
+              "reps": "8-12",
+              "rest": "2:00"
+            },
+            {
+              "ref": "Seated_Cable_Rows",
+              "sets": 3,
+              "reps": "10-12",
+              "rest": "1:30"
+            },
+            {
+              "ref": "Rope_Straight-Arm_Pulldown",
+              "sets": 2,
+              "reps": "12-15",
+              "rest": "1:30"
+            },
+            {
+              "ref": "Face_Pull",
+              "sets": 3,
+              "reps": "15-20",
+              "rest": "1:00"
+            },
+            {
+              "ref": "Incline_Dumbbell_Curl",
+              "sets": 3,
+              "reps": "10-12",
+              "rest": "1:30"
+            },
+            {
+              "ref": "Hammer_Curls",
+              "sets": 2,
+              "reps": "10-12",
+              "rest": "1:00"
+            }
+          ]
+        },
+        {
+          "id": "mf2_sab",
+          "label": "LOWER B",
+          "dayName": "SAB",
+          "color": "#2FA055",
+          "subtitle": "Stacco forza · quadricipiti · glutei",
+          "dur": "~70 min",
+          "exercises": [
+            {
+              "ref": "Barbell_Deadlift",
+              "sets": 1,
+              "reps": "3-5",
+              "rest": "3:30"
+            },
+            {
+              "ref": "mf_stacco_bo",
+              "sets": 2,
+              "reps": "4-5",
+              "rest": "3:00"
+            },
+            {
+              "ref": "Front_Barbell_Squat",
+              "sets": 3,
+              "reps": "6-8",
+              "rest": "2:30"
+            },
+            {
+              "ref": "Barbell_Hip_Thrust",
+              "sets": 3,
+              "reps": "8-12",
+              "rest": "2:00"
+            },
+            {
+              "ref": "Seated_Leg_Curl",
+              "sets": 4,
+              "reps": "12-15",
+              "rest": "1:30"
+            },
+            {
+              "ref": "Standing_Barbell_Calf_Raise",
+              "sets": 5,
+              "reps": "10-15",
+              "rest": "1:00",
+              "tec": "LLP"
+            },
+            {
+              "ref": "Reverse_Crunch",
+              "sets": 3,
+              "reps": "10-15",
+              "rest": "1:00"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "diete": [
+    {
+      "format": "v8d/1",
+      "id": "massa_on",
+      "name": "MASSA · giorno allenamento",
+      "subtitle": "Lun-Mar-Gio-Ven-Sab · ~3.040 kcal · surplus ~10%",
+      "dayType": "allenamento",
+      "target": {
+        "p": 185,
+        "c": 385,
+        "f": 85
+      },
+      "meals": [
+        {
+          "id": "m1",
+          "name": "Colazione",
+          "time": "05:45",
+          "items": [
+            {
+              "ref": "f_avena",
+              "g": 80
+            },
+            {
+              "ref": "f_wheyiso",
+              "g": 20
+            },
+            {
+              "ref": "f_lattescr",
+              "g": 200
+            },
+            {
+              "ref": "f_banana",
+              "g": 120
+            },
+            {
+              "ref": "f_burroarach",
+              "g": 15
+            }
+          ]
+        },
+        {
+          "id": "m2",
+          "name": "Spuntino",
+          "time": "09:30",
+          "items": [
+            {
+              "ref": "f_skyr",
+              "g": 170
+            },
+            {
+              "ref": "f_mela",
+              "g": 150
+            },
+            {
+              "ref": "f_mandorle",
+              "g": 20
+            },
+            {
+              "ref": "f_gallette",
+              "g": 10
+            }
+          ]
+        },
+        {
+          "id": "m3",
+          "name": "Pranzo · schiscetta",
+          "time": "12:00",
+          "items": [
+            {
+              "ref": "f_basmati",
+              "g": 115
+            },
+            {
+              "ref": "f_pollo",
+              "g": 120
+            },
+            {
+              "ref": "f_zucchine",
+              "g": 200
+            },
+            {
+              "ref": "f_evo",
+              "g": 20
+            }
+          ]
+        },
+        {
+          "id": "m4",
+          "name": "Pre-workout",
+          "time": "15:30",
+          "items": [
+            {
+              "ref": "f_banana",
+              "g": 120
+            },
+            {
+              "ref": "f_gallette",
+              "g": 30
+            },
+            {
+              "ref": "f_miele",
+              "g": 15
+            },
+            {
+              "ref": "f_wheyiso",
+              "g": 10
+            }
+          ]
+        },
+        {
+          "id": "m5",
+          "name": "Cena · post-allenamento",
+          "time": "18:00",
+          "items": [
+            {
+              "ref": "f_pasta",
+              "g": 85
+            },
+            {
+              "ref": "f_macinato",
+              "g": 120
+            },
+            {
+              "ref": "f_broccoli",
+              "g": 200
+            },
+            {
+              "ref": "f_evo",
+              "g": 10
+            },
+            {
+              "ref": "f_parmigiano",
+              "g": 10
+            }
+          ]
+        },
+        {
+          "id": "m6",
+          "name": "Pre-nanna",
+          "time": "21:15",
+          "items": [
+            {
+              "ref": "f_greco0",
+              "g": 230
+            },
+            {
+              "ref": "f_noci",
+              "g": 20
+            },
+            {
+              "ref": "f_frutbosco",
+              "g": 100
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "format": "v8d/1",
+      "id": "massa_off",
+      "name": "MASSA · giorno riposo",
+      "subtitle": "Mer-Dom · ~2.725 kcal · senza pre-workout",
+      "dayType": "riposo",
+      "target": {
+        "p": 175,
+        "c": 320,
+        "f": 82
+      },
+      "meals": [
+        {
+          "id": "m1",
+          "name": "Colazione",
+          "time": "05:45",
+          "items": [
+            {
+              "ref": "f_avena",
+              "g": 80
+            },
+            {
+              "ref": "f_wheyiso",
+              "g": 20
+            },
+            {
+              "ref": "f_lattescr",
+              "g": 200
+            },
+            {
+              "ref": "f_banana",
+              "g": 120
+            },
+            {
+              "ref": "f_burroarach",
+              "g": 15
+            }
+          ]
+        },
+        {
+          "id": "m2",
+          "name": "Spuntino",
+          "time": "09:30",
+          "items": [
+            {
+              "ref": "f_skyr",
+              "g": 170
+            },
+            {
+              "ref": "f_mela",
+              "g": 150
+            },
+            {
+              "ref": "f_mandorle",
+              "g": 20
+            },
+            {
+              "ref": "f_gallette",
+              "g": 10
+            }
+          ]
+        },
+        {
+          "id": "m3",
+          "name": "Pranzo · schiscetta",
+          "time": "12:00",
+          "items": [
+            {
+              "ref": "f_basmati",
+              "g": 115
+            },
+            {
+              "ref": "f_pollo",
+              "g": 120
+            },
+            {
+              "ref": "f_zucchine",
+              "g": 200
+            },
+            {
+              "ref": "f_evo",
+              "g": 20
+            }
+          ]
+        },
+        {
+          "id": "m5",
+          "name": "Cena",
+          "time": "18:00",
+          "items": [
+            {
+              "ref": "f_pasta",
+              "g": 85
+            },
+            {
+              "ref": "f_macinato",
+              "g": 120
+            },
+            {
+              "ref": "f_broccoli",
+              "g": 200
+            },
+            {
+              "ref": "f_evo",
+              "g": 10
+            },
+            {
+              "ref": "f_parmigiano",
+              "g": 10
+            }
+          ]
+        },
+        {
+          "id": "m6",
+          "name": "Pre-nanna",
+          "time": "21:15",
+          "items": [
+            {
+              "ref": "f_greco0",
+              "g": 230
+            },
+            {
+              "ref": "f_noci",
+              "g": 20
+            },
+            {
+              "ref": "f_frutbosco",
+              "g": 100
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "attiva": "massa_m1",
+  "dietaAttiva": "massa_on"
+}
