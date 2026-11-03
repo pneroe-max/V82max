@@ -5,8 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="theme-color" content="#0C0C0E">
-<meta name="theme-color" content="#100F0D">
+<meta name="theme-color" content="#0C0C0E">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="V8 Tracker">
@@ -17,7 +16,8 @@
 <title>V8 Tracker</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400;62..125,500;62..125,600;62..125,700;62..125,800&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400;62..125,500;62..125,600;62..125,700;62..125,800&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+<noscript><link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400;62..125,500;62..125,600;62..125,700;62..125,800&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet"></noscript>
 <style>
   /* ============================================================
      TEMA v5 "VETRO & VIOLA" — sintesi img1 (nero+viola, card dati)
@@ -1965,8 +1965,9 @@ const getSuggestedWeight = (exercise, currentWeek, dayId, allWorkouts, exIdx, ph
   const phase = PH[currentWeek] || PH[1];
   // Carico sale solo nelle settimane di "salita" (loadCue 'up'),
   // scende al deload, resta fermo nelle settimane di accumulo rep.
-  if (phase.loadCue === 'up') return (prevWeight + increment).toFixed(1);
-  if (phase.loadCue === 'deload') return (Math.round(prevWeight * 0.85 / 2.5) * 2.5).toFixed(1);
+  const cue = phase.loadCue || phase.load; // le fasi scrivono "load": prima si leggeva solo "loadCue"
+  if (cue === 'up') return (prevWeight + increment).toFixed(1);
+  if (cue === 'deload') return (Math.round(prevWeight * 0.85 / 2.5) * 2.5).toFixed(1);
   return prevWeight.toFixed(1); // hold: aggiungi rep, non carico
 };
 const parseRestSeconds = restStr => {
@@ -2061,7 +2062,7 @@ document.addEventListener('visibilitychange', () => {
 // ============= TEMA v5 "VETRO & VIOLA" =============
 // Card-vetro semitrasparenti (img2) che lasciano filtrare le sfere viola;
 // accento UI viola elettrico (img1). Colori-disco solo per i giorni.
-const APP_VERSION = 'v23.0';
+const APP_VERSION = 'v24.0';
 const APP_BUILD = '2026-07-27';
 const displayFont = "'Archivo', -apple-system, system-ui, sans-serif";
 const monoFont = "'IBM Plex Mono', ui-monospace, 'SF Mono', monospace";
@@ -2385,7 +2386,7 @@ function FloatingTimer() {
   return /*#__PURE__*/React.createElement("div", {
     style: {
       position: 'fixed',
-      bottom: '12px',
+      bottom: 'calc(12px + var(--barra-h, 0px))',
       left: '50%',
       transform: 'translateX(-50%)',
       zIndex: 999,
@@ -2849,323 +2850,6 @@ function MesocycleWave(_ref11) {
       }
     }, w));
   })));
-}
-function HomeScreen(_ref12) {
-  let navigate = _ref12.navigate;
-  const _useState15 = useState({
-      peso: '—',
-      sessioni: 0,
-      sett: 1
-    }),
-    _useState16 = _slicedToArray(_useState15, 2),
-    stats = _useState16[0],
-    setStats = _useState16[1];
-  useEffect(() => {
-    const peso = storage.get('peso');
-    const workouts = storage.get('workouts') || {};
-    let sessioni = 0;
-    let lastWeek = 1;
-    Object.entries(workouts).forEach(_ref13 => {
-      let _ref14 = _slicedToArray(_ref13, 2),
-        w = _ref14[0],
-        days = _ref14[1];
-      Object.values(days).forEach(d => {
-        if (d && d.completato) {
-          sessioni++;
-          if (parseInt(w) > lastWeek) lastWeek = parseInt(w);
-        }
-      });
-    });
-    const serie = peso ? Object.keys(peso).map(Number).sort((a, b) => a - b).filter(w => (peso[w] || {}).media > 0) : [];
-    const ultimaSett = serie.length ? peso[serie[serie.length - 1]] : null;
-    let trend = null;
-    if (serie.length >= 2) {
-      const da = serie[Math.max(0, serie.length - 4)],
-        a = serie[serie.length - 1];
-      if (a > da) trend = (peso[a].media - peso[da].media) / (a - da);
-    }
-    setStats({
-      peso: ultimaSett ? ultimaSett.media.toFixed(1).replace('.', ',') : '—',
-      sessioni,
-      sett: lastWeek,
-      trend
-    });
-  }, []);
-  const sections = [{
-    id: 'workout',
-    label: 'Allenamento',
-    IconComp: Dumbbell,
-    color: PLATE.green,
-    desc: 'Blocco 8 settimane · 5 giorni'
-  }, {
-    id: 'summer',
-    label: 'Estate · 4 giorni',
-    IconComp: Sun,
-    color: PLATE.yellow,
-    desc: '4 giorni · solo manubri · viaggio'
-  }, {
-    id: 'bilanciere',
-    label: 'Bilanciere e dischi',
-    IconComp: Settings,
-    color: '#8A8A93',
-    desc: 'Carico per lato negli esercizi a bilanciere'
-  }, {
-    id: 'storico',
-    label: 'Storico blocchi',
-    IconComp: Layers,
-    color: '#22D3EE',
-    desc: 'Archivia e confronta i mesocicli'
-  }, {
-    id: 'profilo',
-    label: 'Profilo di resistenza',
-    IconComp: BarChart3,
-    color: '#2FA055',
-    desc: 'In che punto della curva carichi'
-  }, {
-    id: 'stalli',
-    label: 'Stalli',
-    IconComp: BarChart3,
-    color: '#E5A82B',
-    desc: 'Quali esercizi non salgono più'
-  }, {
-    id: 'decadimento',
-    label: 'Decadimento serie',
-    IconComp: BarChart3,
-    color: '#4D82E8',
-    desc: 'Calo dalla prima all\'ultima serie'
-  }, {
-    id: 'proiezione',
-    label: 'Proiezione corpo',
-    IconComp: Scale,
-    color: '#2FA055',
-    desc: 'Dove saresti fra 12 settimane'
-  }, {
-    id: 'volume',
-    label: 'Volume settimanale',
-    IconComp: BarChart3,
-    color: '#F472B6',
-    desc: 'Serie per gruppo muscolare'
-  }, {
-    id: 'tdee',
-    label: 'TDEE adattivo',
-    IconComp: Flame,
-    color: '#FB923C',
-    desc: 'Mantenimento reale dai tuoi dati'
-  }, {
-    id: 'exdb',
-    label: 'Database esercizi',
-    IconComp: Search,
-    color: '#22D3EE',
-    desc: '556 esercizi con foto e tecnica'
-  }, {
-    id: 'library',
-    label: 'Le mie schede',
-    IconComp: Layers,
-    color: PLATE.purple,
-    desc: 'Importa e gestisci schede .v8w'
-  }, {
-    id: 'diets',
-    label: 'Le mie diete',
-    IconComp: Utensils,
-    color: '#FF8A4C',
-    desc: 'Crea piani · macro e lista spesa'
-  }, {
-    id: 'nutrition',
-    label: 'Alimentazione',
-    IconComp: Apple,
-    color: PLATE.red,
-    desc: 'Dieta 92 kg · stack · refeed'
-  }, {
-    id: 'peso',
-    label: 'Corpo',
-    IconComp: Scale,
-    color: PLATE.blue,
-    desc: 'Peso, composizione e misure'
-  }, {
-    id: 'dashboard',
-    label: 'Dashboard',
-    IconComp: BarChart3,
-    color: PLATE.purple,
-    desc: '1RM stimato + andamento'
-  }, {
-    id: 'recovery',
-    label: 'Recupero & Sonno',
-    IconComp: Moon,
-    color: '#78909c',
-    desc: 'Sonno + energia + stress'
-  }, {
-    id: 'guide',
-    label: 'Guida & Tecniche',
-    IconComp: BookOpen,
-    color: PLATE.yellow,
-    desc: 'Spiegazione tecniche'
-  }, {
-    id: 'settings',
-    label: 'Impostazioni & Backup',
-    IconComp: Settings,
-    color: '#8A8A93',
-    desc: 'Esporta / importa dati'
-  }];
-  const statItems = [{
-    label: 'Peso',
-    value: stats.peso,
-    color: PLATE.blue
-  }, {
-    label: 'Sessioni',
-    value: stats.sessioni,
-    color: PLATE.green
-  }, {
-    label: 'Settimana',
-    value: `${stats.sett}/8`,
-    color: PLATE.yellow
-  }];
-  return /*#__PURE__*/React.createElement("div", {
-    style: {
-      minHeight: '100vh',
-      background: 'transparent',
-      paddingBottom: '120px'
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      padding: '16px 18px 8px'
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      width: '44px',
-      height: '44px',
-      borderRadius: '50%',
-      background: 'rgba(255,255,255,0.07)',
-      border: '1px solid #2A2A31',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center'
-    }
-  }, /*#__PURE__*/React.createElement(Dumbbell, {
-    size: 20,
-    color: VIOLET
-  })), /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: 'flex',
-      gap: '10px'
-    }
-  }, /*#__PURE__*/React.createElement("button", {
-    onClick: () => navigate('dashboard'),
-    style: {
-      width: '44px',
-      height: '44px',
-      borderRadius: '50%',
-      background: 'rgba(255,255,255,0.07)',
-      border: '1px solid #2A2A31',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      cursor: 'pointer'
-    }
-  }, /*#__PURE__*/React.createElement(BarChart3, {
-    size: 18,
-    color: "#C0BEC6"
-  })), /*#__PURE__*/React.createElement("button", {
-    onClick: () => navigate('settings'),
-    style: {
-      width: '44px',
-      height: '44px',
-      borderRadius: '50%',
-      background: 'rgba(255,255,255,0.07)',
-      border: '1px solid #2A2A31',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      cursor: 'pointer'
-    }
-  }, /*#__PURE__*/React.createElement(Settings, {
-    size: 18,
-    color: "#C0BEC6"
-  })))), /*#__PURE__*/React.createElement("div", {
-    style: {
-      padding: 'calc(12px + env(safe-area-inset-top)) calc(16px + env(safe-area-inset-right)) 18px calc(16px + env(safe-area-inset-left))'
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: 'flex',
-      justifyContent: 'space-between',
-      alignItems: 'flex-start'
-    }
-  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
-    style: lblStyle
-  }, schedaAttiva().label, " \xB7 settimana ", stats.sett, " di ", (schedaAttiva().config.weeks || []).length), /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: 'flex',
-      alignItems: 'baseline',
-      gap: '9px',
-      marginTop: '7px'
-    }
-  }, /*#__PURE__*/React.createElement("span", {
-    style: {
-      ...numStyle,
-      fontSize: '42px',
-      fontWeight: '600',
-      lineHeight: 0.9,
-      letterSpacing: '-0.04em',
-      color: IRON.chalk
-    }
-  }, stats.peso === '—' ? '—' : stats.peso), /*#__PURE__*/React.createElement("span", {
-    style: {
-      ...numStyle,
-      fontSize: '13px',
-      color: IRON.dust
-    }
-  }, "KG"), stats.trend != null && stats.trend !== 0 && /*#__PURE__*/React.createElement("span", {
-    style: {
-      ...numStyle,
-      fontSize: '12px',
-      color: stats.trend < 0 ? '#2FA055' : '#E5A82B'
-    }
-  }, stats.trend > 0 ? '+' : '', String(Math.round(stats.trend * 100) / 100).replace('.', ','), "/sett")), /*#__PURE__*/React.createElement(PesoSpark, null)), /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: 'flex',
-      alignItems: 'center',
-      gap: '8px',
-      border: '1px solid ' + IRON.edge,
-      borderRadius: '3px',
-      padding: '7px 11px',
-      marginTop: '2px'
-    }
-  }, /*#__PURE__*/React.createElement("span", {
-    style: {
-      width: '3px',
-      height: '15px',
-      background: '#D8342C',
-      borderRadius: '1px',
-      display: 'block'
-    }
-  }), /*#__PURE__*/React.createElement("span", {
-    style: {
-      ...lblStyle,
-      color: IRON.chalk,
-      fontSize: '10.5px'
-    }
-  }, "CUT")))), /*#__PURE__*/React.createElement(AvvisoBackup, null), React.createElement(AzioneOggi, {
-    apriSeduta: () => navigate('seduta')
-  }), /*#__PURE__*/React.createElement("div", {
-    style: {
-      padding: '14px 14px 0'
-    }
-  }, /*#__PURE__*/React.createElement(PesoRapido, null), /*#__PURE__*/React.createElement(VociHome, {
-    apri: navigate
-  }), /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: '10px',
-      color: '#55555E',
-      textAlign: 'center',
-      marginTop: '22px',
-      lineHeight: 1.7,
-      letterSpacing: '0.04em',
-      fontWeight: '500'
-    }
-  }, "V8 Tracker ", APP_VERSION, " \xB7 Protocollo V8.3.4 \xB7 92 kg", /*#__PURE__*/React.createElement("br", null), "Dati salvati sul dispositivo")));
 }
 
 // ============= EXERCISE DETAIL =============
@@ -3680,7 +3364,7 @@ function WorkoutScreen(_ref16) {
         color: '#8A8A93',
         marginTop: '3px'
       }
-    }, rotation ? 'Volume fisso · una sola variabile per settimana' : '3 settimane · solo manubri + panca · mantenimento'))), /*#__PURE__*/React.createElement("div", {
+    }, [block.reps, block.rir ? 'RIR ' + block.rir : ''].filter(Boolean).join(' · ') || 'Volume fisso · una sola variabile per settimana'))), /*#__PURE__*/React.createElement("div", {
       style: {
         display: 'flex',
         flexDirection: 'column',
@@ -4186,7 +3870,7 @@ function WorkoutScreen(_ref16) {
         fontSize: '22px',
         cursor: 'pointer'
       }
-    }, "+")), usaBilanciere(ex) && exData.kg && /*#__PURE__*/React.createElement("div", {
+    }, "+")), usaBilanciere(ex) && (exData.kg || suggested) && /*#__PURE__*/React.createElement("div", {
       style: {
         margin: '4px -14px 12px',
         padding: '10px 14px 4px',
@@ -4194,8 +3878,10 @@ function WorkoutScreen(_ref16) {
         borderBottom: '1px solid ' + IRON.edge,
         background: 'repeating-linear-gradient(90deg,transparent 0 3px,rgba(255,255,255,0.022) 3px 4px)'
       }
-    }, /*#__PURE__*/React.createElement(Sleeve, {
-      peso: exData.kg,
+    }, !exData.kg && /*#__PURE__*/React.createElement("div", {
+      style: { ...lblStyle, fontSize: '8.5px', marginBottom: '4px' }
+    }, "dischi per il carico proposto \xB7 ", String(suggested).replace('.', ','), " kg"), /*#__PURE__*/React.createElement(Sleeve, {
+      peso: exData.kg || suggested,
       compatta: true
     })), ex.sup && /*#__PURE__*/React.createElement(FasciaSuperset, {
       lettera: ex.sup,
@@ -5692,7 +5378,7 @@ function GuideScreen(_ref26) {
       fontWeight: '700',
       color: '#F2F1ED'
     }
-  }, "Le 7 regole non negoziabili")), ['Tracking carichi obbligatorio: app o quaderno. Senza log la double progression non funziona.', 'Tecnica > peso: ROM compromesso = ipertrofia compromessa (Schoenfeld 2020).', 'Riposi rispettati: 3 min compound, 90s isolamenti SMH (Schoenfeld 2016).', 'RIR onesto: programma RIR 2 = lascia 2 rep nel serbatoio (Pareja-Blanco 2017).', 'Sonno minimo 7,5h: <7h riduce ipertrofia 60% (Dattilo 2020).', 'Cutting lineare: 500-700 g/sett (0,5-0,7% BW). Sopra 0,8 = perdita LBM.', 'Niente experimentation: nuovi esercizi/integratori solo tra cicli.'].map((r, i) => /*#__PURE__*/React.createElement("div", {
+  }, "Le 7 regole")), ['Tracking carichi obbligatorio: app o quaderno. Senza log la double progression non funziona.', 'Tecnica > peso: ROM compromesso = ipertrofia compromessa (Schoenfeld 2020).', 'Riposi rispettati: 3 min compound, 90s isolamenti SMH (Schoenfeld 2016).', 'RIR onesto: programma RIR 2 = lascia 2 rep nel serbatoio (Pareja-Blanco 2017).', 'Sonno almeno 7 h: una notte in bianco riduce la sintesi proteica del 18% (Lamon 2021).', 'Ritmo del peso secondo la fase: massa +0,25/+0,5% a settimana, cut \u22120,5/\u22121%. La verifica calorie lo controlla ogni 2 settimane.', 'Niente experimentation: nuovi esercizi/integratori solo tra cicli.'].map((r, i) => /*#__PURE__*/React.createElement("div", {
     key: i,
     style: {
       fontSize: '12px',
@@ -6232,7 +5918,7 @@ function SettingsScreen(_ref27) {
     style: {
       color: '#F2F1ED'
     }
-  }, "V8 Tracker ", APP_VERSION, " \xB7 Protocollo V8.3.4"), /*#__PURE__*/React.createElement("br", null), "Programma: V8 Block Cutting \xB7 8 Settimane \xB7 92kg (progressione a singola variabile)", /*#__PURE__*/React.createElement("br", null), "Storage: localStorage del browser", /*#__PURE__*/React.createElement("br", null), "Funziona offline dopo la prima apertura", /*#__PURE__*/React.createElement("br", null), "Immagini esercizi: Wikimedia Commons (con fallback SVG)"))));
+  }, "V8 Tracker ", APP_VERSION), /*#__PURE__*/React.createElement("br", null), "Scheda attiva: ", (schedaAttiva() || {}).label || '—', " \xB7 fase ", faseAttiva().label.toLowerCase(), /*#__PURE__*/React.createElement("br", null), "Storage: localStorage del browser", /*#__PURE__*/React.createElement("br", null), "Funziona offline dopo la prima apertura", /*#__PURE__*/React.createElement("br", null), "Immagini esercizi: Wikimedia Commons (con fallback SVG)"))));
 }
 
 // ============= ESTATE / VIAGGIO =============
@@ -6286,6 +5972,8 @@ const makeApplyLogic = phaseMap => (exercise, week) => {
     reps = exercise.reps,
     isCompound = exercise.isCompound;
   const phase = phaseMap[week] || phaseMap[1];
+  // deload: metà serie, arrotondate per eccesso
+  if ((phase.loadCue || phase.load) === 'deload') sets = Math.max(1, Math.ceil(sets / 2));
   const rir = isCompound ? phase.compRir : phase.accRir;
   let outReps = reps;
   if (!reps.includes('+') && !reps.includes('AMRAP')) outReps = repTargetForPhase(reps, phase.repPos);
@@ -18627,209 +18315,6 @@ function InfoBox(_ref30) {
     }
   }, children));
 }
-function SummerScreen(_ref31) {
-  let goBack = _ref31.goBack;
-  const _useState57 = useState('info'),
-    _useState58 = _slicedToArray(_useState57, 2),
-    mode = _useState58[0],
-    setMode = _useState58[1]; // 'info' | 'train'
-
-  if (mode === 'train') {
-    return /*#__PURE__*/React.createElement(WorkoutScreen, {
-      goBack: () => setMode('info'),
-      config: SUMMER_CONFIG
-    });
-  }
-  return /*#__PURE__*/React.createElement("div", {
-    style: {
-      minHeight: '100vh',
-      background: 'transparent',
-      paddingBottom: '120px'
-    }
-  }, /*#__PURE__*/React.createElement(Header, {
-    title: "Estate \xB7 Viaggio",
-    subtitle: "3 settimane \xB7 manubri + panca \xB7 88-90kg",
-    onBack: goBack
-  }), /*#__PURE__*/React.createElement("div", {
-    style: {
-      padding: '0 12px'
-    }
-  }, /*#__PURE__*/React.createElement("button", {
-    onClick: () => setMode('train'),
-    style: {
-      width: '100%',
-      padding: '16px',
-      marginBottom: '14px',
-      background: 'linear-gradient(135deg, #E8B43C 0%, #9A6A1E 100%)',
-      color: 'white',
-      border: 'none',
-      borderRadius: '3px',
-      fontSize: '15px',
-      fontWeight: '700',
-      cursor: 'pointer',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      gap: '10px',
-      boxShadow: '0 4px 14px rgba(245,158,11,0.4)'
-    }
-  }, /*#__PURE__*/React.createElement(Dumbbell, {
-    size: 20
-  }), " Apri allenamento (tracking interattivo)"), /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: '10px',
-      color: '#8A8A93',
-      textAlign: 'center',
-      marginTop: '-8px',
-      marginBottom: '14px'
-    }
-  }, "Stessa scheda interattiva delle normali: selezioni settimana e giorno, registri kg/reps/RIR, timer di recupero, salvataggio automatico."), /*#__PURE__*/React.createElement(InfoBox, {
-    color: "#E8B43C",
-    title: "A cosa serve"
-  }, "Tre settimane in viaggio con solo ", /*#__PURE__*/React.createElement("b", {
-    style: {
-      color: '#F2F1ED'
-    }
-  }, "manubri regolabili + panca"), ". Obiettivo: ", /*#__PURE__*/React.createElement("b", {
-    style: {
-      color: '#F2F1ED'
-    }
-  }, "mantenere la massa"), " (basta poco volume) e restare asciutto senza stress. Coincide con le ", /*#__PURE__*/React.createElement("b", {
-    style: {
-      color: '#F2F1ED'
-    }
-  }, "2 settimane OFF stimolanti"), ": lasci a casa tutto il termogenico."), /*#__PURE__*/React.createElement("div", {
-    style: {
-      ...glassCard,
-      padding: '12px',
-      marginBottom: '12px',
-      textAlign: 'center'
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: '10px',
-      color: '#8A8A93',
-      textTransform: 'uppercase',
-      letterSpacing: '0.6px',
-      marginBottom: '6px'
-    }
-  }, "Split \xB7 Upper/Lower 4 giorni"), /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: '11px',
-      color: '#F2F1ED',
-      fontWeight: '600'
-    }
-  }, "LUN Upper \xB7 MAR Lower \xB7 MER rest \xB7 GIO Upper \xB7 VEN Lower"), /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: '9.5px',
-      color: '#8A8A93',
-      marginTop: '4px'
-    }
-  }, "Ogni gruppo 2\xD7 a settimana \xB7 ~45 min a seduta \xB7 3 settimane")), /*#__PURE__*/React.createElement("div", {
-    style: {
-      ...glassCard,
-      padding: '14px',
-      marginBottom: '12px'
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: '13px',
-      fontWeight: '700',
-      color: '#E8B43C',
-      marginBottom: '8px'
-    }
-  }, "Dieta veloce (2 opzioni)"), /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: '11px',
-      color: '#C0BEC6',
-      lineHeight: 1.6
-    }
-  }, /*#__PURE__*/React.createElement("b", {
-    style: {
-      color: '#C0BEC6'
-    }
-  }, "A \xB7 Mantenimento (consigliata):"), " ~2.250 kcal \xB7 200g P \xB7 210g C \xB7 60g F. Tieni il peso, recuperi leptina/T3, arrivi a ~90 e chiudi il cut a casa.", /*#__PURE__*/React.createElement("br", null), /*#__PURE__*/React.createElement("b", {
-    style: {
-      color: '#E8B43C'
-    }
-  }, "B \xB7 Cut leggero:"), " ~1.950 kcal \xB7 200g P \xB7 150g C \xB7 55g F. Perdita ~0,4-0,6 kg/sett.", /*#__PURE__*/React.createElement("br", null), /*#__PURE__*/React.createElement("span", {
-    style: {
-      color: '#8A8A93'
-    }
-  }, "Proteine ", /*#__PURE__*/React.createElement("b", {
-    style: {
-      color: '#F2F1ED'
-    }
-  }, "200g"), " in entrambe. IF 16:8 rilassabile in viaggio: conta il totale, non la finestra. Dettagli pasti e opzioni veloci nella sezione Alimentazione."))), /*#__PURE__*/React.createElement(InfoBox, {
-    color: "#E0524A",
-    title: "\u26A0 Coi soli manubri: arti inferiori"
-  }, "Carico limitato sulle gambe \u2192 ", /*#__PURE__*/React.createElement("b", {
-    style: {
-      color: '#F2F1ED'
-    }
-  }, "pi\xF9 ripetizioni, pi\xF9 vicino al cedimento (RIR 0-1), eccentrica lenta"), ". Con carichi leggeri serve avvicinarsi al cedimento per reclutare le fibre veloci. Affondi bulgari e Nordic restano i due esercizi pi\xF9 preziosi."), /*#__PURE__*/React.createElement("div", {
-    style: {
-      ...glassCard,
-      padding: '14px',
-      marginBottom: '12px'
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: '13px',
-      fontWeight: '700',
-      color: '#3FB66C',
-      marginBottom: '8px'
-    }
-  }, "Integratori in valigia (minimal)"), /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: '11px',
-      color: '#C0BEC6',
-      lineHeight: 1.6
-    }
-  }, /*#__PURE__*/React.createElement("b", {
-    style: {
-      color: '#3FB66C'
-    }
-  }, "\u2713 Porta:"), " Whey \xB7 Creatina 5g \xB7 Magnesio + Glicina \xB7 Omega-3 \xB7 Multivitaminico. Opzionali: HMB, citrullina.", /*#__PURE__*/React.createElement("br", null), /*#__PURE__*/React.createElement("b", {
-    style: {
-      color: '#E0524A'
-    }
-  }, "\u2717 Lascia a casa:"), " Baldini, Sinefrina, Forskolina, R-ALA, EGCG, Tirosina, Ghost Pump. Sono il ciclo OFF. Caffeina: solo il caff\xE8.")), /*#__PURE__*/React.createElement(InfoBox, {
-    color: "#78909c",
-    title: "Tips estate"
-  }, /*#__PURE__*/React.createElement("b", {
-    style: {
-      color: '#F2F1ED'
-    }
-  }, "NEAT alto"), " (cammini/nuoti) = grasso facile senza recupero, punta a 10-12k passi. ", /*#__PURE__*/React.createElement("b", {
-    style: {
-      color: '#F2F1ED'
-    }
-  }, "Bastano 2 sedute/sett"), " per mantenere se salti giorni. ", /*#__PURE__*/React.createElement("b", {
-    style: {
-      color: '#F2F1ED'
-    }
-  }, "Non fidarti della bilancia"), " in viaggio (sale, acqua, caldo): pesati a casa. Idratati e aggiungi sale col caldo."), /*#__PURE__*/React.createElement(InfoBox, {
-    color: "#3FB66C",
-    title: "Al ritorno"
-  }, "Riprendi la scheda V8.3.4 dal blocco 1 ", /*#__PURE__*/React.createElement("b", {
-    style: {
-      color: '#F2F1ED'
-    }
-  }, "ricalibrando i carichi base"), " (1-2 sedute e torni ai livelli). Reintroduci gli stimolanti gradualmente: la pausa li avr\xE0 resi di nuovo efficaci. La massa ", /*#__PURE__*/React.createElement("b", {
-    style: {
-      color: '#F2F1ED'
-    }
-  }, "non si perde"), " in 3 settimane di allenamento leggero + proteine alte."), /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: '9px',
-      color: '#55555E',
-      textAlign: 'center',
-      marginTop: '8px',
-      lineHeight: 1.6
-    }
-  }, "Helms 2025 \xB7 Refalo (mantenimento) \xB7 Byrne/Peos (diet break) \xB7 Levine (NEAT)", /*#__PURE__*/React.createElement("br", null), "Per soggetto sano. Non sostituisce parere medico.")));
-}
 
 // ============= ALIMENTAZIONE & INTEGRAZIONE =============
 
@@ -18961,392 +18446,6 @@ const SUPP_STACK = [{
   e: 'Micronutrienti',
   t: '#8A8A93'
 }];
-function NutritionScreen(_ref32) {
-  let goBack = _ref32.goBack;
-  const _useState59 = useState('dieta'),
-    _useState60 = _slicedToArray(_useState59, 2),
-    tab = _useState60[0],
-    setTab = _useState60[1];
-  const tabs = [{
-    id: 'dieta',
-    label: 'Dieta'
-  }, {
-    id: 'stack',
-    label: 'Stack'
-  }, {
-    id: 'refeed',
-    label: 'Refeed'
-  }];
-  return /*#__PURE__*/React.createElement("div", {
-    style: {
-      minHeight: '100vh',
-      background: 'transparent',
-      paddingBottom: '120px'
-    }
-  }, /*#__PURE__*/React.createElement(Header, {
-    title: "Alimentazione & Integrazione",
-    subtitle: "92kg \xB7 ~2.000 kcal \xB7 200P/170C/55F",
-    onBack: goBack
-  }), /*#__PURE__*/React.createElement("div", {
-    style: {
-      padding: '0 12px'
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: 'grid',
-      gridTemplateColumns: '1fr 1fr 1fr',
-      gap: '6px',
-      marginBottom: '14px'
-    }
-  }, tabs.map(t => /*#__PURE__*/React.createElement("button", {
-    key: t.id,
-    onClick: () => setTab(t.id),
-    style: {
-      padding: '10px 0',
-      borderRadius: '3px',
-      cursor: 'pointer',
-      fontWeight: '700',
-      fontSize: '12px',
-      background: tab === t.id ? 'linear-gradient(135deg, #E0524A 0%, #E0524Acc 100%)' : 'rgba(255,255,255,0.05)',
-      color: tab === t.id ? '#fff' : '#8A8A93',
-      border: tab === t.id ? '1px solid #E0524A' : '1px solid #2A2A31'
-    }
-  }, t.label))), tab === 'dieta' && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: 'grid',
-      gridTemplateColumns: 'repeat(4, 1fr)',
-      gap: '6px',
-      marginBottom: '12px'
-    }
-  }, [['KCAL', '~2.000', '#E0524A'], ['PROT', '200g', '#3FB66C'], ['CHO', '170g', '#E8B43C'], ['GRASSI', '55g', '#4D82E8']].map(_ref33 => {
-    let _ref34 = _slicedToArray(_ref33, 3),
-      l = _ref34[0],
-      v = _ref34[1],
-      c = _ref34[2];
-    return /*#__PURE__*/React.createElement("div", {
-      key: l,
-      style: {
-        ...glassCard,
-        padding: '10px 4px',
-        textAlign: 'center'
-      }
-    }, /*#__PURE__*/React.createElement("div", {
-      style: {
-        fontSize: '8px',
-        color: '#8A8A93',
-        letterSpacing: '0.5px'
-      }
-    }, l), /*#__PURE__*/React.createElement("div", {
-      style: {
-        fontSize: '15px',
-        fontWeight: '800',
-        color: c,
-        marginTop: '2px'
-      }
-    }, v));
-  })), /*#__PURE__*/React.createElement(InfoBox, {
-    color: "#E0524A",
-    title: "Principio \u2014 insulina bassa, spike unico post-WO"
-  }, "Finestra 06:00-17:00 zero amidi \u2192 lipolisi. Unico picco insulinico alle 18:30 \u2192 uptake simultaneo di creatina (+50%), carnitina (OCTN2) e glucosio (GLUT-4). IF 16:8."), DIET_TIMELINE.map((m, i) => /*#__PURE__*/React.createElement("div", {
-    key: i,
-    style: {
-      ...glassCard,
-      padding: '12px',
-      marginBottom: '8px',
-      borderLeft: `3px solid ${m.color}`
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: 'flex',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      marginBottom: '4px'
-    }
-  }, /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontSize: '12px',
-      fontWeight: '700',
-      color: m.color
-    }
-  }, m.time), /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontSize: '8px',
-      fontWeight: '700',
-      color: m.color,
-      background: `${m.color}22`,
-      padding: '2px 8px',
-      borderRadius: '3px'
-    }
-  }, m.phase)), /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: '10.5px',
-      color: '#e8e8f0',
-      lineHeight: 1.5
-    }
-  }, m.food), /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: '9px',
-      color: '#8A8A93',
-      marginTop: '3px'
-    }
-  }, m.macro), m.veloce && /*#__PURE__*/React.createElement("div", {
-    style: {
-      marginTop: '7px',
-      padding: '7px 9px',
-      background: 'rgba(245,158,11,0.1)',
-      border: '1px solid rgba(245,158,11,0.25)',
-      borderRadius: '3px'
-    }
-  }, /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontSize: '8.5px',
-      fontWeight: '700',
-      color: '#E8B43C',
-      textTransform: 'uppercase',
-      letterSpacing: '0.4px'
-    }
-  }, "Veloce / pronto"), /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: '9.5px',
-      color: '#C0BEC6',
-      lineHeight: 1.45,
-      marginTop: '2px'
-    }
-  }, m.veloce)))), /*#__PURE__*/React.createElement("div", {
-    style: {
-      ...glassCard,
-      padding: '14px',
-      marginTop: '4px',
-      marginBottom: '10px'
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: '12px',
-      fontWeight: '700',
-      color: '#E8B43C',
-      marginBottom: '8px'
-    }
-  }, "Spuntini veloci (opzionali)"), QUICK_SNACKS.map((q, i) => /*#__PURE__*/React.createElement("div", {
-    key: i,
-    style: {
-      padding: '7px 0',
-      borderBottom: i < QUICK_SNACKS.length - 1 ? '1px solid rgba(255,255,255,0.05)' : 'none'
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: 'flex',
-      justifyContent: 'space-between',
-      alignItems: 'baseline'
-    }
-  }, /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontSize: '11px',
-      fontWeight: '600',
-      color: '#F2F1ED'
-    }
-  }, q.n), /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontSize: '8.5px',
-      color: '#8A8A93'
-    }
-  }, q.m)), /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: '9.5px',
-      color: '#8A8A93',
-      marginTop: '1px'
-    }
-  }, q.d)))), /*#__PURE__*/React.createElement("div", {
-    style: {
-      ...glassCard,
-      padding: '12px',
-      marginBottom: '10px'
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: '11px',
-      fontWeight: '700',
-      color: '#3FB66C',
-      marginBottom: '4px'
-    }
-  }, "Brand testati in Italia"), /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: '9.5px',
-      color: '#8A8A93',
-      lineHeight: 1.5
-    }
-  }, "Amadori Le Vie del Pollo \xB7 Rio Mare tonno naturale \xB7 Fage 0% \xB7 Galbusera cracker integrali \xB7 Rizopia/Riso Scotti pronto \xB7 Findus surgelati grigliati \xB7 Foppen salmone \xB7 Bresaola pre-affettata. Reperibili in Conad, Coop, Esselunga.")), /*#__PURE__*/React.createElement(InfoBox, {
-    color: "#A855F7",
-    title: "Proteine \u2014 confermate dalla scienza 2025"
-  }, "Helms 2025: la ritenzione di massa magra \xE8 massima a 2,3-3,1 g/kg di ", /*#__PURE__*/React.createElement("b", {
-    style: {
-      color: '#F2F1ED'
-    }
-  }, "massa magra"), " (~78kg FFM \u2192 180-240g). I tuoi 200g sono perfetti. ", /*#__PURE__*/React.createElement("b", {
-    style: {
-      color: '#F2F1ED'
-    }
-  }, "Mai sotto 200g"), ", nemmeno nei refeed.")), tab === 'stack' && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement(InfoBox, {
-    color: "#E0524A",
-    title: "Stack completo V8.3.4 \u2014 ~229\u20AC/mese"
-  }, "Ogni integratore ha evidenza diretta su atleti sani in deficit, a dose validata. Colori: ", /*#__PURE__*/React.createElement("span", {
-    style: {
-      color: '#3FB66C'
-    }
-  }, "verde"), " = LBM/recupero, ", /*#__PURE__*/React.createElement("span", {
-    style: {
-      color: '#E8B43C'
-    }
-  }, "arancio"), " = lipolisi/performance, ", /*#__PURE__*/React.createElement("span", {
-    style: {
-      color: '#4D82E8'
-    }
-  }, "blu"), " = recupero/danno, ", /*#__PURE__*/React.createElement("span", {
-    style: {
-      color: '#A855F7'
-    }
-  }, "viola"), " = cortisolo."), SUPP_STACK.map((s, i) => /*#__PURE__*/React.createElement("div", {
-    key: i,
-    style: {
-      ...glassCard,
-      padding: '11px 12px',
-      marginBottom: '7px',
-      borderLeft: `3px solid ${s.t}`
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: 'flex',
-      justifyContent: 'space-between',
-      alignItems: 'baseline'
-    }
-  }, /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontSize: '12px',
-      fontWeight: '700',
-      color: '#F2F1ED'
-    }
-  }, s.n), /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontSize: '9.5px',
-      color: s.t,
-      fontWeight: '600'
-    }
-  }, s.d)), /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: '9.5px',
-      color: '#8A8A93',
-      marginTop: '2px'
-    }
-  }, s.e))), /*#__PURE__*/React.createElement(InfoBox, {
-    color: "#E0524A",
-    title: "Ciclo ON/OFF \u2014 non negoziabile"
-  }, "Ogni 8-12 settimane fai 2 settimane OFF: salta Baldini, Sinefrina, Forskolina, R-ALA, EGCG, Tirosina. Mantieni creatina, HMB, multi, Omega-3, whey, citrullina, Mg, glicina. Ripristina la sensibilit\xE0 \u03B2-adrenergica.")), tab === 'refeed' && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: 'grid',
-      gridTemplateColumns: 'repeat(4, 1fr)',
-      gap: '6px',
-      marginBottom: '12px'
-    }
-  }, [['KCAL', '~2.800', '#E0524A'], ['PROT', '200g', '#3FB66C'], ['CHO', '460-550', '#E8B43C'], ['GRASSI', '30-40', '#4D82E8']].map(_ref35 => {
-    let _ref36 = _slicedToArray(_ref35, 3),
-      l = _ref36[0],
-      v = _ref36[1],
-      c = _ref36[2];
-    return /*#__PURE__*/React.createElement("div", {
-      key: l,
-      style: {
-        ...glassCard,
-        padding: '10px 4px',
-        textAlign: 'center'
-      }
-    }, /*#__PURE__*/React.createElement("div", {
-      style: {
-        fontSize: '8px',
-        color: '#8A8A93',
-        letterSpacing: '0.5px'
-      }
-    }, l), /*#__PURE__*/React.createElement("div", {
-      style: {
-        fontSize: '13px',
-        fontWeight: '800',
-        color: c,
-        marginTop: '2px'
-      }
-    }, v));
-  })), /*#__PURE__*/React.createElement(InfoBox, {
-    color: "#E0524A",
-    title: "Quando \u2014 ogni 10-12 giorni (gioved\xEC gambe)"
-  }, "A 92kg stringi da 14 a 10-12 giorni. Ripristina leptina (12-24h) e T3 (24-48h). Salta gli stimolanti (sei anabolic, non lipolitico). Mantieni creatina, HMB, whey+carnitina post-WO, Mg+glicina."), [{
-    n: 'PIZZA · consigliata',
-    r: 'CHO/F 4,3',
-    d: '2 pizze margherita a cena (~1.500 kcal) + giornata CHO puliti. Migliore equilibrio.',
-    c: '#E8B43C'
-  }, {
-    n: 'SUSHI a volontà',
-    r: 'CHO/F 12',
-    d: '20-25 nigiri + 12 hosomaki + 15 sashimi + edamame. Miglior profilo, +sodio (+1,5kg acqua).',
-    c: '#4D82E8'
-  }, {
-    n: 'BURGER',
-    r: 'CHO/F 2,4',
-    d: 'Whopper + Long Chicken (no maio) + patatine medie + Coca regolare. Resto giornata zero-fat.',
-    c: '#E0524A'
-  }].map((o, i) => /*#__PURE__*/React.createElement("div", {
-    key: i,
-    style: {
-      ...glassCard,
-      padding: '12px',
-      marginBottom: '8px',
-      borderLeft: `3px solid ${o.c}`
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: 'flex',
-      justifyContent: 'space-between',
-      alignItems: 'baseline',
-      marginBottom: '3px'
-    }
-  }, /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontSize: '12px',
-      fontWeight: '700',
-      color: '#F2F1ED'
-    }
-  }, o.n), /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontSize: '9px',
-      color: o.c,
-      fontWeight: '700'
-    }
-  }, o.r)), /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: '10px',
-      color: '#C0BEC6',
-      lineHeight: 1.5
-    }
-  }, o.d))), /*#__PURE__*/React.createElement(InfoBox, {
-    color: "#78909c",
-    title: "La mattina dopo"
-  }, /*#__PURE__*/React.createElement("b", {
-    style: {
-      color: '#F2F1ED'
-    }
-  }, "+1,5/2,5 kg"), " = acqua + glicogeno, NON grasso. Whoosh effect: peso reale scende in 3-5 giorni. ", /*#__PURE__*/React.createElement("b", {
-    style: {
-      color: '#F2F1ED'
-    }
-  }, "Pesati il marted\xEC."), " Aspettati +1-2 rep nelle prime sedute = ha funzionato."), /*#__PURE__*/React.createElement(InfoBox, {
-    color: "#E0524A",
-    title: "5 regole d'oro"
-  }, "1\xB7 Mai pi\xF9 di 1 refeed/sett. 2\xB7 Proteine mai sotto 200g. 3\xB7 Solo con training pesante. 4\xB7 Zero alcol (-30% MPS). 5\xB7 Se +3kg il giorno dopo = troppo sodio/porzioni.")), /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: '9px',
-      color: '#55555E',
-      textAlign: 'center',
-      marginTop: '8px',
-      lineHeight: 1.6
-    }
-  }, "Evidence-based \xB7 per soggetto sano, metabolicamente normale.", /*#__PURE__*/React.createElement("br", null), "Non sostituisce parere medico. Esami del sangue ogni 3 mesi.")));
-}
 
 // ============= ICONE EXTRA (libreria schede) =============
 const Layers = p => /*#__PURE__*/React.createElement(Icon, _extends({
@@ -19391,479 +18490,8 @@ const XIcon = p => /*#__PURE__*/React.createElement(Icon, _extends({
 }, p));
 
 // ============= ESTATE V2 · 4 GIORNI =============
-function Summer2Screen(_ref37) {
-  let goBack = _ref37.goBack;
-  const _useState61 = useState('info'),
-    _useState62 = _slicedToArray(_useState61, 2),
-    mode = _useState62[0],
-    setMode = _useState62[1];
-  if (mode === 'train') return /*#__PURE__*/React.createElement(WorkoutScreen, {
-    goBack: () => setMode('info'),
-    config: SUMMER2_CONFIG
-  });
-  const cols = [['LUN', 'Push', '#3b82f6'], ['MAR', 'Pull', '#8b5cf6'], ['MER', 'riposo', '#55555E'], ['GIO', 'Gambe', '#f59e0b'], ['VEN', 'Upper', '#14b8a6'], ['SAB', '—', '#55555E'], ['DOM', '—', '#55555E']];
-  return /*#__PURE__*/React.createElement("div", {
-    style: {
-      minHeight: '100vh',
-      background: 'transparent',
-      paddingBottom: '120px'
-    }
-  }, /*#__PURE__*/React.createElement(Header, {
-    title: "Estate \xB7 4 giorni",
-    subtitle: "Solo manubri \xB7 bilanciata \xB7 viaggio",
-    onBack: goBack
-  }), /*#__PURE__*/React.createElement("div", {
-    style: {
-      padding: '0 12px'
-    }
-  }, /*#__PURE__*/React.createElement("button", {
-    onClick: () => setMode('train'),
-    style: {
-      width: '100%',
-      padding: '16px',
-      marginBottom: '14px',
-      background: 'linear-gradient(135deg, #14b8a6 0%, #0f766e 100%)',
-      color: 'white',
-      border: 'none',
-      borderRadius: '3px',
-      fontSize: '15px',
-      fontWeight: '700',
-      cursor: 'pointer',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      gap: '10px',
-      boxShadow: '0 4px 14px rgba(20,184,166,0.4)'
-    }
-  }, /*#__PURE__*/React.createElement(Dumbbell, {
-    size: 20
-  }), " Apri allenamento (tracking)"), /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: 'flex',
-      gap: '4px',
-      marginBottom: '14px'
-    }
-  }, cols.map(_ref38 => {
-    let _ref39 = _slicedToArray(_ref38, 3),
-      d = _ref39[0],
-      n = _ref39[1],
-      c = _ref39[2];
-    return /*#__PURE__*/React.createElement("div", {
-      key: d,
-      style: {
-        ...glassCard,
-        flex: 1,
-        borderRadius: '3px',
-        padding: '8px 2px',
-        textAlign: 'center'
-      }
-    }, /*#__PURE__*/React.createElement("div", {
-      style: {
-        fontSize: '8px',
-        color: '#8A8A93',
-        fontWeight: '700',
-        letterSpacing: '0.3px'
-      }
-    }, d), /*#__PURE__*/React.createElement("div", {
-      style: {
-        fontSize: '10px',
-        fontWeight: '800',
-        color: c,
-        marginTop: '2px'
-      }
-    }, n));
-  })), /*#__PURE__*/React.createElement(InfoBox, {
-    color: "#14b8a6",
-    title: "Come funziona"
-  }, "4 giorni bilanciati: ", /*#__PURE__*/React.createElement("b", {
-    style: {
-      color: '#F2F1ED'
-    }
-  }, "Push \xB7 Pull \xB7 Gambe \xB7 Upper"), ". Ogni muscolo dell'alto lavora ", /*#__PURE__*/React.createElement("b", {
-    style: {
-      color: '#F2F1ED'
-    }
-  }, "2\xD7/sett"), ", le gambe ", /*#__PURE__*/React.createElement("b", {
-    style: {
-      color: '#F2F1ED'
-    }
-  }, "1\xD7"), " ad alto volume. ~45 min a seduta, 3 settimane con accumulo rep progressivo."), /*#__PURE__*/React.createElement(InfoBox, {
-    color: "#ef5350",
-    title: "Coi soli manubri"
-  }, "Carico limitato \u2192 ", /*#__PURE__*/React.createElement("b", {
-    style: {
-      color: '#F2F1ED'
-    }
-  }, "avvicinati al cedimento (RIR 0-2), eccentrica lenta 2-3s, ROM completo"), ". Affondi bulgari e Nordic curl restano i due esercizi pi\xF9 preziosi per le gambe."), /*#__PURE__*/React.createElement(InfoBox, {
-    color: "#78909c",
-    title: "Riposo & viaggio"
-  }, /*#__PURE__*/React.createElement("b", {
-    style: {
-      color: '#F2F1ED'
-    }
-  }, "3 giorni off"), " (MER/SAB/DOM). NEAT alto (10-12k passi) per il grasso. Se salti giorni bastano ", /*#__PURE__*/React.createElement("b", {
-    style: {
-      color: '#F2F1ED'
-    }
-  }, "2 sedute/sett"), " per mantenere: non perdi massa in 2-3 settimane di lavoro leggero + proteine alte."), /*#__PURE__*/React.createElement(InfoBox, {
-    color: "#3FB66C",
-    title: "Al ritorno"
-  }, "Riprendi la ", /*#__PURE__*/React.createElement("b", {
-    style: {
-      color: '#F2F1ED'
-    }
-  }, "V8.3.4"), " dal blocco 1 ricalibrando i carichi base (1-2 sedute e torni ai livelli).")));
-}
 
 // ============= LIBRERIA SCHEDE (import .v8w) =============
-function LibraryScreenLegacy(_ref40) {
-  let goBack = _ref40.goBack;
-  const _useState63 = useState(() => storage.get('custom_schedules') || []),
-    _useState64 = _slicedToArray(_useState63, 2),
-    schedules = _useState64[0],
-    setSchedules = _useState64[1];
-  const _useState65 = useState(null),
-    _useState66 = _slicedToArray(_useState65, 2),
-    selected = _useState66[0],
-    setSelected = _useState66[1];
-  const _useState67 = useState(false),
-    _useState68 = _slicedToArray(_useState67, 2),
-    panel = _useState68[0],
-    setPanel = _useState68[1];
-  const _useState69 = useState(''),
-    _useState70 = _slicedToArray(_useState69, 2),
-    paste = _useState70[0],
-    setPaste = _useState70[1];
-  const _useState71 = useState(null),
-    _useState72 = _slicedToArray(_useState71, 2),
-    msg = _useState72[0],
-    setMsg = _useState72[1];
-  const fileRef = useRef(null);
-  const persist = list => {
-    setSchedules(list);
-    storage.set('custom_schedules', list);
-  };
-  const importText = raw => {
-    let obj;
-    try {
-      obj = JSON.parse(raw);
-    } catch (e) {
-      setMsg({
-        ok: false,
-        text: 'JSON non valido: ' + e.message
-      });
-      return;
-    }
-    const err = validateV8w(obj);
-    if (err) {
-      setMsg({
-        ok: false,
-        text: err
-      });
-      return;
-    }
-    if (!obj.id) obj.id = 'sched_' + Date.now();
-    if (!obj.storageKey) obj.storageKey = 'sched_' + obj.id;
-    const list = schedules.filter(s => s.id !== obj.id).concat([obj]);
-    persist(list);
-    setMsg({
-      ok: true,
-      text: 'Scheda "' + (obj.name || obj.id) + '" importata.'
-    });
-    setPaste('');
-    setPanel(false);
-  };
-  const onFile = e => {
-    const f = e.target.files && e.target.files[0];
-    if (!f) return;
-    const r = new FileReader();
-    r.onload = () => importText(String(r.result));
-    r.onerror = () => setMsg({
-      ok: false,
-      text: 'Impossibile leggere il file.'
-    });
-    r.readAsText(f);
-    e.target.value = '';
-  };
-  const openSchedule = s => {
-    try {
-      setSelected(rehydrateSchedule(s));
-    } catch (e) {
-      setMsg({
-        ok: false,
-        text: 'Errore apertura: ' + e.message
-      });
-    }
-  };
-  const remove = id => persist(schedules.filter(s => s.id !== id));
-  if (selected) return /*#__PURE__*/React.createElement(WorkoutScreen, {
-    goBack: () => setSelected(null),
-    config: selected
-  });
-  return /*#__PURE__*/React.createElement("div", {
-    style: {
-      minHeight: '100vh',
-      background: 'transparent',
-      paddingBottom: '120px'
-    }
-  }, /*#__PURE__*/React.createElement(Header, {
-    title: "Le mie schede",
-    subtitle: "Importa e gestisci schede (.v8w)",
-    onBack: goBack
-  }), /*#__PURE__*/React.createElement("div", {
-    style: {
-      padding: '0 12px'
-    }
-  }, /*#__PURE__*/React.createElement("button", {
-    onClick: () => {
-      setPanel(!panel);
-      setMsg(null);
-    },
-    style: {
-      width: '100%',
-      padding: '15px',
-      marginBottom: '12px',
-      background: panel ? 'rgba(168,85,247,0.15)' : 'linear-gradient(135deg, #A855F7 0%, #7C3AED 100%)',
-      color: panel ? '#A855F7' : 'white',
-      border: panel ? '1px solid rgba(168,85,247,0.4)' : 'none',
-      borderRadius: '3px',
-      fontSize: '14px',
-      fontWeight: '700',
-      cursor: 'pointer',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      gap: '9px'
-    }
-  }, panel ? /*#__PURE__*/React.createElement(XIcon, {
-    size: 18
-  }) : /*#__PURE__*/React.createElement(Plus, {
-    size: 18
-  }), " ", panel ? 'Chiudi' : 'Importa scheda'), panel && /*#__PURE__*/React.createElement("div", {
-    style: {
-      ...glassCard,
-      padding: '14px',
-      marginBottom: '14px'
-    }
-  }, /*#__PURE__*/React.createElement("input", {
-    ref: fileRef,
-    type: "file",
-    accept: ".v8w,.json,application/json",
-    onChange: onFile,
-    style: {
-      display: 'none'
-    }
-  }), /*#__PURE__*/React.createElement("button", {
-    onClick: () => fileRef.current && fileRef.current.click(),
-    style: {
-      width: '100%',
-      padding: '12px',
-      marginBottom: '10px',
-      background: 'rgba(77,130,232,0.15)',
-      border: '1px solid rgba(77,130,232,0.4)',
-      color: '#4D82E8',
-      borderRadius: '3px',
-      fontSize: '13px',
-      fontWeight: '700',
-      cursor: 'pointer',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      gap: '8px'
-    }
-  }, /*#__PURE__*/React.createElement(Upload, {
-    size: 16
-  }), " Carica file .v8w / .json"), /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: '10px',
-      color: '#8A8A93',
-      textAlign: 'center',
-      margin: '2px 0 10px'
-    }
-  }, "oppure incolla il codice qui sotto"), /*#__PURE__*/React.createElement("textarea", {
-    value: paste,
-    onChange: e => setPaste(e.target.value),
-    placeholder: '{ "format": "v8w/1", "name": "...", "days": [ ... ] }',
-    style: {
-      ...inputDark,
-      width: '100%',
-      minHeight: '110px',
-      fontFamily: 'monospace',
-      fontSize: '11px',
-      color: '#F2F1ED',
-      padding: '10px',
-      borderRadius: '3px',
-      resize: 'vertical',
-      boxSizing: 'border-box'
-    }
-  }), /*#__PURE__*/React.createElement("button", {
-    onClick: () => importText(paste),
-    disabled: !paste.trim(),
-    style: {
-      width: '100%',
-      marginTop: '10px',
-      padding: '12px',
-      background: paste.trim() ? 'linear-gradient(135deg, #3FB66C 0%, #2E8B57 100%)' : 'rgba(255,255,255,0.06)',
-      color: paste.trim() ? 'white' : '#55555E',
-      border: 'none',
-      borderRadius: '3px',
-      fontSize: '13px',
-      fontWeight: '700',
-      cursor: paste.trim() ? 'pointer' : 'default',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      gap: '8px'
-    }
-  }, /*#__PURE__*/React.createElement(Check, {
-    size: 16
-  }), " Importa dal testo")), msg && /*#__PURE__*/React.createElement("div", {
-    style: {
-      background: msg.ok ? 'rgba(63,182,108,0.14)' : 'rgba(224,82,74,0.14)',
-      border: '1px solid ' + (msg.ok ? 'rgba(63,182,108,0.4)' : 'rgba(224,82,74,0.4)'),
-      borderRadius: '3px',
-      padding: '11px 13px',
-      marginBottom: '14px',
-      fontSize: '12px',
-      color: msg.ok ? '#3FB66C' : '#E0524A',
-      lineHeight: 1.5
-    }
-  }, msg.text), schedules.length === 0 && !panel && /*#__PURE__*/React.createElement("div", {
-    style: {
-      ...glassCard,
-      padding: '22px 16px',
-      textAlign: 'center',
-      marginBottom: '14px'
-    }
-  }, /*#__PURE__*/React.createElement(Layers, {
-    size: 30,
-    color: "#55555E"
-  }), /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: '13px',
-      color: '#C0BEC6',
-      fontWeight: '600',
-      marginTop: '10px'
-    }
-  }, "Nessuna scheda importata"), /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: '11px',
-      color: '#8A8A93',
-      marginTop: '6px',
-      lineHeight: 1.5
-    }
-  }, "Tocca \"Importa scheda\" per aggiungere una scheda in formato .v8w. Le schede integrate (Allenamento, Estate) restano nella home.")), schedules.map(s => {
-    const nGiorni = Array.isArray(s.days) ? s.days.length : 0;
-    const col = s.blocks && s.blocks[0] && s.blocks[0].color || '#A855F7';
-    return /*#__PURE__*/React.createElement("div", {
-      key: s.id,
-      style: {
-        ...glassCard,
-        padding: '13px',
-        marginBottom: '10px',
-        borderLeft: '3px solid ' + col
-      }
-    }, /*#__PURE__*/React.createElement("div", {
-      style: {
-        display: 'flex',
-        alignItems: 'center',
-        gap: '11px'
-      }
-    }, /*#__PURE__*/React.createElement("div", {
-      style: {
-        background: col + '22',
-        border: '1px solid ' + col + '44',
-        width: '40px',
-        height: '40px',
-        borderRadius: '3px',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        flexShrink: 0
-      }
-    }, /*#__PURE__*/React.createElement(Layers, {
-      size: 18,
-      color: col
-    })), /*#__PURE__*/React.createElement("div", {
-      style: {
-        flex: 1,
-        minWidth: 0
-      }
-    }, /*#__PURE__*/React.createElement("div", {
-      style: {
-        display: 'flex',
-        alignItems: 'baseline',
-        gap: '7px'
-      }
-    }, /*#__PURE__*/React.createElement("span", {
-      style: {
-        fontFamily: displayFont,
-        fontSize: '14px',
-        fontWeight: '700',
-        color: '#F2F1ED',
-        lineHeight: 1.2,
-        flex: 1
-      }
-    }, s.name || 'Scheda'), attiva === s.id && /*#__PURE__*/React.createElement("span", {
-      style: {
-        ...lblStyle,
-        color: '#2FA055',
-        fontSize: '8.5px'
-      }
-    }, "attiva")), /*#__PURE__*/React.createElement("div", {
-      style: {
-        fontSize: '10px',
-        color: '#8A8A93',
-        marginTop: '3px'
-      }
-    }, s.subtitle ? s.subtitle + ' · ' : '', nGiorni, " giorni")), /*#__PURE__*/React.createElement("button", {
-      onClick: () => remove(s.id),
-      style: {
-        background: 'rgba(224,82,74,0.12)',
-        border: '1px solid rgba(224,82,74,0.3)',
-        borderRadius: '3px',
-        width: '34px',
-        height: '34px',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        cursor: 'pointer',
-        flexShrink: 0
-      }
-    }, /*#__PURE__*/React.createElement(Trash2, {
-      size: 15,
-      color: "#E0524A"
-    }))), /*#__PURE__*/React.createElement("button", {
-      onClick: () => openSchedule(s),
-      style: {
-        width: '100%',
-        marginTop: '11px',
-        padding: '11px',
-        background: 'linear-gradient(135deg, ' + col + ' 0%, ' + col + 'cc 100%)',
-        color: 'white',
-        border: 'none',
-        borderRadius: '3px',
-        fontSize: '13px',
-        fontWeight: '700',
-        cursor: 'pointer',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: '8px'
-      }
-    }, /*#__PURE__*/React.createElement(Dumbbell, {
-      size: 16
-    }), " Apri allenamento"));
-  }), /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: '10px',
-      color: '#55555E',
-      textAlign: 'center',
-      marginTop: '18px',
-      lineHeight: 1.6
-    }
-  }, "Formato .v8w: JSON con \"days\" (i giorni) ed esercizi per ID (dal database) o inline.", /*#__PURE__*/React.createElement("br", null), "Le schede importate salvano i log separatamente.")));
-}
 
 // ============================================================
 // V10 · ICONE EXTRA
@@ -22031,7 +20659,7 @@ function LibraryScreen(_ref50) {
       ...lblStyle,
       padding: '0 2px 8px'
     }
-  }, "Schede integrate"), SCHEDE_INTEGRATE().map(p => {
+  }, SCHEDE_INTEGRATE().length ? "Schede integrate" : null), SCHEDE_INTEGRATE().map(p => {
     const att = attiva === p.id;
     return /*#__PURE__*/React.createElement("div", {
       key: p.id,
@@ -22114,7 +20742,7 @@ function LibraryScreen(_ref50) {
         fontWeight: '600',
         cursor: att ? 'default' : 'pointer'
       }
-    }, att ? '—' : 'attiva'), /*#__PURE__*/React.createElement(MiniBtn, {
+    }, att ? 'in uso' : 'usa questa'), /*#__PURE__*/React.createElement(MiniBtn, {
       onClick: () => dupBuiltin(p.config, p.label, p.sub),
       color: "#E8B43C",
       title: "Duplica"
@@ -24046,15 +22674,11 @@ function computeVolume(config, weekLog) {
 }
 function VolumeScreen(_ref64) {
   let goBack = _ref64.goBack;
-  const programs = [{
+  const programs = ((storage.get('custom_schedules') || []).length ? [] : [{
     id: 'main',
     label: 'V8.3.4',
     config: MAIN_CONFIG
-  }, {
-    id: 'summer2',
-    label: 'Estate',
-    config: SUMMER2_CONFIG
-  }].concat((storage.get('custom_schedules') || []).map(s => {
+  }]).concat((storage.get('custom_schedules') || []).map(s => {
     let cfg = null;
     try {
       cfg = rehydrateSchedule(s);
@@ -25009,15 +23633,11 @@ function statsBlocco(config, log) {
     ultimo
   };
 }
-const PROGRAMMI = () => [{
+const PROGRAMMI = () => ((storage.get('custom_schedules') || []).length ? [] : [{
   id: 'main',
   label: 'V8.3.4',
   config: MAIN_CONFIG
-}, {
-  id: 'summer2',
-  label: 'Estate',
-  config: SUMMER2_CONFIG
-}].concat((storage.get('custom_schedules') || []).map(s => {
+}]).concat((storage.get('custom_schedules') || []).map(s => {
   try {
     return {
       id: s.id,
@@ -26257,7 +24877,9 @@ const btnCentro = {
 // Integrate e personali nello stesso posto. Una sola è "attiva":
 // la home e la dashboard seguono quella.
 // ============================================================
-const SCHEDE_INTEGRATE = () => [{
+const SCHEDE_INTEGRATE = () => [];
+// Ripiego: solo se non c'è nessuna scheda personale, perché l'app non resti vuota
+const SCHEDE_RIPIEGO = () => [{
   id: 'main',
   label: 'V8.3.4',
   sub: '5 giorni · blocco 8 settimane',
@@ -26270,7 +24892,12 @@ const SCHEDE_INTEGRATE = () => [{
   config: SUMMER2_CONFIG,
   integrata: true
 }];
+let _cacheSchede = { raw: undefined, val: null };
 function tutteLeSchede() {
+  // le schede si ricostruiscono solo quando cambiano: prima a ogni render
+  let raw = null;
+  try { raw = localStorage.getItem(KEY_PREFIX + 'custom_schedules'); } catch (e) {}
+  if (_cacheSchede.val && _cacheSchede.raw === raw) return _cacheSchede.val;
   const custom = (storage.get('custom_schedules') || []).map(s => {
     let cfg = null;
     try {
@@ -26287,9 +24914,11 @@ function tutteLeSchede() {
       integrata: false
     } : null;
   }).filter(Boolean);
-  return SCHEDE_INTEGRATE().concat(custom);
+  const val = custom.length ? custom : SCHEDE_RIPIEGO();
+  _cacheSchede = { raw, val };
+  return val;
 }
-const schedaAttivaId = () => storage.get('scheda_attiva') || 'main';
+const schedaAttivaId = () => storage.get('scheda_attiva') || ((storage.get('custom_schedules') || [])[0] || {}).id || 'main';
 function schedaAttiva() {
   const tutte = tutteLeSchede();
   return tutte.find(s => s.id === schedaAttivaId()) || tutte[0];
@@ -27347,178 +25976,6 @@ function StalliScreen(_ref93) {
 // ANALISI · CURVA DI DECADIMENTO DELLE SERIE
 // Quanto perdi dalla prima all'ultima serie dello stesso esercizio.
 // ============================================================
-function DecadimentoScreen(_ref95) {
-  let goBack = _ref95.goBack;
-  const schede = tutteLeSchede();
-  const _useState171 = useState(() => Math.max(0, schede.findIndex(s => s.id === schedaAttivaId()))),
-    _useState172 = _slicedToArray(_useState171, 2),
-    i = _useState172[0],
-    setI = _useState172[1];
-  const prog = schede[i] || schede[0];
-  const dati = serieEsercizi(prog.config).map(e => {
-    const cali = e.sedute.filter(s => s.reps.length >= 3).map(s => s.calo);
-    if (!cali.length) return null;
-    const medio = cali.reduce((a, b) => a + b, 0) / cali.length;
-    return {
-      ...e,
-      medio,
-      n: cali.length,
-      ultimo: e.sedute[e.sedute.length - 1]
-    };
-  }).filter(Boolean).sort((a, b) => b.medio - a.medio);
-  const banda = v => v > 30 ? {
-    c: '#E5A82B',
-    t: 'crollo',
-    n: 'Perdi più del 30%: o parti troppo vicino al cedimento, o il recupero fra le serie è corto.'
-  } : v < 10 ? {
-    c: '#4D82E8',
-    t: 'piatto',
-    n: 'Perdi meno del 10%: probabilmente stai lasciando ripetizioni in canna. Puoi avvicinarti di più.'
-  } : {
-    c: '#2FA055',
-    t: 'calibrato',
-    n: 'Calo fra il 10 e il 30%: sforzo e recupero sono nella misura giusta.'
-  };
-  const medioGen = dati.length ? dati.reduce((a, x) => a + x.medio, 0) / dati.length : 0;
-  return /*#__PURE__*/React.createElement("div", {
-    style: {
-      minHeight: '100vh',
-      paddingBottom: '120px'
-    }
-  }, /*#__PURE__*/React.createElement(Header, {
-    title: "Decadimento",
-    subtitle: "Quanto cali dalla prima all'ultima serie",
-    onBack: goBack
-  }), /*#__PURE__*/React.createElement("div", {
-    style: {
-      padding: '0 14px'
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: 'flex',
-      gap: '5px',
-      overflowX: 'auto',
-      paddingBottom: '12px'
-    }
-  }, schede.map((p, k) => /*#__PURE__*/React.createElement("button", {
-    key: p.id,
-    onClick: () => setI(k),
-    style: {
-      flexShrink: 0,
-      padding: '8px 13px',
-      borderRadius: '3px',
-      fontFamily: monoFont,
-      fontSize: '11px',
-      fontWeight: '600',
-      cursor: 'pointer',
-      background: k === i ? IRON.chalk : IRON.surface,
-      color: k === i ? IRON.bg : IRON.dust,
-      border: '1px solid ' + (k === i ? IRON.chalk : IRON.edge)
-    }
-  }, p.label))), dati.length === 0 ? /*#__PURE__*/React.createElement("div", {
-    style: {
-      ...glassCard,
-      padding: '22px 16px',
-      textAlign: 'center'
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      ...lblStyle,
-      marginBottom: '7px'
-    }
-  }, "Nessun dato"), /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: '11.5px',
-      color: IRON.dust,
-      lineHeight: 1.5
-    }
-  }, "Servono sedute con almeno 3 serie registrate con le ripetizioni.")) : /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
-    style: {
-      ...glassCard,
-      padding: '14px',
-      marginBottom: '13px',
-      textAlign: 'center'
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      ...numStyle,
-      fontSize: '30px',
-      fontWeight: '600',
-      color: banda(medioGen).c
-    }
-  }, medioGen.toFixed(0), "%"), /*#__PURE__*/React.createElement("div", {
-    style: {
-      ...lblStyle,
-      marginTop: '2px'
-    }
-  }, "calo medio \xB7 ", banda(medioGen).t)), dati.map(x => {
-    const b = banda(x.medio);
-    const larg = Math.min(100, Math.max(2, x.medio * 2));
-    return /*#__PURE__*/React.createElement("div", {
-      key: x.giorno.id + x.idx,
-      style: {
-        marginBottom: '13px'
-      }
-    }, /*#__PURE__*/React.createElement("div", {
-      style: {
-        display: 'flex',
-        alignItems: 'baseline',
-        gap: '8px',
-        marginBottom: '4px'
-      }
-    }, /*#__PURE__*/React.createElement("span", {
-      style: {
-        fontSize: '12px',
-        color: '#C0BEC6',
-        flex: 1
-      }
-    }, x.ex.name), /*#__PURE__*/React.createElement("span", {
-      style: {
-        ...numStyle,
-        fontSize: '12.5px',
-        fontWeight: '600',
-        color: b.c
-      }
-    }, x.medio.toFixed(0), "%")), /*#__PURE__*/React.createElement("div", {
-      style: {
-        height: '6px',
-        background: IRON.knurl,
-        position: 'relative'
-      }
-    }, /*#__PURE__*/React.createElement("div", {
-      style: {
-        position: 'absolute',
-        left: '20%',
-        width: '40%',
-        top: 0,
-        bottom: 0,
-        background: 'rgba(47,160,85,0.14)'
-      }
-    }), /*#__PURE__*/React.createElement("div", {
-      style: {
-        width: larg + '%',
-        height: '100%',
-        background: b.c
-      }
-    })), /*#__PURE__*/React.createElement("div", {
-      style: {
-        ...lblStyle,
-        fontSize: '8px',
-        marginTop: '4px'
-      }
-    }, x.giorno.label, " \xB7 ultima seduta ", x.ultimo.reps.join(' · '), " @ ", x.ultimo.kg, " kg"));
-  }), /*#__PURE__*/React.createElement(InfoBox, {
-    color: "#2FA055",
-    title: "La fascia verde \xE8 10-30%"
-  }, "Sotto il 10% quasi certamente ti fermi troppo lontano dal cedimento. Sopra il 30% arrivi all'ultima serie troppo affaticato: allunga il recupero o parti con un RIR pi\xF9 alto."), /*#__PURE__*/React.createElement(InfoBox, {
-    color: "#8A8A93",
-    title: "Onest\xE0 sulle soglie"
-  }, "Il 10 e il 30% sono ", /*#__PURE__*/React.createElement("b", {
-    style: {
-      color: IRON.chalk
-    }
-  }, "soglie ragionate, non prese da uno studio"), ". La logica sotto \u2014 se non cali non stai spingendo, se crolli hai gestito male fatica o recupero \u2014 \xE8 solida; i numeri esatti sono un punto di partenza da tarare su di te."))));
-}
 
 // ============================================================
 // ANALISI · PROIEZIONE DELLA COMPOSIZIONE
@@ -27568,302 +26025,6 @@ function proietta(_ref96) {
     }
   }
   return tappe;
-}
-function ProiezioneScreen(_ref97) {
-  let goBack = _ref97.goBack;
-  const pesoLog = storage.get('peso') || {};
-  const misure = storage.get('misure') || {};
-  const h = storage.get('altezza') || '';
-  const blocchi = Object.keys(misure);
-  const ultimo = blocchi.length ? misure[blocchi[blocchi.length - 1]] : {};
-  const serie = Object.keys(pesoLog).map(Number).sort((a, b) => a - b).map(w => mediaSett(pesoLog[w])).filter(x => x > 0);
-  const peso = serie.length ? serie[serie.length - 1] : null;
-  const comp = stimaComposizione({
-    peso,
-    vita: ultimo['Vita ombelicale'],
-    collo: ultimo['Collo'],
-    altezza: h
-  });
-  const tdee = parseFloat(storage.get('tdee_manuale')) || 2638;
-  const _useState173 = useState(1),
-    _useState174 = _slicedToArray(_useState173, 2),
-    scelta = _useState174[0],
-    setScelta = _useState174[1];
-  const opzioni = [{
-    l: 'Deficit',
-    k: Math.round(tdee * 0.85),
-    c: '#4D82E8'
-  }, {
-    l: 'Pareggio',
-    k: Math.round(tdee),
-    c: '#2FA055'
-  }, {
-    l: 'Lean gain',
-    k: Math.round(tdee * 1.08),
-    c: '#E5A82B'
-  }];
-  if (!comp) {
-    return /*#__PURE__*/React.createElement("div", {
-      style: {
-        minHeight: '100vh',
-        paddingBottom: '120px'
-      }
-    }, /*#__PURE__*/React.createElement(Header, {
-      title: "Proiezione",
-      subtitle: "Dove saresti fra 12 settimane",
-      onBack: goBack
-    }), /*#__PURE__*/React.createElement("div", {
-      style: {
-        padding: '0 14px'
-      }
-    }, /*#__PURE__*/React.createElement("div", {
-      style: {
-        ...glassCard,
-        padding: '20px 16px',
-        textAlign: 'center'
-      }
-    }, /*#__PURE__*/React.createElement("div", {
-      style: {
-        ...lblStyle,
-        marginBottom: '8px',
-        color: '#E5A82B'
-      }
-    }, "Dati insufficienti"), /*#__PURE__*/React.createElement("div", {
-      style: {
-        fontSize: '11.5px',
-        color: IRON.dust,
-        lineHeight: 1.55
-      }
-    }, "Servono peso, altezza, vita e collo. Li inserisci nella schermata ", /*#__PURE__*/React.createElement("b", {
-      style: {
-        color: IRON.chalk
-      }
-    }, "Corpo"), "."))));
-  }
-  const tappe = proietta({
-    peso,
-    bf: comp.bf,
-    altezza: parseFloat(h),
-    tdee,
-    intake: opzioni[scelta].k,
-    settimane: 12
-  });
-  const fine = tappe[tappe.length - 1];
-  return /*#__PURE__*/React.createElement("div", {
-    style: {
-      minHeight: '100vh',
-      paddingBottom: '120px'
-    }
-  }, /*#__PURE__*/React.createElement(Header, {
-    title: "Proiezione",
-    subtitle: "Dove saresti fra 12 settimane",
-    onBack: goBack
-  }), /*#__PURE__*/React.createElement("div", {
-    style: {
-      padding: '0 14px'
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: 'flex',
-      gap: '6px',
-      marginBottom: '14px'
-    }
-  }, opzioni.map((o, k) => /*#__PURE__*/React.createElement("button", {
-    key: o.l,
-    onClick: () => setScelta(k),
-    style: {
-      flex: 1,
-      minHeight: '52px',
-      borderRadius: '3px',
-      cursor: 'pointer',
-      background: k === scelta ? o.c : IRON.surface,
-      color: k === scelta ? IRON.bg : IRON.dust,
-      border: '1px solid ' + (k === scelta ? o.c : IRON.edge),
-      fontFamily: monoFont,
-      fontSize: '11px',
-      fontWeight: '600',
-      lineHeight: 1.4
-    }
-  }, o.l, /*#__PURE__*/React.createElement("br", null), /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontSize: '9.5px',
-      opacity: 0.85
-    }
-  }, o.k, " kcal")))), /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: 'flex',
-      gap: '10px',
-      alignItems: 'stretch',
-      marginBottom: '14px'
-    }
-  }, [{
-    t: 'OGGI',
-    d: {
-      peso,
-      bf: comp.bf,
-      ffmi: comp.ffmi
-    }
-  }, {
-    t: 'SETT. 12',
-    d: fine
-  }].map(x => /*#__PURE__*/React.createElement("div", {
-    key: x.t,
-    style: {
-      flex: 1,
-      ...glassCard,
-      padding: '12px 8px'
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      ...lblStyle,
-      textAlign: 'center',
-      marginBottom: '6px'
-    }
-  }, x.t), /*#__PURE__*/React.createElement(Figura, {
-    bf: x.d.bf,
-    ffmi: x.d.ffmi,
-    altezzaPx: 148
-  }), /*#__PURE__*/React.createElement("div", {
-    style: {
-      textAlign: 'center',
-      marginTop: '9px'
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      ...numStyle,
-      fontSize: '19px',
-      fontWeight: '600',
-      color: IRON.chalk
-    }
-  }, x.d.peso.toFixed(1).replace('.', ',')), /*#__PURE__*/React.createElement("div", {
-    style: {
-      ...lblStyle,
-      fontSize: '8px'
-    }
-  }, "KG"), /*#__PURE__*/React.createElement("div", {
-    style: {
-      ...numStyle,
-      fontSize: '13px',
-      color: '#E5A82B',
-      marginTop: '6px'
-    }
-  }, x.d.bf.toFixed(1).replace('.', ','), "%"), /*#__PURE__*/React.createElement("div", {
-    style: {
-      ...lblStyle,
-      fontSize: '8px'
-    }
-  }, "GRASSO"), /*#__PURE__*/React.createElement("div", {
-    style: {
-      ...numStyle,
-      fontSize: '13px',
-      color: '#2FA055',
-      marginTop: '6px'
-    }
-  }, x.d.ffmi.toFixed(1).replace('.', ',')), /*#__PURE__*/React.createElement("div", {
-    style: {
-      ...lblStyle,
-      fontSize: '8px'
-    }
-  }, "FFMI"))))), /*#__PURE__*/React.createElement("div", {
-    style: {
-      ...glassCard,
-      padding: '13px',
-      marginBottom: '13px'
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      ...lblStyle,
-      marginBottom: '9px'
-    }
-  }, "Tappe"), /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: 'flex',
-      ...lblStyle,
-      fontSize: '8px',
-      paddingBottom: '5px',
-      borderBottom: '1px solid ' + IRON.edge
-    }
-  }, /*#__PURE__*/React.createElement("span", {
-    style: {
-      width: '46px'
-    }
-  }, "Sett."), /*#__PURE__*/React.createElement("span", {
-    style: {
-      flex: 1,
-      textAlign: 'right'
-    }
-  }, "Peso"), /*#__PURE__*/React.createElement("span", {
-    style: {
-      flex: 1,
-      textAlign: 'right'
-    }
-  }, "Grasso"), /*#__PURE__*/React.createElement("span", {
-    style: {
-      flex: 1,
-      textAlign: 'right'
-    }
-  }, "Magra")), tappe.map(t => /*#__PURE__*/React.createElement("div", {
-    key: t.w,
-    style: {
-      display: 'flex',
-      padding: '7px 0',
-      borderBottom: '1px solid ' + IRON.edge,
-      ...numStyle,
-      fontSize: '12px',
-      color: '#C0BEC6'
-    }
-  }, /*#__PURE__*/React.createElement("span", {
-    style: {
-      width: '46px',
-      color: IRON.ash
-    }
-  }, "S", t.w), /*#__PURE__*/React.createElement("span", {
-    style: {
-      flex: 1,
-      textAlign: 'right',
-      color: IRON.chalk
-    }
-  }, t.peso.toFixed(1)), /*#__PURE__*/React.createElement("span", {
-    style: {
-      flex: 1,
-      textAlign: 'right'
-    }
-  }, t.bf.toFixed(1), "%"), /*#__PURE__*/React.createElement("span", {
-    style: {
-      flex: 1,
-      textAlign: 'right'
-    }
-  }, t.magra.toFixed(1))))), (() => {
-    const dGrasso = fine.peso * fine.bf / 100 - peso * comp.bf / 100;
-    const dMagra = fine.magra - comp.ffm;
-    return /*#__PURE__*/React.createElement(InfoBox, {
-      color: opzioni[scelta].c,
-      title: 'In 12 settimane · ' + opzioni[scelta].l
-    }, "Grasso ", /*#__PURE__*/React.createElement("b", {
-      style: {
-        color: IRON.chalk
-      }
-    }, dGrasso > 0 ? '+' : '', dGrasso.toFixed(1), " kg"), ", massa magra ", /*#__PURE__*/React.createElement("b", {
-      style: {
-        color: IRON.chalk
-      }
-    }, dMagra > 0 ? '+' : '', dMagra.toFixed(1), " kg"), ", peso ", /*#__PURE__*/React.createElement("b", {
-      style: {
-        color: IRON.chalk
-      }
-    }, fine.peso - peso > 0 ? '+' : '', (fine.peso - peso).toFixed(1), " kg"), ".");
-  })(), /*#__PURE__*/React.createElement(InfoBox, {
-    color: "#8A8A93",
-    title: "Cosa assume il modello"
-  }, "Che tu segua le calorie scelte, che il mantenimento scenda col peso pi\xF9 una quota di adattamento fino al 6%, e che in deficit l'", /*#__PURE__*/React.createElement("b", {
-    style: {
-      color: IRON.chalk
-    }
-  }, "85% del calo sia grasso"), " (realistico con proteine alte e pesi), mentre in surplus lo sia il 55%. Sono valori medi di letteratura: la tua ripartizione reale pu\xF2 discostarsi.", /*#__PURE__*/React.createElement("b", {
-    style: {
-      color: IRON.chalk
-    }
-  }, " \xC8 una proiezione, non una previsione"), " \u2014 serve a confrontare le tre strade, non a promettere un numero.")));
 }
 
 // ============================================================
@@ -27933,584 +26094,16 @@ function CurvaProfilo(_ref98) {
     fontFamily: "monospace"
   }, "corto"));
 }
-function ProfiloScreen(_ref99) {
-  let goBack = _ref99.goBack;
-  const schede = tutteLeSchede();
-  const _useState175 = useState(() => Math.max(0, schede.findIndex(s => s.id === schedaAttivaId()))),
-    _useState176 = _slicedToArray(_useState175, 2),
-    i = _useState176[0],
-    setI = _useState176[1];
-  const prog = schede[i] || schede[0];
-  const CFG = prog.config;
-
-  // serie per muscolo primario, divise per profilo
-  const mappa = {};
-  (CFG.days || []).forEach(d => {
-    (CFG.exercises[d.id] || []).forEach(ex => {
-      const twin = BUILTIN_TWIN[ex.id] ? EXERCISE_DB[BUILTIN_TWIN[ex.id]] : null;
-      const prof = ex.prof || twin && twin.prof || EXERCISE_DB[ex.id] && EXERCISE_DB[ex.id].prof || 'MEDIO';
-      // conteggio frazionale, come nella schermata Volume: il gruppo primario
-      // vale una serie piena, i secondari mezza. Senza questo, un muscolo
-      // allenato soprattutto come secondario risultava scoperto per finta.
-      (ex.tags || []).forEach((g, i) => {
-        if (!g) return;
-        const peso = i === 0 ? 1 : 0.5;
-        if (!mappa[g]) mappa[g] = {
-          ALLUNGATO: 0,
-          MEDIO: 0,
-          ACCORCIATO: 0,
-          tot: 0,
-          es: []
-        };
-        mappa[g][prof] += (ex.sets || 0) * peso;
-        mappa[g].tot += (ex.sets || 0) * peso;
-        mappa[g].es.push({
-          name: ex.name,
-          prof,
-          sets: ex.sets,
-          giorno: d.label,
-          primario: i === 0
-        });
-      });
-    });
-  });
-  const gruppi = Object.keys(mappa).filter(g => mappa[g].tot >= 6).sort((a, b) => mappa[b].tot - mappa[a].tot);
-  const _useState177 = useState(null),
-    _useState178 = _slicedToArray(_useState177, 2),
-    aperto = _useState178[0],
-    setAperto = _useState178[1];
-  const giudizio = m => {
-    const qa = m.ALLUNGATO / m.tot;
-    if (qa >= 0.33) return {
-      c: '#2FA055',
-      t: 'coperto',
-      n: 'Almeno un terzo del volume carica il muscolo allungato.'
-    };
-    if (qa >= 0.15) return {
-      c: '#8A8A93',
-      t: 'parziale',
-      n: 'Un po\' di lavoro in allungamento c\'è, ma il grosso sta altrove.'
-    };
-    return {
-      c: '#E5A82B',
-      t: 'scoperto',
-      n: 'Quasi nessuna serie carica il muscolo quando è lungo: è la zona con il vantaggio documentato.'
-    };
-  };
-  return /*#__PURE__*/React.createElement("div", {
-    style: {
-      minHeight: '100vh',
-      paddingBottom: '120px'
-    }
-  }, /*#__PURE__*/React.createElement(Header, {
-    title: "Profilo di resistenza",
-    subtitle: "In che punto della curva carichi ogni muscolo",
-    onBack: goBack
-  }), /*#__PURE__*/React.createElement("div", {
-    style: {
-      padding: '0 14px'
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: 'flex',
-      gap: '5px',
-      overflowX: 'auto',
-      paddingBottom: '12px'
-    }
-  }, schede.map((p, k) => /*#__PURE__*/React.createElement("button", {
-    key: p.id,
-    onClick: () => setI(k),
-    style: {
-      flexShrink: 0,
-      padding: '8px 13px',
-      borderRadius: '3px',
-      fontFamily: monoFont,
-      fontSize: '11px',
-      fontWeight: '600',
-      cursor: 'pointer',
-      background: k === i ? IRON.chalk : IRON.surface,
-      color: k === i ? IRON.bg : IRON.dust,
-      border: '1px solid ' + (k === i ? IRON.chalk : IRON.edge)
-    }
-  }, p.label))), /*#__PURE__*/React.createElement("div", {
-    style: {
-      ...glassCard,
-      padding: '13px',
-      marginBottom: '14px'
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      ...lblStyle,
-      marginBottom: '10px'
-    }
-  }, "Le tre zone"), ['ALLUNGATO', 'MEDIO', 'ACCORCIATO'].map(k => /*#__PURE__*/React.createElement("div", {
-    key: k,
-    style: {
-      display: 'flex',
-      gap: '11px',
-      alignItems: 'center',
-      padding: '7px 0',
-      borderBottom: '1px solid ' + IRON.edge
-    }
-  }, /*#__PURE__*/React.createElement(CurvaProfilo, {
-    prof: k
-  }), /*#__PURE__*/React.createElement("div", {
-    style: {
-      flex: 1
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      ...lblStyle,
-      color: PROFILI[k].c,
-      fontSize: '9px'
-    }
-  }, PROFILI[k].t), /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: '10.5px',
-      color: IRON.dust,
-      lineHeight: 1.45,
-      marginTop: '2px'
-    }
-  }, PROFILI[k].n))))), gruppi.map(g => {
-    const m = mappa[g];
-    const gj = giudizio(m);
-    const col = TAG_COLORS[g] && TAG_COLORS[g].text || IRON.dust;
-    const isOpen = aperto === g;
-    return /*#__PURE__*/React.createElement("div", {
-      key: g,
-      style: {
-        ...glassCard,
-        padding: '12px',
-        marginBottom: '9px',
-        borderLeft: '3px solid ' + gj.c
-      }
-    }, /*#__PURE__*/React.createElement("button", {
-      onClick: () => setAperto(isOpen ? null : g),
-      style: {
-        width: '100%',
-        background: 'none',
-        border: 'none',
-        padding: 0,
-        cursor: 'pointer',
-        textAlign: 'left'
-      }
-    }, /*#__PURE__*/React.createElement("div", {
-      style: {
-        display: 'flex',
-        alignItems: 'baseline',
-        gap: '8px',
-        marginBottom: '8px'
-      }
-    }, /*#__PURE__*/React.createElement("span", {
-      style: {
-        ...lblStyle,
-        color: col,
-        fontSize: '10px'
-      }
-    }, g), /*#__PURE__*/React.createElement("span", {
-      style: {
-        ...numStyle,
-        fontSize: '11px',
-        color: IRON.dust,
-        flex: 1
-      }
-    }, m.tot, " serie"), /*#__PURE__*/React.createElement("span", {
-      style: {
-        ...lblStyle,
-        color: gj.c,
-        fontSize: '8.5px'
-      }
-    }, gj.t)), /*#__PURE__*/React.createElement("div", {
-      style: {
-        display: 'flex',
-        height: '9px',
-        overflow: 'hidden'
-      }
-    }, ['ALLUNGATO', 'MEDIO', 'ACCORCIATO'].map(k => m[k] > 0 && /*#__PURE__*/React.createElement("div", {
-      key: k,
-      style: {
-        width: m[k] / m.tot * 100 + '%',
-        background: PROFILI[k].c,
-        marginRight: '1px'
-      }
-    }))), /*#__PURE__*/React.createElement("div", {
-      style: {
-        display: 'flex',
-        gap: '13px',
-        marginTop: '6px'
-      }
-    }, ['ALLUNGATO', 'MEDIO', 'ACCORCIATO'].map(k => /*#__PURE__*/React.createElement("span", {
-      key: k,
-      style: {
-        ...numStyle,
-        fontSize: '9.5px',
-        color: m[k] > 0 ? PROFILI[k].c : IRON.edge
-      }
-    }, PROFILI[k].t, " ", Math.round(m[k] / m.tot * 100), "%")))), isOpen && /*#__PURE__*/React.createElement("div", {
-      style: {
-        marginTop: '11px',
-        paddingTop: '10px',
-        borderTop: '1px solid ' + IRON.edge
-      }
-    }, /*#__PURE__*/React.createElement("div", {
-      style: {
-        fontSize: '11.5px',
-        color: '#C0BEC6',
-        lineHeight: 1.55,
-        marginBottom: '10px'
-      }
-    }, gj.n), m.es.map((x, k) => /*#__PURE__*/React.createElement("div", {
-      key: k,
-      style: {
-        display: 'flex',
-        alignItems: 'center',
-        gap: '9px',
-        padding: '4px 0'
-      }
-    }, /*#__PURE__*/React.createElement("span", {
-      style: {
-        width: '3px',
-        height: '15px',
-        background: PROFILI[x.prof].c,
-        display: 'block',
-        flexShrink: 0
-      }
-    }), /*#__PURE__*/React.createElement("span", {
-      style: {
-        flex: 1,
-        fontSize: '11px',
-        color: '#C0BEC6'
-      }
-    }, x.name), /*#__PURE__*/React.createElement("span", {
-      style: {
-        ...numStyle,
-        fontSize: '9.5px',
-        color: IRON.ash
-      }
-    }, x.giorno, " \xB7 ", x.sets, "\xD7", x.primario ? '' : ' (sec.)')))));
-  }), /*#__PURE__*/React.createElement(InfoBox, {
-    color: "#2FA055",
-    title: "Perch\xE9 conta"
-  }, "Una meta-analisi del 2026 su otto studi trova che allenare a lunghezza muscolare maggiore produce pi\xF9 ipertrofia rispetto alla lunghezza corta (", /*#__PURE__*/React.createElement("b", {
-    style: {
-      color: IRON.chalk
-    }
-  }, "ES 0,283"), "), con l'effetto pi\xF9 marcato sulle regioni ", /*#__PURE__*/React.createElement("b", {
-    style: {
-      color: IRON.chalk
-    }
-  }, "distale e centrale"), " del muscolo. Tre confronti diretti lo mostrano bene: ", /*#__PURE__*/React.createElement("b", {
-    style: {
-      color: IRON.chalk
-    }
-  }, "leg curl seduto contro prono"), " (+14,1% contro +9,3% sui femorali),", /*#__PURE__*/React.createElement("b", {
-    style: {
-      color: IRON.chalk
-    }
-  }, "estensioni sopra la testa contro push-down"), " per i tricipiti, e", /*#__PURE__*/React.createElement("b", {
-    style: {
-      color: IRON.chalk
-    }
-  }, "calf in piedi contro seduto"), ". In tutti e tre il vantaggio va alla versione in cui l'articolazione non bersaglio allunga il muscolo."), /*#__PURE__*/React.createElement(InfoBox, {
-    color: "#8A8A93",
-    title: "Come ho classificato, e i limiti"
-  }, "La classificazione \xE8 dedotta dal ", /*#__PURE__*/React.createElement("b", {
-    style: {
-      color: IRON.chalk
-    }
-  }, "gesto"), " \u2014 inclinazione, posizione dell'articolazione, tipo di attrezzo \u2014 non da una misura di coppia articolare. Per i muscoli ", /*#__PURE__*/React.createElement("b", {
-    style: {
-      color: IRON.chalk
-    }
-  }, "biarticolari"), " (femorali, capo lungo del tricipite, gastrocnemio) \xE8 l'angolo dell'altra articolazione a decidere la lunghezza, ed \xE8 l\xEC che la regola \xE8 pi\xF9 affidabile. \xC8 una prima approssimazione: su alcuni esercizi il profilo reale dipende dalla tua leva e da come li esegui. Una revisione del 2026 avverte che lunghezza muscolare, escursione e scelta dell'esercizio sono intrecciate, e non \xE8 ancora chiaro quale pesi di pi\xF9.")));
-}
 
 // ============================================================
 // HOME · SEI RIQUADRI INVECE DI DICIANNOVE RIGHE
 // Le voci che facevano la stessa cosa stanno ora dentro un unico
 // riquadro. Ogni riquadro porta un dato vivo, non solo un'etichetta.
 // ============================================================
-const SCHERMATE = {
-  library: LibraryScreen,
-  peso: PesoScreen,
-  proiezione: ProiezioneScreen,
-  recovery: RecoveryScreen,
-  nutrition: NutritionScreen,
-  diets: DietScreen,
-  tdee: TdeeScreen,
-  dashboard: DashboardScreen,
-  volume: VolumeScreen,
-  profilo: ProfiloScreen,
-  stalli: StalliScreen,
-  decadimento: DecadimentoScreen,
-  storico: StoricoScreen,
-  exdb: ExerciseDBScreen,
-  guide: GuideScreen,
-  settings: SettingsScreen,
-  bilanciere: BilanciereScreen
-};
-const GRUPPI_HOME = [{
-  id: 'schede',
-  label: 'Schede',
-  icona: Dumbbell,
-  colore: '#F2F1ED',
-  figli: [['library', 'Tutte le schede', 'Integrate e personali, importa .v8w']]
-}, {
-  id: 'corpo',
-  label: 'Corpo',
-  icona: Scale,
-  colore: '#4D82E8',
-  figli: [['peso', 'Peso e misure', 'Registra, composizione, figura'], ['proiezione', 'Proiezione', 'Dove saresti fra 12 settimane'], ['recovery', 'Recupero', 'Sonno, energia, stress']]
-}, {
-  id: 'cibo',
-  label: 'Nutrizione',
-  icona: Utensils,
-  colore: '#D8342C',
-  figli: [['diets', 'Le mie diete', 'Piani, macro, lista spesa'], ['tdee', 'TDEE adattivo', 'Mantenimento reale dai tuoi dati'], ['nutrition', 'Protocollo', 'Dieta di riferimento e stack']]
-}, {
-  id: 'analisi',
-  label: 'Analisi',
-  icona: BarChart3,
-  colore: '#2FA055',
-  figli: [['dashboard', 'Dashboard', '1RM stimato e andamento'], ['volume', 'Volume', 'Serie per gruppo muscolare'], ['profilo', 'Profilo di resistenza', 'In che punto della curva carichi'], ['stalli', 'Stalli', 'Quali esercizi non salgono più'], ['decadimento', 'Decadimento', 'Calo dalla prima all\u2019ultima serie'], ['storico', 'Storico blocchi', 'Archivia e confronta i mesocicli']]
-}, {
-  id: 'esercizi',
-  label: 'Esercizi',
-  icona: Search,
-  colore: '#22D3EE',
-  figli: [['exdb', 'Database', '556 esercizi con foto e tecnica'], ['bilanciere', 'Bilanciere e dischi', 'Carico per lato']]
-}, {
-  id: 'guida',
-  label: 'Guida',
-  icona: BookOpen,
-  colore: '#A855F7',
-  figli: [['guide', 'Tecniche', 'Come si eseguono'], ['settings', 'Impostazioni', 'Backup, versione, spazio']]
-}];
 
 // Il dato vivo che compare su ogni riquadro
-function statoRiquadro(id) {
-  try {
-    if (id === 'schede') {
-      const a = schedaAttiva();
-      return {
-        v: a.label.length > 13 ? a.label.slice(0, 12) + '…' : a.label,
-        l: 'attiva'
-      };
-    }
-    if (id === 'corpo') {
-      const p = storage.get('peso') || {};
-      const s = Object.keys(p).map(Number).sort((a, b) => a - b).map(w => mediaSett(p[w])).filter(x => x > 0);
-      return s.length ? {
-        v: s[s.length - 1].toFixed(1).replace('.', ','),
-        l: 'kg'
-      } : {
-        v: '—',
-        l: 'kg'
-      };
-    }
-    if (id === 'cibo') {
-      const d = storage.get('custom_diets') || [];
-      if (!d.length) return {
-        v: '—',
-        l: 'kcal'
-      };
-      return {
-        v: String(r0(dietTotals(d[0]).kcal)),
-        l: 'kcal'
-      };
-    }
-    if (id === 'analisi') {
-      const cfg = schedaAttiva().config;
-      const log = storage.get(cfg.storageKey) || {};
-      let n = 0;
-      Object.keys(log).forEach(w => (cfg.days || []).forEach(d => {
-        if ((log[w][d.id] || {}).completato) n++;
-      }));
-      return {
-        v: String(n),
-        l: 'sedute'
-      };
-    }
-    if (id === 'esercizi') return {
-      v: String(Object.keys(EXERCISE_PACK.exercises).length),
-      l: 'esercizi'
-    };
-    if (id === 'guida') return {
-      v: String(Object.keys(TECNICHE).length),
-      l: 'tecniche'
-    };
-  } catch (e) {}
-  return {
-    v: '',
-    l: ''
-  };
-}
-function HubScreen(_ref100) {
-  let gruppo = _ref100.gruppo,
-    goBack = _ref100.goBack;
-  const _useState179 = useState(null),
-    _useState180 = _slicedToArray(_useState179, 2),
-    figlio = _useState180[0],
-    setFiglio = _useState180[1];
-  useAndroidBack(() => setFiglio(null), !!figlio);
-  if (figlio) {
-    const C = SCHERMATE[figlio];
-    if (C) return /*#__PURE__*/React.createElement(C, {
-      goBack: () => setFiglio(null)
-    });
-  }
-  return /*#__PURE__*/React.createElement("div", {
-    style: {
-      minHeight: '100vh',
-      paddingBottom: '120px'
-    }
-  }, /*#__PURE__*/React.createElement(Header, {
-    title: gruppo.label,
-    subtitle: gruppo.figli.length + ' sezioni',
-    onBack: goBack
-  }), /*#__PURE__*/React.createElement("div", {
-    style: {
-      padding: '0 14px'
-    }
-  }, gruppo.figli.map((_ref101, i) => {
-    let _ref102 = _slicedToArray(_ref101, 3),
-      id = _ref102[0],
-      l = _ref102[1],
-      d = _ref102[2];
-    return /*#__PURE__*/React.createElement("button", {
-      key: id,
-      onClick: () => setFiglio(id),
-      style: {
-        width: '100%',
-        display: 'flex',
-        alignItems: 'center',
-        gap: '13px',
-        minHeight: '64px',
-        padding: '0 14px',
-        background: IRON.surface,
-        cursor: 'pointer',
-        textAlign: 'left',
-        border: '1px solid ' + IRON.edge,
-        borderRadius: '3px',
-        marginBottom: '8px'
-      }
-    }, /*#__PURE__*/React.createElement("span", {
-      style: {
-        ...numStyle,
-        fontSize: '11px',
-        color: IRON.ash,
-        width: '18px'
-      }
-    }, String(i + 1).padStart(2, '0')), /*#__PURE__*/React.createElement("span", {
-      style: {
-        width: '3px',
-        height: '26px',
-        background: gruppo.colore,
-        flexShrink: 0,
-        display: 'block'
-      }
-    }), /*#__PURE__*/React.createElement("span", {
-      style: {
-        flex: 1,
-        minWidth: 0
-      }
-    }, /*#__PURE__*/React.createElement("span", {
-      style: {
-        display: 'block',
-        fontFamily: displayFont,
-        fontSize: '14px',
-        fontWeight: '700',
-        color: IRON.chalk
-      }
-    }, l), /*#__PURE__*/React.createElement("span", {
-      style: {
-        display: 'block',
-        fontSize: '10.5px',
-        color: IRON.dust,
-        marginTop: '2px'
-      }
-    }, d)), /*#__PURE__*/React.createElement(ChevronRight, {
-      size: 16,
-      color: IRON.ash
-    }));
-  })));
-}
 
 // Griglia della home: due colonne, ogni riquadro con la sua cifra
-function GrigliaHome(_ref103) {
-  let apri = _ref103.apri;
-  return /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: 'grid',
-      gridTemplateColumns: '1fr 1fr',
-      gap: '9px'
-    }
-  }, GRUPPI_HOME.map(g => {
-    const st = statoRiquadro(g.id);
-    const I = g.icona;
-    return /*#__PURE__*/React.createElement("button", {
-      key: g.id,
-      onClick: () => apri(g.id),
-      style: {
-        minHeight: '112px',
-        padding: '13px 12px',
-        cursor: 'pointer',
-        textAlign: 'left',
-        background: IRON.surface,
-        border: '1px solid ' + IRON.edge,
-        borderRadius: '3px',
-        borderTop: '2px solid ' + g.colore,
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'space-between'
-      }
-    }, /*#__PURE__*/React.createElement("div", {
-      style: {
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'flex-start'
-      }
-    }, /*#__PURE__*/React.createElement(I, {
-      size: 17,
-      color: g.colore
-    }), /*#__PURE__*/React.createElement("span", {
-      style: {
-        ...lblStyle,
-        fontSize: '7.5px'
-      }
-    }, g.figli.length > 1 ? g.figli.length + ' sez.' : '')), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
-      style: {
-        display: 'flex',
-        alignItems: 'baseline',
-        gap: '5px'
-      }
-    }, /*#__PURE__*/React.createElement("span", {
-      style: {
-        ...numStyle,
-        fontSize: st.v.length > 6 ? '13px' : '21px',
-        fontWeight: '600',
-        color: IRON.chalk,
-        lineHeight: 1
-      }
-    }, st.v), /*#__PURE__*/React.createElement("span", {
-      style: {
-        ...lblStyle,
-        fontSize: '7.5px'
-      }
-    }, st.l)), /*#__PURE__*/React.createElement("div", {
-      style: {
-        fontFamily: displayFont,
-        fontVariationSettings: "'wdth' 108",
-        fontSize: '15px',
-        fontWeight: '800',
-        letterSpacing: '-0.01em',
-        textTransform: 'uppercase',
-        color: IRON.chalk,
-        marginTop: '5px'
-      }
-    }, g.label)));
-  }));
-}
 
 // ============================================================
 // ACCESSO RAPIDO · la seduta di oggi in un tocco
@@ -28555,7 +26148,8 @@ function sedutaDiOggi() {
     const lista = cfg.exercises[giorno.id] || [];
     const finiti = lista.filter((ex, i) => {
       const r = (dl.esercizi || {})[i] || {};
-      return (r.sets_done || []).filter(Boolean).length >= (ex.sets || 4);
+      const sv = (cfg.applyLogic(ex, week) || {}).sets || ex.sets || 4;
+      return (r.sets_done || []).filter(Boolean).length >= sv;
     }).length;
     // quante sedute restano in questa settimana
     const restaSett = giorni.filter(d => !((log[week] || {})[d.id] || {}).completato).length;
@@ -28830,10 +26424,7 @@ function SedutaRapida(_ref105) {
 // ============================================================
 const dietaAttivaId = () => storage.get('dieta_attiva') || null;
 function dietaAttiva() {
-  const tutte = storage.get('custom_diets') || [];
-  if (!tutte.length) return null;
-  const id = dietaAttivaId();
-  return tutte.find(d => d.id === id) || tutte[0];
+  return dietaDiOggi().dieta || null;
 }
 function DietaAttiva(_ref106) {
   let goBack = _ref106.goBack;
@@ -29190,297 +26781,12 @@ function SicurezzaScreen(_p) {
 // Il dispositivo ha un codice. Sul repository, alla cartella
 // consegne/<codice>.json, puo esserci un pacchetto da importare.
 // ============================================================
-var BASE_CONSEGNE = (typeof window !== 'undefined' && window.__BASE) || 'https://pneroe-max.github.io/V82max/consegne/';
 
-function codiceDispositivo() {
-  var c = storage.get('codice_dispositivo');
-  if (!c) {
-    c = 'd' + Math.random().toString(36).slice(2, 7);
-    storage.set('codice_dispositivo', c);
-  }
-  return c;
-}
 
-function ConsegneScreen(_p) {
-  var goBack = _p.goBack;
-  var h = React.createElement;
-  var _c = useState(codiceDispositivo), codice = _c[0], setCodice = _c[1];
-  var _m = useState(''), modifica = _m[0], setModifica = _m[1];
-  var _s = useState(null), stato = _s[0], setStato = _s[1];
-  var _p2 = useState(null), pacco = _p2[0], setPacco = _p2[1];
-
-  var controlla = function () {
-    setStato({ tipo: 'attesa', testo: 'Controllo in corso...' });
-    setPacco(null);
-    // provo il codice come scritto, poi in minuscolo e in maiuscolo:
-    // gli indirizzi di GitHub distinguono le maiuscole, i codici no
-    var varianti = [codice, codice.toLowerCase(), codice.toUpperCase()]
-      .filter(function (v, i, a) { return a.indexOf(v) === i; });
-    var tenta = function (k) {
-      if (k >= varianti.length) return Promise.reject(new Error('vuoto'));
-      return fetch(BASE_CONSEGNE + encodeURIComponent(varianti[k]) + '.json?t=' + Date.now(), { cache: 'no-store' })
-        .then(function (r) {
-          if (r.status === 404) return tenta(k + 1);
-          if (!r.ok) throw new Error('rete');
-          return r.json();
-        });
-    };
-    tenta(0)
-      .then(function (j) {
-        setPacco(j);
-        setStato({ tipo: 'ok', testo: 'Trovato un pacchetto' });
-      })
-      .catch(function (e) {
-        setStato({ tipo: e.message === 'vuoto' ? 'vuoto' : 'errore',
-          testo: e.message === 'vuoto'
-            ? 'Nessuna consegna per il codice ' + codice
-            : 'Connessione non riuscita. Riprova quando sei online.' });
-      });
-  };
-
-  var importa = function () {
-    if (!pacco) return;
-    var nSchede = 0, nDiete = 0;
-    if (pacco.schede && pacco.schede.length) {
-      var attuali = storage.get('custom_schedules') || [];
-      pacco.schede.forEach(function (sc) {
-        var k = attuali.findIndex(function (x) { return x.id === sc.id; });
-        if (k >= 0) attuali[k] = sc; else attuali.push(sc);
-        nSchede++;
-      });
-      storage.set('custom_schedules', attuali);
-    }
-    if (pacco.diete && pacco.diete.length) {
-      var dd = storage.get('custom_diets') || [];
-      pacco.diete.forEach(function (di) {
-        var k = dd.findIndex(function (x) { return x.id === di.id; });
-        if (k >= 0) dd[k] = di; else dd.push(di);
-        nDiete++;
-      });
-      storage.set('custom_diets', dd);
-    }
-    storage.set('ultima_consegna', pacco.aggiornato || new Date().toISOString().slice(0, 10));
-    setStato({ tipo: 'ok', testo: 'Importati: ' + nSchede + ' schede e ' + nDiete + ' diete. Le trovi in Schede e Diete.' });
-    setPacco(null);
-  };
-
-  var colore = stato ? ({ ok: '#2FA055', vuoto: '#8A8A93', errore: '#E5A82B', attesa: '#8A8A93' })[stato.tipo] : IRON.edge;
-
-  return h('div', { style: { minHeight: '100vh', paddingBottom: '120px' } },
-    h(Header, { title: 'Consegne', subtitle: 'Ricevi schede e diete assegnate a questo dispositivo', onBack: goBack }),
-    h('div', { style: { padding: '0 14px' } },
-
-      h('div', { style: Object.assign({}, glassCard, { padding: '14px', marginBottom: '13px' }) },
-        h('div', { style: Object.assign({}, lblStyle, { marginBottom: '9px' }) }, 'Codice di questo dispositivo'),
-        h('div', { style: Object.assign({}, numStyle, { fontSize: '30px', fontWeight: '600', color: IRON.chalk, letterSpacing: '0.08em', textAlign: 'center', padding: '6px 0' }) }, codice),
-        h('div', { style: { display: 'flex', gap: '7px', marginTop: '11px' } },
-          h('input', {
-            type: 'text', value: modifica, placeholder: 'cambia codice',
-            onChange: function (e) { setModifica(e.target.value.replace(/[^A-Za-z0-9_-]/g, '')); },
-            style: Object.assign({}, inputDark, { flex: 1, minHeight: '46px', fontSize: '14px' })
-          }),
-          h('button', {
-            onClick: function () {
-              if (!modifica.trim()) return;
-              storage.set('codice_dispositivo', modifica.trim());
-              setCodice(modifica.trim()); setModifica(''); setStato(null); setPacco(null);
-            },
-            style: { width: '90px', minHeight: '46px', background: modifica.trim() ? IRON.chalk : IRON.surface,
-              color: modifica.trim() ? IRON.bg : IRON.ash, border: 'none', borderRadius: '3px',
-              fontFamily: monoFont, fontSize: '11px', fontWeight: '600', cursor: 'pointer' }
-          }, 'imposta')
-        ),
-        h('div', { style: { fontSize: '10.5px', color: IRON.dust, marginTop: '9px', lineHeight: 1.5 } },
-          'Comunica questo codice a chi ti prepara le schede. Puoi anche sceglierne uno tuo, per esempio il tuo nome.')
-      ),
-
-      h('button', {
-        onClick: controlla,
-        style: { width: '100%', minHeight: '56px', background: IRON.chalk, color: IRON.bg, border: 'none',
-          borderRadius: '3px', fontFamily: displayFont, fontVariationSettings: "'wdth' 112", fontSize: '14px',
-          fontWeight: '800', letterSpacing: '0.07em', textTransform: 'uppercase', cursor: 'pointer', marginBottom: '13px' }
-      }, 'Controlla aggiornamenti'),
-
-      stato && h('div', { style: { border: '1px solid ' + colore + '66', borderLeft: '3px solid ' + colore,
-        background: colore + '10', borderRadius: '3px', padding: '12px 13px', marginBottom: '13px',
-        fontSize: '12px', color: '#C0BEC6', lineHeight: 1.55 } }, stato.testo),
-
-      pacco && h('div', { style: Object.assign({}, glassCard, { padding: '14px', marginBottom: '13px' }) },
-        h('div', { style: Object.assign({}, lblStyle, { marginBottom: '9px' }) },
-          'Contenuto' + (pacco.aggiornato ? ' \u00b7 ' + pacco.aggiornato : '')),
-        pacco.nota && h('div', { style: { fontSize: '12px', color: IRON.chalk, marginBottom: '11px', lineHeight: 1.55 } }, pacco.nota),
-        (pacco.schede || []).map(function (sc, i) {
-          return h('div', { key: 's' + i, style: { display: 'flex', alignItems: 'center', gap: '9px', padding: '6px 0', borderTop: '1px solid ' + IRON.edge } },
-            h('span', { style: { width: '3px', height: '18px', background: '#A855F7', display: 'block', flexShrink: 0 } }),
-            h('span', { style: { flex: 1, fontSize: '12px', color: '#C0BEC6' } }, sc.name || 'Scheda'),
-            h('span', { style: Object.assign({}, lblStyle, { fontSize: '8px' }) }, 'scheda'));
-        }),
-        (pacco.diete || []).map(function (di, i) {
-          return h('div', { key: 'd' + i, style: { display: 'flex', alignItems: 'center', gap: '9px', padding: '6px 0', borderTop: '1px solid ' + IRON.edge } },
-            h('span', { style: { width: '3px', height: '18px', background: '#D8342C', display: 'block', flexShrink: 0 } }),
-            h('span', { style: { flex: 1, fontSize: '12px', color: '#C0BEC6' } }, di.name || 'Dieta'),
-            h('span', { style: Object.assign({}, lblStyle, { fontSize: '8px' }) }, 'dieta'));
-        }),
-        h('button', {
-          onClick: importa,
-          style: { width: '100%', minHeight: '52px', marginTop: '12px', background: '#2FA055', color: '#08210F',
-            border: 'none', borderRadius: '3px', fontFamily: displayFont, fontVariationSettings: "'wdth' 112",
-            fontSize: '13px', fontWeight: '800', letterSpacing: '0.06em', textTransform: 'uppercase', cursor: 'pointer' }
-        }, 'Importa nel telefono')
-      ),
-
-      h(InfoBox, { color: '#8A8A93', title: 'Come funziona' },
-        'Il pacchetto viene letto da una cartella pubblica del repository. Le schede con lo stesso identificativo vengono ',
-        h('b', { style: { color: IRON.chalk } }, 'aggiornate'),
-        ', le altre aggiunte. I tuoi allenamenti registrati non vengono toccati.')
-    )
-  );
-}
 
 // ============================================================
 // IMPOSTAZIONI · scheda e dieta attive
 // ============================================================
-function AttiveScreen(_ref107) {
-  let goBack = _ref107.goBack;
-  const _useState189 = useState(schedaAttivaId),
-    _useState190 = _slicedToArray(_useState189, 2),
-    sc = _useState190[0],
-    setSc = _useState190[1];
-  const _useState191 = useState(() => {
-      const d = dietaAttiva();
-      return d ? d.id : null;
-    }),
-    _useState192 = _slicedToArray(_useState191, 2),
-    di = _useState192[0],
-    setDi = _useState192[1];
-  const schede = tutteLeSchede();
-  const diete = storage.get('custom_diets') || [];
-  const Riga = _ref108 => {
-    let on = _ref108.on,
-      titolo = _ref108.titolo,
-      sotto = _ref108.sotto,
-      onClick = _ref108.onClick;
-    return /*#__PURE__*/React.createElement("button", {
-      onClick: onClick,
-      style: {
-        width: '100%',
-        display: 'flex',
-        alignItems: 'center',
-        gap: '12px',
-        minHeight: '60px',
-        padding: '0 13px',
-        background: on ? 'rgba(47,160,85,0.07)' : IRON.surface,
-        border: '1px solid ' + (on ? '#2FA05566' : IRON.edge),
-        borderRadius: '3px',
-        marginBottom: '8px',
-        cursor: 'pointer',
-        textAlign: 'left'
-      }
-    }, /*#__PURE__*/React.createElement("span", {
-      style: {
-        width: '3px',
-        height: '26px',
-        background: on ? '#2FA055' : IRON.edge,
-        flexShrink: 0,
-        display: 'block'
-      }
-    }), /*#__PURE__*/React.createElement("span", {
-      style: {
-        flex: 1,
-        minWidth: 0
-      }
-    }, /*#__PURE__*/React.createElement("span", {
-      style: {
-        display: 'block',
-        fontSize: '13.5px',
-        fontWeight: '700',
-        color: IRON.chalk
-      }
-    }, titolo), /*#__PURE__*/React.createElement("span", {
-      style: {
-        display: 'block',
-        fontSize: '10px',
-        color: IRON.dust,
-        marginTop: '2px'
-      }
-    }, sotto)), /*#__PURE__*/React.createElement("span", {
-      style: {
-        ...lblStyle,
-        fontSize: '8px',
-        color: on ? '#2FA055' : IRON.ash
-      }
-    }, on ? 'attiva' : 'usa'));
-  };
-  return /*#__PURE__*/React.createElement("div", {
-    style: {
-      minHeight: '100vh',
-      paddingBottom: '120px'
-    }
-  }, /*#__PURE__*/React.createElement(Header, {
-    title: "Attive",
-    subtitle: "Cosa usa la home",
-    onBack: goBack
-  }), /*#__PURE__*/React.createElement("div", {
-    style: {
-      padding: '0 14px'
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      ...lblStyle,
-      padding: '0 2px 9px'
-    }
-  }, "Scheda di allenamento"), schede.map(p => /*#__PURE__*/React.createElement(Riga, {
-    key: p.id,
-    on: sc === p.id,
-    titolo: p.label,
-    sotto: (p.config.days || []).length + ' giorni · ' + (p.config.weeks || []).length + ' settimane',
-    onClick: () => {
-      storage.set('scheda_attiva', p.id);
-      setSc(p.id);
-    }
-  })), /*#__PURE__*/React.createElement("div", {
-    style: {
-      ...lblStyle,
-      padding: '18px 2px 9px'
-    }
-  }, "Dieta"), diete.length === 0 && /*#__PURE__*/React.createElement("div", {
-    style: {
-      ...glassCard,
-      padding: '16px',
-      textAlign: 'center',
-      fontSize: '11.5px',
-      color: IRON.dust,
-      lineHeight: 1.5
-    }
-  }, "Nessuna dieta salvata. Creala o importala nella sezione ", /*#__PURE__*/React.createElement("b", {
-    style: {
-      color: IRON.chalk
-    }
-  }, "Oggi"), "."), diete.map(d => {
-    const t = dietTotals(d);
-    return /*#__PURE__*/React.createElement(Riga, {
-      key: d.id,
-      on: di === d.id,
-      titolo: d.name,
-      sotto: r0(t.kcal) + ' kcal · P' + r0(t.p) + ' C' + r0(t.c) + ' G' + r0(t.f),
-      onClick: () => {
-        storage.set('dieta_attiva', d.id);
-        setDi(d.id);
-      }
-    });
-  }), /*#__PURE__*/React.createElement(InfoBox, {
-    color: "#8A8A93",
-    title: "A cosa serve"
-  }, "La ", /*#__PURE__*/React.createElement("b", {
-    style: {
-      color: IRON.chalk
-    }
-  }, "scheda attiva"), " decide quale seduta apre il pulsante in home e su quali dati lavorano le analisi. La ", /*#__PURE__*/React.createElement("b", {
-    style: {
-      color: IRON.chalk
-    }
-  }, "dieta attiva"), " \xE8 quella che si apre toccando \"Oggi\". Importazione e modifica stanno nelle sezioni Schede e Diete, qui accanto.")));
-}
 
 // ============================================================
 // UNIONE DELLE SCHERMATE
@@ -29494,7 +26800,9 @@ function SezioniScreen(_ref109) {
     sezioni = _ref109.sezioni,
     goBack = _ref109.goBack,
     _ref109$iniziale = _ref109.iniziale,
-    iniziale = _ref109$iniziale === void 0 ? 0 : _ref109$iniziale;
+    iniziale = _ref109$iniziale === void 0 ? 0 : _ref109$iniziale,
+    extra = _ref109.extra,
+    senzaIndietro = _ref109.senzaIndietro;
   const _useState193 = useState(iniziale),
     _useState194 = _slicedToArray(_useState193, 2),
     i = _useState194[0],
@@ -29508,8 +26816,8 @@ function SezioniScreen(_ref109) {
   }, /*#__PURE__*/React.createElement(Header, {
     title: titolo,
     subtitle: sez.desc || sez.label,
-    onBack: goBack
-  }), /*#__PURE__*/React.createElement("div", {
+    onBack: senzaIndietro ? null : goBack
+  }), extra || null, /*#__PURE__*/React.createElement("div", {
     style: {
       padding: '0 14px 12px',
       overflowX: 'auto'
@@ -29544,259 +26852,8 @@ function SezioniScreen(_ref109) {
 }
 
 // Le quattro destinazioni: cosa mangio oggi · come sto · come va l'allenamento · come è configurato
-const DESTINAZIONI = [{
-  id: 'oggi',
-  label: 'Oggi',
-  desc: 'La dieta di oggi, aperta',
-  icona: Utensils,
-  colore: '#D8342C',
-  diretta: DietaAttiva
-}, {
-  id: 'corpo',
-  label: 'Corpo',
-  desc: 'Peso, composizione, proiezione',
-  icona: Scale,
-  colore: '#4D82E8',
-  sezioni: [{
-    id: 'peso',
-    desc: 'Registra, composizione, figura',
-    label: 'Peso e misure',
-    C: PesoScreen
-  }, {
-    id: 'proiezione',
-    desc: 'Dove saresti fra 12 settimane',
-    label: 'Proiezione',
-    C: ProiezioneScreen
-  }, {
-    id: 'tdee',
-    desc: 'Mantenimento reale dai tuoi dati',
-    label: 'TDEE',
-    C: TdeeScreen
-  }, {
-    id: 'recovery',
-    desc: 'Sonno, energia, stress',
-    label: 'Recupero',
-    C: RecoveryScreen
-  }]
-}, {
-  id: 'progressi',
-  label: 'Progressi',
-  desc: 'Volume, stalli, 1RM, storico',
-  icona: BarChart3,
-  colore: '#2FA055',
-  sezioni: [{
-    id: 'volume',
-    desc: 'Serie per gruppo muscolare',
-    label: 'Volume',
-    C: VolumeScreen
-  }, {
-    id: 'profilo',
-    desc: 'In che punto della curva carichi',
-    label: 'Profilo',
-    C: ProfiloScreen
-  }, {
-    id: 'stalli',
-    desc: 'Quali esercizi non salgono più',
-    label: 'Stalli',
-    C: StalliScreen
-  }, {
-    id: 'decadimento',
-    desc: "Calo dalla prima all'ultima serie",
-    label: 'Decadimento',
-    C: DecadimentoScreen
-  }, {
-    id: 'dashboard',
-    desc: '1RM stimato e andamento',
-    label: '1RM',
-    C: DashboardScreen
-  }, {
-    id: 'storico',
-    desc: 'Archivia e confronta i blocchi',
-    label: 'Storico',
-    C: StoricoScreen
-  }]
-}, {
-  id: 'setup',
-  label: 'Impostazioni',
-  desc: 'Schede, database, guida, backup',
-  icona: Settings,
-  colore: '#8A8A93',
-  sezioni: [{
-    id: 'attive',
-    desc: 'Quale scheda e quale dieta usi ora',
-    label: 'Attive',
-    C: AttiveScreen
-  }, {
-      id: 'diets',
-      desc: 'Crea, importa e modifica i piani',
-      label: 'Diete',
-      C: DietScreen
-    }, {
-      id: 'consegne',
-      desc: 'Ricevi schede assegnate a questo dispositivo',
-      label: 'Consegne',
-      C: ConsegneScreen
-    }, {
-      id: 'sicurezza',
-      desc: 'Backup automatico e memoria persistente',
-      label: 'Sicurezza',
-      C: SicurezzaScreen
-    }, {
-    id: 'library',
-    desc: 'Integrate e personali, importa .v8w',
-    label: 'Schede',
-    C: LibraryScreen
-  }, {
-    id: 'exdb',
-    desc: '556 esercizi con foto e tecnica',
-    label: 'Esercizi',
-    C: ExerciseDBScreen
-  }, {
-    id: 'bilanciere',
-    desc: 'Carico per lato',
-    label: 'Bilanciere',
-    C: BilanciereScreen
-  }, {
-    id: 'guide',
-    desc: 'Come si eseguono le tecniche',
-    label: 'Tecniche',
-    C: GuideScreen
-  }, {
-    id: 'nutrition',
-    desc: 'Dieta di riferimento e stack',
-    label: 'Protocollo',
-    C: NutritionScreen
-  }, {
-    id: 'settings',
-    desc: 'Backup, versione, spazio',
-    label: 'Backup',
-    C: SettingsScreen
-  }]
-}];
 
 // Le quattro voci in home, con il dato vivo
-function VociHome(_ref110) {
-  let apri = _ref110.apri;
-  const dato = id => {
-    try {
-      if (id === 'oggi') {
-        const d = storage.get('custom_diets') || [];
-        return d.length ? {
-          v: String(r0(dietTotals(d[0]).kcal)),
-          u: 'kcal'
-        } : {
-          v: '—',
-          u: 'kcal'
-        };
-      }
-      if (id === 'corpo') {
-        const p = storage.get('peso') || {};
-        const s = Object.keys(p).map(Number).sort((a, b) => a - b).map(w => mediaSett(p[w])).filter(x => x > 0);
-        return s.length ? {
-          v: s[s.length - 1].toFixed(1).replace('.', ','),
-          u: 'kg'
-        } : {
-          v: '—',
-          u: 'kg'
-        };
-      }
-      if (id === 'progressi') {
-        const cfg = schedaAttiva().config;
-        const log = storage.get(cfg.storageKey) || {};
-        let n = 0;
-        Object.keys(log).forEach(w => (cfg.days || []).forEach(d => {
-          if ((log[w][d.id] || {}).completato) n++;
-        }));
-        return {
-          v: String(n),
-          u: 'sedute'
-        };
-      }
-      if (id === 'setup') return {
-        v: schedaAttiva().label.slice(0, 11),
-        u: 'attiva'
-      };
-    } catch (e) {}
-    return {
-      v: '',
-      u: ''
-    };
-  };
-  return /*#__PURE__*/React.createElement("div", null, DESTINAZIONI.map(d => {
-    const s = dato(d.id);
-    const I = d.icona;
-    return /*#__PURE__*/React.createElement("button", {
-      key: d.id,
-      onClick: () => apri(d.id),
-      style: {
-        width: '100%',
-        display: 'flex',
-        alignItems: 'center',
-        gap: '14px',
-        minHeight: '68px',
-        padding: '0 2px',
-        background: 'none',
-        border: 'none',
-        borderBottom: '1px solid ' + IRON.edge,
-        cursor: 'pointer',
-        textAlign: 'left'
-      }
-    }, /*#__PURE__*/React.createElement("span", {
-      style: {
-        width: '3px',
-        height: '30px',
-        background: d.colore,
-        flexShrink: 0,
-        display: 'block'
-      }
-    }), /*#__PURE__*/React.createElement("span", {
-      style: {
-        flex: 1,
-        minWidth: 0
-      }
-    }, /*#__PURE__*/React.createElement("span", {
-      style: {
-        display: 'block',
-        fontFamily: displayFont,
-        fontVariationSettings: "'wdth' 108",
-        fontSize: '21px',
-        fontWeight: '800',
-        letterSpacing: '-0.02em',
-        textTransform: 'uppercase',
-        color: IRON.chalk
-      }
-    }, d.label), /*#__PURE__*/React.createElement("span", {
-      style: {
-        display: 'block',
-        fontSize: '10.5px',
-        color: IRON.dust,
-        marginTop: '2px'
-      }
-    }, d.desc)), /*#__PURE__*/React.createElement("span", {
-      style: {
-        textAlign: 'right',
-        flexShrink: 0
-      }
-    }, /*#__PURE__*/React.createElement("span", {
-      style: {
-        display: 'block',
-        ...numStyle,
-        fontSize: s.v.length > 6 ? '12px' : '17px',
-        fontWeight: '600',
-        color: IRON.chalk
-      }
-    }, s.v), /*#__PURE__*/React.createElement("span", {
-      style: {
-        display: 'block',
-        ...lblStyle,
-        fontSize: '7.5px'
-      }
-    }, s.u)), /*#__PURE__*/React.createElement(ChevronRight, {
-      size: 16,
-      color: IRON.ash
-    }));
-  }));
-}
 
 // ============================================================
 // CONSEGNE · schede e diete pubblicate per questo dispositivo
@@ -29945,75 +27002,546 @@ function ConsegneScreen(_refCons) {
 
 // ============= MAIN =============
 
-function App() {
-  const _useState195 = useState('home'),
-    _useState196 = _slicedToArray(_useState195, 2),
-    screen = _useState196[0],
-    setScreen = _useState196[1];
-  const goHome = useCallback(() => setScreen('home'), []);
-  // Quando siamo fuori da home, intercetta il tasto indietro per tornare alla home
-  useAndroidBack(goHome, screen !== 'home');
-  // Wrapper per navigate da HomeScreen che ora pusha history (così back funziona da subito)
-  const navigate = useCallback(s => setScreen(s), []);
-  return /*#__PURE__*/React.createElement(TimerProvider, null, /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontFamily: '-apple-system, "Helvetica Neue", Arial, sans-serif',
-      maxWidth: '480px',
-      margin: '0 auto',
-      minHeight: '100vh'
-    }
-  }, screen === 'home' && /*#__PURE__*/React.createElement(HomeScreen, {
-    navigate: navigate
-  }), screen === 'workout' && /*#__PURE__*/React.createElement(WorkoutScreen, {
-    goBack: goHome
-  }), screen === 'summer' && /*#__PURE__*/React.createElement(Summer2Screen, {
-    goBack: goHome
-  }), screen === 'library' && /*#__PURE__*/React.createElement(LibraryScreen, {
-    goBack: goHome
-  }), screen === 'exdb' && /*#__PURE__*/React.createElement(ExerciseDBScreen, {
-    goBack: goHome
-  }), screen === 'volume' && /*#__PURE__*/React.createElement(VolumeScreen, {
-    goBack: goHome
-  }), DESTINAZIONI.map(d => screen === d.id ? d.diretta ? /*#__PURE__*/React.createElement(d.diretta, {
-    key: d.id,
-    goBack: goHome
-  }) : /*#__PURE__*/React.createElement(SezioniScreen, {
-    key: d.id,
-    titolo: d.label,
-    sezioni: d.sezioni,
-    goBack: goHome
-  }) : null), screen === 'seduta' && /*#__PURE__*/React.createElement(SedutaRapida, {
-    goBack: goHome
-  }), screen === 'profilo' && /*#__PURE__*/React.createElement(ProfiloScreen, {
-    goBack: goHome
-  }), screen === 'stalli' && /*#__PURE__*/React.createElement(StalliScreen, {
-    goBack: goHome
-  }), screen === 'decadimento' && /*#__PURE__*/React.createElement(DecadimentoScreen, {
-    goBack: goHome
-  }), screen === 'proiezione' && /*#__PURE__*/React.createElement(ProiezioneScreen, {
-    goBack: goHome
-  }), screen === 'storico' && /*#__PURE__*/React.createElement(StoricoScreen, {
-    goBack: goHome
-  }), screen === 'bilanciere' && /*#__PURE__*/React.createElement(BilanciereScreen, {
-    goBack: goHome
-  }), /*#__PURE__*/React.createElement(ConfirmHost, null), /*#__PURE__*/React.createElement(StorageBanner, null), screen === 'tdee' && /*#__PURE__*/React.createElement(TdeeScreen, {
-    goBack: goHome
-  }), screen === 'nutrition' && /*#__PURE__*/React.createElement(NutritionScreen, {
-    goBack: goHome
-  }), screen === 'diets' && /*#__PURE__*/React.createElement(DietScreen, {
-    goBack: goHome
-  }), screen === 'peso' && /*#__PURE__*/React.createElement(PesoScreen, {
-    goBack: goHome
-  }), screen === 'dashboard' && /*#__PURE__*/React.createElement(DashboardScreen, {
-    goBack: goHome
-  }), screen === 'recovery' && /*#__PURE__*/React.createElement(RecoveryScreen, {
-    goBack: goHome
-  }), screen === 'guide' && /*#__PURE__*/React.createElement(GuideScreen, {
-    goBack: goHome
-  }), screen === 'settings' && /*#__PURE__*/React.createElement(SettingsScreen, {
-    goBack: goHome
-  })));
+// ============================================================
+// v24 · RIPROGETTAZIONE
+// Barra fissa in basso con quattro destinazioni, dieta che segue
+// il giorno (allenamento/riposo), verifica delle calorie dal peso
+// medio, impostazioni ridotte, avviso di nuova versione.
+// ============================================================
+const h24 = React.createElement;
+
+// ---------- fase del ciclo: colori, ritmo atteso, verifica calorie ----------
+const FASI = {
+  massa: { label: 'Massa', col: '#2FA055', min: 0.2, max: 0.45, testo: '+0,2 / +0,45 kg a settimana' },
+  mantenimento: { label: 'Mantenimento', col: '#4D82E8', min: -0.15, max: 0.15, testo: '±0,15 kg a settimana' },
+  cut: { label: 'Cut', col: '#D8342C', min: -0.8, max: -0.35, testo: '−0,35 / −0,8 kg a settimana' }
+};
+const faseId = () => { const f = storage.get('fase'); return FASI[f] ? f : 'massa'; };
+const faseAttiva = () => FASI[faseId()];
+
+const dataOggi = () => {
+  const d = new Date();
+  return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+};
+const nomeOggi = () => NOMI_GIORNI[GIORNI_SETT[new Date().getDay()]];
+
+function oggiSiAllena() {
+  try {
+    const att = schedaAttiva();
+    if (!att) return false;
+    return (att.config.days || []).some(d => (d.dayName || '').toUpperCase() === nomeOggi());
+  } catch (e) {
+    return false;
+  }
 }
+
+// ---------- coppia di diete: giorni di allenamento / giorni di riposo ----------
+function coppiaDiete() {
+  const tutte = storage.get('custom_diets') || [];
+  const trova = id => id ? tutte.find(d => d.id === id) : null;
+  let on = trova(storage.get('dieta_on'));
+  let off = trova(storage.get('dieta_off'));
+  if (!on) {
+    const att = trova(storage.get('dieta_attiva'));
+    on = att && att.dayType !== 'riposo' ? att : tutte.find(d => d.dayType === 'allenamento') || att || tutte[0] || null;
+  }
+  if (!off) {
+    const pref = on ? String(on.id).replace(/_[^_]*$/, '') : '';
+    off = tutte.find(d => d.dayType === 'riposo' && pref && String(d.id).indexOf(pref) === 0)
+      || tutte.find(d => d.dayType === 'riposo') || on;
+  }
+  return { on, off, tutte };
+}
+
+// La dieta di oggi: segue il giorno della scheda; si puo forzare per la sola giornata
+function dietaDiOggi() {
+  const c = coppiaDiete();
+  if (!c.on && !c.off) return { dieta: null, tipo: null, forzata: false };
+  if (storage.get('dieta_auto') === false) {
+    const a = c.tutte.find(d => d.id === storage.get('dieta_attiva')) || c.on || c.off;
+    return { dieta: a, tipo: a ? a.dayType : null, forzata: false, manuale: true };
+  }
+  let tipo = oggiSiAllena() ? 'allenamento' : 'riposo';
+  let forzata = false;
+  const f = storage.get('dieta_oggi');
+  if (f && f.data === dataOggi() && (f.tipo === 'allenamento' || f.tipo === 'riposo')) {
+    tipo = f.tipo;
+    forzata = true;
+  }
+  return { dieta: tipo === 'allenamento' ? c.on || c.off : c.off || c.on, tipo, forzata };
+}
+
+// ---------- verifica calorie dal peso medio ----------
+const CARBO_BASE = ['f_basmati', 'f_riso', 'f_pasta', 'f_pastaint', 'f_couscous', 'f_farro', 'f_patate', 'f_patatedolci', 'f_avena', 'f_paneint', 'f_pane', 'f_gallette'];
+function verificaCalorie() {
+  const f = faseAttiva();
+  const log = storage.get('peso') || {};
+  const corrente = settimanaCorrente();
+  const piene = Object.keys(log).map(Number)
+    .filter(w => !isNaN(w) && w < corrente)
+    .filter(w => GIORNI_SETT.filter(g => parseFloat((log[w] || {})[g]) > 0).length >= 3)
+    .sort((a, b) => a - b);
+  const stato0 = storage.get('calorie_auto') || {};
+  const giorni = stato0.ultima ? Math.floor((Date.now() - new Date(stato0.ultima).getTime()) / 86400000) : 999;
+  if (piene.length < 3) return { stato: 'pochi', piene: piene.length, fase: f, giorni, dovuta: false };
+  const a = piene[piene.length - 3],
+    b = piene[piene.length - 1];
+  const ma = mediaSett(log[a]),
+    mb = mediaSett(log[b]);
+  const rate = (mb - ma) / (b - a);
+  const stato = rate < f.min ? 'sotto' : rate > f.max ? 'sopra' : 'ok';
+  return { stato, rate, da: a, a: b, ma, mb, fase: f, giorni, dovuta: giorni >= 14 };
+}
+function propostaCarbo(dieta, deltaC) {
+  let best = null;
+  (dieta.meals || []).forEach((m, mi) => (m.items || []).forEach((it, ii) => {
+    if (CARBO_BASE.indexOf(it.ref) < 0) return;
+    const per = per100Of(it);
+    if (!per.c) return;
+    const c = per.c * (parseFloat(it.g) || 0) / 100;
+    if (!best || c > best.c) best = { mi, ii, c, per, it, pasto: m.name };
+  }));
+  if (!best) return null;
+  const g0 = parseFloat(best.it.g) || 0;
+  let dg = Math.round(deltaC / (best.per.c / 100) / 5) * 5;
+  if (g0 + dg < 0) dg = -g0;
+  return { mi: best.mi, ii: best.ii, dg, nome: nameOf(best.it), pasto: best.pasto, nuovoG: g0 + dg };
+}
+function registraVerifica(azione, dettagli) {
+  const s = storage.get('calorie_auto') || {};
+  const st = (s.storico || []).slice(0, 19);
+  const ora = new Date().toISOString();
+  storage.set('calorie_auto', { ultima: ora, storico: [{ quando: ora, azione, dettagli: dettagli || [] }].concat(st) });
+}
+function anteprimaVerifica(segno) {
+  const c = coppiaDiete();
+  const viste = {};
+  return [c.on, c.off].filter(d => d && !viste[d.id] && (viste[d.id] = true)).map(d => {
+    const p = propostaCarbo(d, 40 * segno);
+    return p ? { id: d.id, nome: d.name, p } : null;
+  }).filter(Boolean);
+}
+function applicaVerifica(segno) {
+  const prev = anteprimaVerifica(segno);
+  const tutte = storage.get('custom_diets') || [];
+  const fatti = [];
+  prev.forEach(x => {
+    const k = tutte.findIndex(d => d.id === x.id);
+    if (k < 0) return;
+    const d = JSON.parse(JSON.stringify(tutte[k]));
+    d.meals[x.p.mi].items[x.p.ii].g = x.p.nuovoG;
+    if (d.target) d.target.c = Math.max(0, (parseFloat(d.target.c) || 0) + 40 * segno);
+    tutte[k] = d;
+    fatti.push(x.nome + ': ' + x.p.nome + ' ' + (x.p.dg > 0 ? '+' : '') + x.p.dg + ' g');
+  });
+  storage.set('custom_diets', tutte);
+  registraVerifica(segno > 0 ? '+150 kcal' : '−150 kcal', fatti);
+  return fatti;
+}
+const kgSett = v => (v > 0 ? '+' : v < 0 ? '−' : '') + String(Math.abs(Math.round(v * 100) / 100)).replace('.', ',') + ' kg/sett';
+
+function CalorieCard(_p) {
+  const compatta = _p && _p.compatta;
+  const [, rif] = useState(0);
+  const [esito, setEsito] = useState(null);
+  const v = verificaCalorie();
+  if (esito) {
+    return h24('div', { style: { ...glassCard, padding: '13px 14px', marginBottom: '10px', borderLeft: '2px solid #2FA055' } },
+      h24('div', { style: lblStyle }, 'Calorie aggiornate'),
+      esito.map((t, i) => h24('div', { key: i, style: { fontFamily: monoFont, fontSize: '11.5px', color: IRON.chalk, marginTop: '6px' } }, t)));
+  }
+  if (v.stato === 'pochi') {
+    if (compatta) return null;
+    return h24('div', { style: { ...glassCard, padding: '13px 14px', marginBottom: '12px' } },
+      h24('div', { style: lblStyle }, 'Verifica calorie · fase ' + v.fase.label.toLowerCase()),
+      h24('div', { style: { fontSize: '12.5px', color: IRON.dust, marginTop: '7px', lineHeight: 1.5 } },
+        'Servono 3 settimane complete con almeno 3 pesate ciascuna. Ne hai ' + v.piene + '. Poi ogni 2 settimane ti propongo se alzare o abbassare le calorie.'));
+  }
+  const fuori = v.stato !== 'ok';
+  if (compatta && !(v.dovuta && fuori)) return null;
+  const segno = v.stato === 'sotto' ? 1 : -1;
+  const prev = fuori ? anteprimaVerifica(segno) : [];
+  const col = !fuori ? '#2FA055' : '#E5A82B';
+  const titolo = !fuori ? 'Ritmo nel range' : v.stato === 'sotto' ? 'Sotto il ritmo atteso' : 'Sopra il ritmo atteso';
+  const btn = (testo, onClick, primario) => h24('button', {
+    onClick,
+    style: { flex: 1, minHeight: '44px', borderRadius: '3px', cursor: 'pointer', fontFamily: monoFont, fontSize: '11.5px', fontWeight: '600', letterSpacing: '0.03em', background: primario ? IRON.chalk : 'transparent', color: primario ? IRON.bg : IRON.dust, border: '1px solid ' + (primario ? IRON.chalk : IRON.edge) }
+  }, testo);
+  return h24('div', { style: { ...glassCard, padding: '13px 14px', marginBottom: '12px', borderLeft: '2px solid ' + col } },
+    h24('div', { style: { display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' } },
+      h24('span', { style: lblStyle }, 'Verifica calorie · ' + v.fase.label.toLowerCase()),
+      h24('span', { style: { ...lblStyle, color: col } }, titolo)),
+    h24('div', { style: { display: 'flex', alignItems: 'baseline', gap: '8px', marginTop: '8px' } },
+      h24('span', { style: { ...numStyle, fontSize: '26px', fontWeight: '600', color: IRON.chalk } }, kgSett(v.rate)),
+      h24('span', { style: { fontFamily: monoFont, fontSize: '10.5px', color: IRON.dust } }, 'sett ' + v.da + '→' + v.a + ' · atteso ' + v.fase.testo)),
+    fuori && prev.length > 0 && h24('div', { style: { fontSize: '12.5px', color: IRON.chalk, marginTop: '9px', lineHeight: 1.5 } },
+      (segno > 0 ? '+150' : '−150') + ' kcal (' + (segno > 0 ? '+' : '−') + '40 g di carboidrati):',
+      prev.map((x, i) => h24('div', { key: i, style: { fontFamily: monoFont, fontSize: '11px', color: IRON.dust, marginTop: '4px' } },
+        x.nome + ' · ' + x.p.pasto + ' · ' + x.p.nome + ' ' + (x.p.dg > 0 ? '+' : '') + x.p.dg + ' g'))),
+    fuori && prev.length === 0 && h24('div', { style: { fontSize: '12px', color: IRON.dust, marginTop: '9px' } },
+      'Nessun carboidrato base nelle diete attive: correggi a mano di ' + (segno > 0 ? '+' : '−') + '40 g di carboidrati.'),
+    !v.dovuta && h24('div', { style: { fontFamily: monoFont, fontSize: '10.5px', color: IRON.ash, marginTop: '8px' } },
+      'Prossima verifica tra ' + Math.max(1, 14 - v.giorni) + ' giorni'),
+    v.dovuta && h24('div', { style: { display: 'flex', gap: '7px', marginTop: '11px' } },
+      fuori && prev.length > 0 && btn('Applica', () => setEsito(applicaVerifica(segno)), true),
+      btn(fuori ? 'Non ora' : 'Confermo', () => { registraVerifica(fuori ? 'rinviata' : 'confermata'); rif(x => x + 1); }, !fuori || prev.length === 0)));
+}
+
+// ---------- OGGI ----------
+const tondoStile = {
+  width: '44px', height: '44px', borderRadius: '50%', background: 'rgba(255,255,255,0.07)', border: '1px solid #2A2A31',
+  display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', flexShrink: 0
+};
+const minutiDi = t => {
+  const m = String(t || '').match(/(\d+)[:.](\d+)/);
+  return m ? +m[1] * 60 + +m[2] : 9999;
+};
+
+function DietaOggiCard(_p) {
+  const apri = _p.apri;
+  const [, rif] = useState(0);
+  const o = dietaDiOggi();
+  if (!o.dieta) {
+    return h24('button', { onClick: apri, style: { ...glassCard, width: '100%', textAlign: 'left', padding: '14px', marginBottom: '10px', cursor: 'pointer', color: IRON.chalk } },
+      h24('div', { style: lblStyle }, 'Dieta di oggi'),
+      h24('div', { style: { fontSize: '13px', color: IRON.dust, marginTop: '6px' } }, 'Nessuna dieta: creala o importala da Impostazioni'));
+  }
+  const t = dietTotals(o.dieta);
+  const tgt = o.dieta.target || {};
+  const tk = kcalOf(parseFloat(tgt.p) || 0, parseFloat(tgt.c) || 0, parseFloat(tgt.f) || 0);
+  const ora = new Date().getHours() * 60 + new Date().getMinutes();
+  const pross = (o.dieta.meals || []).find(m => minutiDi(m.time) >= ora);
+  const altro = o.tipo === 'allenamento' ? 'riposo' : 'allenamento';
+  const cambia = e => {
+    e.stopPropagation();
+    storage.set('dieta_oggi', o.forzata ? null : { data: dataOggi(), tipo: altro });
+    rif(x => x + 1);
+  };
+  return h24('div', { onClick: apri, role: 'button', style: { ...glassCard, padding: '14px', marginBottom: '10px', cursor: 'pointer' } },
+    h24('div', { style: { display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' } },
+      h24('span', { style: lblStyle }, 'Dieta di oggi · ' + (o.tipo === 'riposo' ? 'riposo' : 'allenamento') + (o.manuale ? '' : o.forzata ? ' · scelta da te' : ' · automatica')),
+      !o.manuale && h24('button', { onClick: cambia, style: { background: 'transparent', border: '1px solid ' + IRON.edge, borderRadius: '3px', color: IRON.dust, fontFamily: monoFont, fontSize: '10px', padding: '6px 9px', cursor: 'pointer' } },
+        o.forzata ? 'torna auto' : 'oggi ' + altro)),
+    h24('div', { style: { fontSize: '15px', fontWeight: '700', color: IRON.chalk, marginTop: '7px' } }, o.dieta.name),
+    h24('div', { style: { display: 'flex', alignItems: 'baseline', gap: '8px', marginTop: '6px' } },
+      h24('span', { style: { ...numStyle, fontSize: '26px', fontWeight: '600', color: IRON.chalk } }, r0(t.kcal)),
+      h24('span', { style: { fontFamily: monoFont, fontSize: '10.5px', color: IRON.dust } },
+        'kcal' + (tk ? ' / ' + tk : '') + ' · P' + r0(t.p) + ' C' + r0(t.c) + ' G' + r0(t.f))),
+    pross && h24('div', { style: { fontFamily: monoFont, fontSize: '11px', color: IRON.dust, marginTop: '8px' } },
+      'Prossimo: ' + pross.name + (pross.time ? ' · ' + pross.time : '') + ' · ' + (pross.items || []).length + ' alimenti'));
+}
+
+function OggiTab(_p) {
+  const apri = _p.apri;
+  const f = faseAttiva();
+  const peso = storage.get('peso') || {};
+  const serie = Object.keys(peso).map(Number).filter(w => (peso[w] || {}).media > 0).sort((a, b) => a - b);
+  const ult = serie.length ? peso[serie[serie.length - 1]] : null;
+  let trend = null;
+  if (serie.length >= 2) {
+    const da = serie[Math.max(0, serie.length - 4)],
+      a = serie[serie.length - 1];
+    if (a > da) trend = (peso[a].media - peso[da].media) / (a - da);
+  }
+  const trendCol = trend == null ? IRON.dust : trend >= f.min && trend <= f.max ? '#2FA055' : '#E5A82B';
+  return h24('div', { style: { minHeight: '100vh', paddingBottom: 'calc(100px + env(safe-area-inset-bottom))' } },
+    h24('div', { style: { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '10px', padding: 'calc(14px + env(safe-area-inset-top)) calc(16px + env(safe-area-inset-right)) 16px calc(16px + env(safe-area-inset-left))' } },
+      h24('div', { style: { minWidth: 0 } },
+        h24('div', { style: lblStyle }, 'Peso medio · settimana ', settimanaCorrente()),
+        h24('div', { style: { display: 'flex', alignItems: 'baseline', gap: '9px', marginTop: '7px' } },
+          h24('span', { style: { ...numStyle, fontSize: '42px', fontWeight: '600', lineHeight: 0.9, letterSpacing: '-0.04em', color: IRON.chalk } }, ult ? ult.media.toFixed(1).replace('.', ',') : '—'),
+          h24('span', { style: { ...numStyle, fontSize: '13px', color: IRON.dust } }, 'KG'),
+          trend != null && trend !== 0 && h24('span', { style: { ...numStyle, fontSize: '12px', color: trendCol } }, kgSett(trend))),
+        h24(PesoSpark, null)),
+      h24('div', { style: { display: 'flex', gap: '8px', alignItems: 'center' } },
+        h24('button', { onClick: () => apri('impostazioni', 0), 'aria-label': 'Fase del ciclo', style: { display: 'flex', alignItems: 'center', gap: '8px', border: '1px solid ' + IRON.edge, borderRadius: '3px', padding: '0 11px', minHeight: '44px', background: 'transparent', cursor: 'pointer' } },
+          h24('span', { style: { width: '3px', height: '15px', background: f.col, borderRadius: '1px', display: 'block' } }),
+          h24('span', { style: { ...lblStyle, color: IRON.chalk, fontSize: '10.5px' } }, f.label.toUpperCase())),
+        h24('button', { onClick: () => apri('impostazioni'), 'aria-label': 'Impostazioni', style: tondoStile }, h24(Settings, { size: 18, color: '#C0BEC6' })))),
+    h24(AvvisoBackup, null),
+    h24(AzioneOggi, { apriSeduta: () => apri('seduta') }),
+    h24('div', { style: { padding: '14px 14px 0' } },
+      h24(PesoRapido, null),
+      h24(CalorieCard, { compatta: true }),
+      h24(DietaOggiCard, { apri: () => apri('dieta') }),
+      h24('div', { style: { fontSize: '10px', color: '#55555E', textAlign: 'center', marginTop: '22px', lineHeight: 1.7, letterSpacing: '0.04em', fontWeight: '500' } },
+        'V8 Tracker ', APP_VERSION, ' · fase ', f.label.toLowerCase(), h24('br', null), 'Dati salvati sul dispositivo')));
+}
+
+// ---------- ALLENAMENTO ----------
+function AllenamentoTab(_p) {
+  const apri = _p.apri;
+  const att = schedaAttiva();
+  const s = sedutaDiOggi();
+  const cfg = att ? att.config : null;
+  const [week, setWeek] = useState(() => s && s.week || (cfg ? cfg.weeks[0] : 1));
+  if (!cfg) {
+    return h24('div', { style: { minHeight: '100vh', padding: 'calc(20px + env(safe-area-inset-top)) 16px 120px' } },
+      h24('div', { style: { ...dispStyle, fontSize: '28px', color: IRON.chalk } }, 'Nessuna scheda'),
+      h24('div', { style: { fontSize: '13px', color: IRON.dust, margin: '10px 0 16px', lineHeight: 1.5 } }, 'Importa una scheda dalle Consegne o creane una nella Libreria.'),
+      h24('button', { onClick: () => apri('impostazioni', 3), style: { ...glassCard, width: '100%', minHeight: '48px', color: IRON.chalk, cursor: 'pointer', fontFamily: monoFont, fontSize: '12px' } }, 'Apri Consegne'));
+  }
+  const log = storage.get(cfg.storageKey) || {};
+  const ph = (cfg.phase || {})[week] || {};
+  const cue = ph.loadCue || ph.load;
+  const giorni = cfg.days || [];
+  const oggi = nomeOggi();
+  const statoGiorno = (w, d) => {
+    const dl = (log[w] || {})[d.id] || {};
+    const lista = cfg.exercises[d.id] || [];
+    const tot = lista.reduce((a, e) => a + ((cfg.applyLogic(e, w) || {}).sets || e.sets || 0), 0);
+    const fatte = Object.values(dl.esercizi || {}).reduce((a, r) => a + ((r && r.sets_done) || []).filter(Boolean).length, 0);
+    return { fatta: !!dl.completato, fatte, tot, nEs: lista.length };
+  };
+  const fatteSett = w => giorni.filter(d => ((log[w] || {})[d.id] || {}).completato).length;
+  return h24('div', { style: { minHeight: '100vh', paddingBottom: 'calc(100px + env(safe-area-inset-bottom))' } },
+    h24(Header, { title: 'Allenamento', subtitle: att.label + (att.sub ? ' · ' + att.sub : '') }),
+    h24('div', { style: { padding: '0 14px 12px', overflowX: 'auto' } },
+      h24('div', { style: { display: 'flex', gap: '5px' } }, cfg.weeks.map(w => {
+        const on = w === week;
+        const n = fatteSett(w);
+        return h24('button', { key: w, onClick: () => setWeek(w), style: { flexShrink: 0, minWidth: '46px', minHeight: '46px', borderRadius: '3px', cursor: 'pointer', fontFamily: monoFont, fontSize: '11px', fontWeight: '600', background: on ? IRON.chalk : 'transparent', color: on ? IRON.bg : IRON.dust, border: '1px solid ' + (on ? IRON.chalk : IRON.edge), display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '2px' } },
+          'S' + w, h24('span', { style: { fontSize: '8.5px', opacity: 0.8 } }, n + '/' + giorni.length));
+      }))),
+    h24('div', { style: { padding: '0 14px' } },
+      h24('div', { style: { ...glassCard, padding: '13px 14px', marginBottom: '12px', borderLeft: '2px solid ' + (cue === 'deload' ? '#4D82E8' : cue === 'up' ? '#E5A82B' : '#2FA055') } },
+        h24('div', { style: lblStyle }, ph.name || 'Settimana ' + week),
+        h24('div', { style: { fontSize: '14px', fontWeight: '700', color: IRON.chalk, marginTop: '6px' } }, ph.variable || '—'),
+        h24('div', { style: { fontFamily: monoFont, fontSize: '10.5px', color: IRON.dust, marginTop: '7px' } },
+          'RIR multiarticolari ' + (ph.compRir || '—') + ' · isolamenti ' + (ph.accRir || '—') + (cue === 'deload' ? ' · serie dimezzate in automatico' : ''))),
+      giorni.map(d => {
+        const st = statoGiorno(week, d);
+        const prossima = s && s.giorno && s.giorno.id === d.id && s.week === week;
+        const diOggi = (d.dayName || '').toUpperCase() === oggi;
+        const stato = st.fatta ? 'fatta' : st.fatte > 0 ? 'in corso' : 'da fare';
+        const colStato = st.fatta ? '#2FA055' : st.fatte > 0 ? '#E5A82B' : IRON.ash;
+        return h24('button', { key: d.id, onClick: () => apri({ tipo: 'giorno', giorno: d.id, week }), style: { ...glassCard, width: '100%', textAlign: 'left', display: 'flex', alignItems: 'center', gap: '12px', padding: '13px 14px', marginBottom: '8px', cursor: 'pointer', border: '1px solid ' + (prossima ? IRON.chalk : IRON.edge) } },
+          h24('span', { style: { width: '4px', alignSelf: 'stretch', background: d.color || '#4D82E8', borderRadius: '2px', flexShrink: 0 } }),
+          h24('span', { style: { flex: 1, minWidth: 0 } },
+            h24('span', { style: { display: 'block', ...lblStyle, color: diOggi ? IRON.chalk : IRON.dust } }, (d.dayName || '') + (diOggi ? ' · oggi' : '') + (prossima ? ' · prossima' : '')),
+            h24('span', { style: { display: 'block', fontSize: '15px', fontWeight: '700', color: IRON.chalk, marginTop: '4px' } }, d.label),
+            h24('span', { style: { display: 'block', fontFamily: monoFont, fontSize: '10.5px', color: IRON.dust, marginTop: '4px' } }, st.nEs + ' esercizi · ' + st.fatte + '/' + st.tot + ' serie' + (d.dur ? ' · ' + d.dur : ''))),
+          h24('span', { style: { ...lblStyle, color: colStato, flexShrink: 0 } }, stato),
+          h24(ChevronRight, { size: 18, color: IRON.ash }));
+      }),
+      h24('div', { style: { display: 'flex', gap: '7px', marginTop: '6px' } },
+        h24('button', { onClick: () => apri({ tipo: 'settimane', week }), style: { flex: 1, minHeight: '46px', background: 'transparent', border: '1px solid ' + IRON.edge, borderRadius: '3px', color: IRON.dust, fontFamily: monoFont, fontSize: '11px', cursor: 'pointer' } }, 'Vista completa'),
+        h24('button', { onClick: () => apri('impostazioni', 0), style: { flex: 1, minHeight: '46px', background: 'transparent', border: '1px solid ' + IRON.edge, borderRadius: '3px', color: IRON.dust, fontFamily: monoFont, fontSize: '11px', cursor: 'pointer' } }, 'Cambia scheda'))));
+}
+
+// ---------- DIETA DI OGGI (schermata intera) ----------
+function DietaOggiScreen(_p) {
+  const goBack = _p.goBack;
+  const [v, setV] = useState(0);
+  const o = dietaDiOggi();
+  const imposta = tipo => {
+    storage.set('dieta_oggi', tipo ? { data: dataOggi(), tipo } : null);
+    setV(x => x + 1);
+  };
+  const chip = (lab, on, fn) => h24('button', { key: lab, onClick: fn, style: { flex: 1, minHeight: '42px', borderRadius: '3px', cursor: 'pointer', fontFamily: monoFont, fontSize: '11px', fontWeight: '600', background: on ? IRON.chalk : 'transparent', color: on ? IRON.bg : IRON.dust, border: '1px solid ' + (on ? IRON.chalk : IRON.edge) } }, lab);
+  return h24('div', { style: { minHeight: '100vh' } },
+    h24(Header, { title: 'Dieta di oggi', subtitle: o.dieta ? o.dieta.name : 'Nessuna dieta', onBack: goBack }),
+    !o.manuale && o.dieta && h24('div', { style: { padding: '0 14px 12px', display: 'flex', gap: '5px' } },
+      chip('Automatica', !o.forzata, () => imposta(null)),
+      chip('Allenamento', o.forzata && o.tipo === 'allenamento', () => imposta('allenamento')),
+      chip('Riposo', o.forzata && o.tipo === 'riposo', () => imposta('riposo'))),
+    h24(DentroSezione.Provider, { value: true }, h24(DietaAttiva, { key: (o.dieta ? o.dieta.id : 'x') + '_' + v, goBack })));
+}
+
+// ---------- ATTIVE: scheda, diete, fase ----------
+function AttiveScreen(_p) {
+  const goBack = _p.goBack;
+  const [, rif] = useState(0);
+  const schede = tutteLeSchede();
+  const sc = schedaAttiva();
+  const c = coppiaDiete();
+  const auto = storage.get('dieta_auto') !== false;
+  const fid = faseId();
+  const Riga = r => h24('button', { onClick: r.onClick, style: { ...glassCard, width: '100%', textAlign: 'left', display: 'flex', alignItems: 'center', gap: '11px', padding: '12px 13px', marginBottom: '7px', cursor: 'pointer', border: '1px solid ' + (r.on ? IRON.chalk : IRON.edge) } },
+    h24('span', { style: { width: '9px', height: '9px', borderRadius: '50%', background: r.on ? '#2FA055' : 'transparent', border: '1px solid ' + (r.on ? '#2FA055' : IRON.ash), flexShrink: 0 } }),
+    h24('span', { style: { flex: 1, minWidth: 0 } },
+      h24('span', { style: { display: 'block', fontSize: '13.5px', fontWeight: '700', color: IRON.chalk } }, r.titolo),
+      r.sotto && h24('span', { style: { display: 'block', fontFamily: monoFont, fontSize: '10.5px', color: IRON.dust, marginTop: '3px' } }, r.sotto)),
+    h24('span', { style: { ...lblStyle, color: r.on ? '#2FA055' : IRON.ash } }, r.on ? 'attiva' : 'usa'));
+  const titolo = t => h24('div', { style: { ...lblStyle, padding: '14px 2px 8px' } }, t);
+  const set = (k, val) => { storage.set(k, val); rif(x => x + 1); };
+  const riga = d => { const t = dietTotals(d); return r0(t.kcal) + ' kcal · P' + r0(t.p) + ' C' + r0(t.c) + ' G' + r0(t.f); };
+  return h24('div', { style: { minHeight: '100vh', paddingBottom: '120px' } },
+    h24(Header, { title: 'Attive', subtitle: 'Fase, scheda e diete in uso', onBack: goBack }),
+    h24('div', { style: { padding: '0 14px' } },
+      titolo('Fase del ciclo'),
+      h24('div', { style: { display: 'flex', gap: '5px' } }, Object.keys(FASI).map(k => {
+        const on = k === fid;
+        return h24('button', { key: k, onClick: () => set('fase', k), style: { flex: 1, minHeight: '46px', borderRadius: '3px', cursor: 'pointer', fontFamily: monoFont, fontSize: '11px', fontWeight: '600', background: on ? FASI[k].col : 'transparent', color: on ? '#fff' : IRON.dust, border: '1px solid ' + (on ? FASI[k].col : IRON.edge) } }, FASI[k].label);
+      })),
+      h24('div', { style: { fontFamily: monoFont, fontSize: '10.5px', color: IRON.dust, marginTop: '7px' } }, 'Ritmo atteso: ' + FASI[fid].testo + '. Decide i colori del peso e la verifica calorie.'),
+      titolo('Scheda di allenamento'),
+      schede.map(p => h24(Riga, { key: p.id, on: sc && sc.id === p.id, titolo: p.label, sotto: (p.config.days || []).length + ' giorni · ' + (p.config.weeks || []).length + ' settimane', onClick: () => set('scheda_attiva', p.id) })),
+      titolo('Dieta automatica'),
+      h24(Riga, { on: auto, titolo: auto ? 'Segue il giorno della scheda' : 'Spenta: usa sempre la stessa dieta', sotto: 'Giorno con seduta = dieta allenamento, altrimenti riposo', onClick: () => set('dieta_auto', !auto) }),
+      c.tutte.length === 0 && h24('div', { style: { ...glassCard, padding: '13px', fontSize: '12.5px', color: IRON.dust } }, 'Nessuna dieta salvata. Creala in Diete o importala dalle Consegne.'),
+      c.tutte.length > 0 && (auto ? h24(React.Fragment, null,
+        titolo('Giorni di allenamento'),
+        c.tutte.map(d => h24(Riga, { key: 'on_' + d.id, on: c.on && c.on.id === d.id, titolo: d.name, sotto: riga(d), onClick: () => set('dieta_on', d.id) })),
+        titolo('Giorni di riposo'),
+        c.tutte.map(d => h24(Riga, { key: 'off_' + d.id, on: c.off && c.off.id === d.id, titolo: d.name, sotto: riga(d), onClick: () => set('dieta_off', d.id) }))
+      ) : h24(React.Fragment, null,
+        titolo('Dieta in uso'),
+        c.tutte.map(d => h24(Riga, { key: 'm_' + d.id, on: storage.get('dieta_attiva') === d.id, titolo: d.name, sotto: riga(d), onClick: () => set('dieta_attiva', d.id) }))
+      ))));
+}
+
+// ---------- BACKUP: sicurezza + esporta/importa in una schermata ----------
+function BackupScreen(_p) {
+  return h24('div', null, h24(SicurezzaScreen, { goBack: _p.goBack }), h24(SettingsScreen, { goBack: _p.goBack }));
+}
+
+// ---------- sezioni delle destinazioni ----------
+const SEZ_CORPO = [
+  { id: 'peso', label: 'Peso e misure', desc: 'Registra, composizione, figura', C: PesoScreen },
+  { id: 'tdee', label: 'TDEE', desc: 'Mantenimento reale dai tuoi dati', C: TdeeScreen },
+  { id: 'recovery', label: 'Recupero', desc: 'Sonno, energia, stress', C: RecoveryScreen }
+];
+const SEZ_PROGRESSI = [
+  { id: 'dashboard', label: '1RM', desc: '1RM stimato e andamento', C: DashboardScreen },
+  { id: 'volume', label: 'Volume', desc: 'Serie per gruppo muscolare', C: VolumeScreen },
+  { id: 'stalli', label: 'Stalli', desc: 'Quali esercizi non salgono più', C: StalliScreen },
+  { id: 'storico', label: 'Storico', desc: 'Archivia e confronta i blocchi', C: StoricoScreen }
+];
+const SEZ_IMPOSTAZIONI = [
+  { id: 'attive', label: 'Attive', desc: 'Fase, scheda e diete in uso', C: AttiveScreen },
+  { id: 'library', label: 'Schede', desc: 'Le tue schede, importa .v8w', C: LibraryScreen },
+  { id: 'diets', label: 'Diete', desc: 'Crea, importa e modifica i piani', C: DietScreen },
+  { id: 'consegne', label: 'Consegne', desc: 'Ricevi schede e diete per questo dispositivo', C: ConsegneScreen },
+  { id: 'exdb', label: 'Esercizi', desc: '556 esercizi con foto e tecnica', C: ExerciseDBScreen },
+  { id: 'bilanciere', label: 'Dischi', desc: 'Bilanciere e dischi per il carico per lato', C: BilanciereScreen },
+  { id: 'guide', label: 'Tecniche', desc: 'Come si eseguono le tecniche', C: GuideScreen },
+  { id: 'backup', label: 'Backup', desc: 'Backup automatico, esporta e importa', C: BackupScreen }
+];
+
+// ---------- barra in basso ----------
+const TABS = [
+  { id: 'oggi', label: 'Oggi', I: Sun },
+  { id: 'allenamento', label: 'Allenamento', I: Dumbbell },
+  { id: 'corpo', label: 'Corpo', I: Scale },
+  { id: 'progressi', label: 'Progressi', I: BarChart3 }
+];
+function BarraTab(_p) {
+  const tab = _p.tab,
+    setTab = _p.setTab;
+  return h24('nav', { 'aria-label': 'Sezioni', style: { position: 'fixed', left: 0, right: 0, bottom: 0, zIndex: 900, background: 'rgba(12,12,14,0.97)', borderTop: '1px solid ' + IRON.edge, paddingBottom: 'env(safe-area-inset-bottom)' } },
+    h24('div', { style: { maxWidth: '480px', margin: '0 auto', display: 'flex' } }, TABS.map(t => {
+      const on = t.id === tab;
+      return h24('button', { key: t.id, onClick: () => setTab(t.id), 'aria-current': on ? 'page' : undefined, style: { flex: 1, minHeight: '62px', background: 'transparent', border: 'none', borderTop: '2px solid ' + (on ? VIOLET : 'transparent'), cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '5px', color: on ? IRON.chalk : IRON.ash } },
+        h24(t.I, { size: 20, color: on ? IRON.chalk : IRON.ash }),
+        h24('span', { style: { fontFamily: monoFont, fontSize: '9.5px', fontWeight: '600', letterSpacing: '0.06em', textTransform: 'uppercase' } }, t.label));
+    })));
+}
+
+// ---------- avviso nuova versione (dal service worker) ----------
+function AggiornamentoBanner() {
+  const [pronta, setPronta] = useState(false);
+  useEffect(() => {
+    if (!('serviceWorker' in navigator)) return;
+    const on = e => {
+      if (!e.data) return;
+      if (e.data.tipo === 'NUOVA_VERSIONE') setPronta(true);
+      if (e.data.tipo === 'VERSIONE' && e.data.v && e.data.v !== APP_VERSION) setPronta(true);
+    };
+    navigator.serviceWorker.addEventListener('message', on);
+    // l'aggiornamento puo finire prima che l'app sia pronta ad ascoltare: chiedo io
+    const chiedi = () => { try { const c = navigator.serviceWorker.controller; if (c) c.postMessage({ tipo: 'VERSIONE?' }); } catch (e) {} };
+    const t1 = setTimeout(chiedi, 1500), t2 = setTimeout(chiedi, 8000);
+    const vis = () => { if (document.visibilityState === 'visible') chiedi(); };
+    document.addEventListener('visibilitychange', vis);
+    return () => { navigator.serviceWorker.removeEventListener('message', on); clearTimeout(t1); clearTimeout(t2); document.removeEventListener('visibilitychange', vis); };
+  }, []);
+  if (!pronta) return null;
+  return h24('button', {
+    onClick: () => {
+      try { flushSaves(); } catch (e) {}
+      location.reload();
+    },
+    style: { position: 'fixed', top: 'calc(10px + env(safe-area-inset-top))', left: '50%', transform: 'translateX(-50%)', zIndex: 2100, width: '92%', maxWidth: '440px', minHeight: '48px', background: VIOLET, color: '#fff', border: 'none', borderRadius: '3px', fontFamily: monoFont, fontSize: '12px', fontWeight: '600', letterSpacing: '0.03em', cursor: 'pointer', boxShadow: '0 6px 24px rgba(0,0,0,0.5)' }
+  }, 'Nuova versione pronta · tocca per aggiornare');
+}
+
+// ---------- migrazione una tantum ----------
+(function migraV24() {
+  try {
+    if (storage.get('migrazione_v24')) return;
+    const arch = storage.get('archivio') || [];
+    let cambiato = false;
+    [{ cfg: MAIN_CONFIG, label: 'V8.3.4 · cut', id: 'main' }, { cfg: SUMMER2_CONFIG, label: 'Estate · 4 giorni', id: 'summer2' }].forEach(p => {
+      const log = storage.get(p.cfg.storageKey) || {};
+      const st = statsBlocco(p.cfg, log);
+      if (!st || !st.sessioni) return;
+      if (arch.some(a => a.storageKey === p.cfg.storageKey && a.sessioni === st.sessioni)) return;
+      arch.unshift({ id: 'blk_' + Date.now() + '_' + p.id, programma: p.label, storageKey: p.cfg.storageKey, progId: p.id, creato: Date.now(), dal: st.primo, al: st.ultimo, sessioni: st.sessioni, serie: st.serie, tonnellaggio: st.tonnellaggio, vol: st.vol, log, auto: true });
+      cambiato = true;
+    });
+    if (cambiato) {
+      try { localStorage.setItem(KEY_PREFIX + 'archivio', JSON.stringify(arch)); } catch (e) { return; } // spazio pieno: riprovo al prossimo avvio
+    }
+    const att = storage.get('scheda_attiva');
+    const custom = storage.get('custom_schedules') || [];
+    if ((att === 'main' || att === 'summer2' || !att) && custom.length) storage.set('scheda_attiva', custom[0].id);
+    if (!storage.get('dieta_on')) {
+      const cp = coppiaDiete();
+      if (cp.on) storage.set('dieta_on', cp.on.id);
+      if (cp.off) storage.set('dieta_off', cp.off.id);
+    }
+    if (!storage.get('fase')) storage.set('fase', 'massa');
+    storage.set('migrazione_v24', true);
+  } catch (e) {}
+})();
+
+// ---------- APP ----------
+function App() {
+  const [tab, setTab] = useState('oggi');
+  const [over, setOver] = useState(null);
+  const chiudi = useCallback(() => setOver(null), []);
+  const vaiOggi = useCallback(() => setTab('oggi'), []);
+  const apri = useCallback((cosa, i) => {
+    if (cosa === 'impostazioni') setOver({ tipo: 'impostazioni', i: i || 0 });
+    else if (typeof cosa === 'string') setOver({ tipo: cosa });
+    else setOver(cosa);
+  }, []);
+  useAndroidBack(() => {
+    if (over) setOver(null);
+    else setTab('oggi');
+  }, !!over || tab !== 'oggi');
+  useEffect(() => {
+    try {
+      document.documentElement.style.setProperty('--barra-h', over ? '0px' : 'calc(62px + env(safe-area-inset-bottom))');
+    } catch (e) {}
+    window.scrollTo(0, 0);
+  }, [over, tab]);
+  let corpo = null;
+  if (over) {
+    const att = schedaAttiva();
+    if (over.tipo === 'seduta') corpo = h24(SedutaRapida, { goBack: chiudi });
+    else if (over.tipo === 'giorno' && att) corpo = h24(WorkoutScreen, { key: 'g_' + over.giorno + '_' + over.week, goBack: chiudi, config: att.config, giornoIniziale: over.giorno, settimanaIniziale: over.week });
+    else if (over.tipo === 'settimane' && att) corpo = h24(WorkoutScreen, { key: 's_' + over.week, goBack: chiudi, config: att.config, settimanaIniziale: over.week });
+    else if (over.tipo === 'dieta') corpo = h24(DietaOggiScreen, { goBack: chiudi });
+    else if (over.tipo === 'impostazioni') corpo = h24(SezioniScreen, { key: 'imp_' + (over.i || 0), titolo: 'Impostazioni', sezioni: SEZ_IMPOSTAZIONI, iniziale: over.i || 0, goBack: chiudi });
+  }
+  if (!corpo) {
+    if (tab === 'allenamento') corpo = h24(AllenamentoTab, { apri });
+    else if (tab === 'corpo') corpo = h24(SezioniScreen, { key: 'corpo', titolo: 'Corpo', sezioni: SEZ_CORPO, goBack: vaiOggi, senzaIndietro: true, extra: h24('div', { style: { padding: '0 14px' } }, h24(CalorieCard, null)) });
+    else if (tab === 'progressi') corpo = h24(SezioniScreen, { key: 'progressi', titolo: 'Progressi', sezioni: SEZ_PROGRESSI, goBack: vaiOggi, senzaIndietro: true });
+    else corpo = h24(OggiTab, { apri });
+  }
+  const conBarra = !over;
+  return h24(TimerProvider, null,
+    h24('div', { style: { fontFamily: '-apple-system, "Helvetica Neue", Arial, sans-serif', maxWidth: '480px', margin: '0 auto', minHeight: '100vh', paddingBottom: conBarra ? 'calc(62px + env(safe-area-inset-bottom))' : 0 } },
+      corpo,
+      conBarra && h24(BarraTab, { tab, setTab: t => { setTab(t); } }),
+      h24(ConfirmHost, null),
+      h24(StorageBanner, null),
+      h24(AggiornamentoBanner, null)));
+}
+
 
 // Error boundary: un errore runtime in un componente non deve più
 // produrre uno schermo bianco. I dati restano al sicuro in localStorage.

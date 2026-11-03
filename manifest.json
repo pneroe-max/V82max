@@ -1,7 +1,7 @@
 {
   "name": "V8 Tracker",
   "short_name": "V8",
-  "description": "Tracking V8 Block Cutting · 8 Settimane",
+  "description": "V8 Tracker · allenamento, dieta e progressi",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
